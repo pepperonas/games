@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Mario Brothers</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #6b8cff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .game-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            max-height: 600px;
+            max-width: 1000px;
+            margin: 0 auto;
+            overflow: hidden;
+            background-image: linear-gradient(to bottom, #6b8cff 0%, #6b8cff 70%, #5c94fc 70%, #5c94fc 100%);
+        }
+
+        .mario {
+            position: absolute;
+            width: 40px;
+            height: 60px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 150"><rect x="30" y="10" width="40" height="20" fill="red"/><rect x="20" y="30" width="60" height="20" fill="red"/><rect x="30" y="50" width="40" height="20" fill="blue"/><rect x="10" y="70" width="80" height="20" fill="blue"/><rect x="30" y="90" width="40" height="20" fill="brown"/><rect x="10" y="110" width="30" height="20" fill="brown"/><rect x="60" y="110" width="30" height="20" fill="brown"/><rect x="20" y="30" width="20" height="20" fill="%23FFB482"/><rect x="60" y="30" width="20" height="20" fill="%23FFB482"/><rect x="40" y="30" width="20" height="20" fill="%23FFB482"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            bottom: 40px;
+            left: 50px;
+            z-index: 10;
+        }
+
+        .ground {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 200%;
+            height: 40px;
+            background-image: linear-gradient(to bottom, #5da513 0%, #5da513 40%, #795548 40%, #795548 100%);
+        }
+
+        .block {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: #D2691E;
+            border: 2px solid #8B4513;
+            box-sizing: border-box;
+        }
+
+        .question-block {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: #FFD700;
+            border: 2px solid #FFA500;
+            box-sizing: border-box;
+            animation: pulse 1s infinite alternate;
+        }
+
+        .pipe {
+            position: absolute;
+            width: 60px;
+            height: 80px;
+            background-color: #00a651;
+            border: 2px solid #006241;
+            border-radius: 5px 5px 0 0;
+            box-sizing: border-box;
+            bottom: 40px;
+        }
+
+        .goomba {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="40" r="40" fill="%23A0522D"/><rect x="20" y="70" width="20" height="30" fill="black"/><rect x="60" y="70" width="20" height="30" fill="black"/><circle cx="30" cy="30" r="10" fill="white"/><circle cx="70" cy="30" r="10" fill="white"/><circle cx="30" cy="30" r="5" fill="black"/><circle cx="70" cy="30" r="5" fill="black"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            bottom: 40px;
+            z-index: 5;
+        }
+
+        .coin {
+            position: absolute;
+            width: 20px;
+            height: 30px;
+            background-color: gold;
+            border-radius: 50%;
+            bottom: 40px;
+            z-index: 1;
+            animation: coinSpin 0.5s infinite alternate;
+        }
+
+        .score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 black;
+            z-index: 100;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            z-index: 100;
+        }
+
+        .game-over button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            100% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes coinSpin {
+            0% {
+                transform: scaleX(1);
+            }
+            100% {
+                transform: scaleX(0.2);
+            }
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        @media (min-width: 768px) {
+            .controls {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="mario"></div>
+    <div class="ground"></div>
+    <div class="score">Punkte: <span id="score-value">0</span></div>
+    <div class="game-over">
+        <h2>Game Over!</h2>
+        <p>Deine Punktzahl: <span id="final-score">0</span></p>
+        <button onclick="restartGame()">Neustart</button>
+    </div>
+    <div class="controls">
+        <div class="control-btn" id="left-btn">←</div>
+        <div class="control-btn" id="jump-btn">↑</div>
+        <div class="control-btn" id="right-btn">→</div>
+    </div>
+</div>
+
+<script>
+    // Spielvariablen
+    const mario = document.querySelector('.mario');
+    const gameContainer = document.querySelector('.game-container');
+    const ground = document.querySelector('.ground');
+    const scoreValue = document.getElementById('score-value');
+    const finalScore = document.getElementById('final-score');
+    const gameOverScreen = document.querySelector('.game-over');
+
+    // Steuerungselemente
+    const leftBtn = document.getElementById('left-btn');
+    const rightBtn = document.getElementById('right-btn');
+    const jumpBtn = document.getElementById('jump-btn');
+
+    // Spielzustand
+    let marioPosition = 50;
+    let marioJumping = false;
+    let marioVelocityY = 0;
+    let marioBottom = 40;
+    let isGameOver = false;
+    let score = 0;
+    let gameSpeed = 3;
+    let obstacleInterval;
+    let coinInterval;
+    let gameInterval;
+
+    // Bewegungszustand
+    const keys = {
+        ArrowLeft: false,
+        ArrowRight: false,
+        ArrowUp: false,
+        ' ': false
+    };
+
+    // Event-Listener für Tastaturbedienung
+    document.addEventListener('keydown', (e) => {
+        if (keys.hasOwnProperty(e.key)) {
+            keys[e.key] = true;
+        }
+    });
+
+    document.addEventListener('keyup', (e) => {
+        if (keys.hasOwnProperty(e.key)) {
+            keys[e.key] = false;
+        }
+    });
+
+    // Touch-Event-Listener
+    leftBtn.addEventListener('touchstart', () => keys.ArrowLeft = true);
+    leftBtn.addEventListener('touchend', () => keys.ArrowLeft = false);
+    rightBtn.addEventListener('touchstart', () => keys.ArrowRight = true);
+    rightBtn.addEventListener('touchend', () => keys.ArrowRight = false);
+    jumpBtn.addEventListener('touchstart', () => keys.ArrowUp = true);
+    jumpBtn.addEventListener('touchend', () => keys.ArrowUp = false);
+
+    // Mausbedienung für mobile Steuerelemente
+    leftBtn.addEventListener('mousedown', () => keys.ArrowLeft = true);
+    leftBtn.addEventListener('mouseup', () => keys.ArrowLeft = false);
+    rightBtn.addEventListener('mousedown', () => keys.ArrowRight = true);
+    rightBtn.addEventListener('mouseup', () => keys.ArrowRight = false);
+    jumpBtn.addEventListener('mousedown', () => keys.ArrowUp = true);
+    jumpBtn.addEventListener('mouseup', () => keys.ArrowUp = false);
+
+    // Funktion zum Erstellen von Hindernissen
+    function createObstacle() {
+        if (isGameOver) return;
+
+        const types = ['pipe', 'goomba', 'block', 'question-block'];
+        const type = types[Math.floor(Math.random() * types.length)];
+
+        const obstacle = document.createElement('div');
+        obstacle.classList.add(type);
+
+        const containerWidth = gameContainer.offsetWidth;
+        let bottom = 40;
+        let width = 40;
+        let height = 40;
+
+        if (type === 'pipe') {
+            width = 60;
+            height = 80;
+        } else if (type === 'goomba') {
+            width = 30;
+            height = 30;
+        } else if (type === 'block' || type === 'question-block') {
+            // Zufällige Höhe für Blöcke
+            bottom = 40 + Math.random() * 150;
+        }
+
+        obstacle.style.left = `${containerWidth}px`;
+        obstacle.style.bottom = `${bottom}px`;
+
+        if (type === 'goomba') {
+            obstacle.dataset.direction = 'left';
+            obstacle.dataset.speed = Math.random() * 2 + 1;
+        }
+
+        gameContainer.appendChild(obstacle);
+
+        // Nach einiger Zeit wieder entfernen
+        setTimeout(() => {
+            if (obstacle && obstacle.parentNode) {
+                obstacle.parentNode.removeChild(obstacle);
+            }
+        }, 15000);
+    }
+
+    // Funktion zum Erstellen von Münzen
+    function createCoin() {
+        if (isGameOver) return;
+
+        const coin = document.createElement('div');
+        coin.classList.add('coin');
+
+        const containerWidth = gameContainer.offsetWidth;
+        const bottom = 40 + Math.random() * 150;
+
+        coin.style.left = `${containerWidth}px`;
+        coin.style.bottom = `${bottom}px`;
+
+        gameContainer.appendChild(coin);
+
+        // Nach einiger Zeit wieder entfernen
+        setTimeout(() => {
+            if (coin && coin.parentNode) {
+                coin.parentNode.removeChild(coin);
+            }
+        }, 15000);
+    }
+
+    // Kollisionserkennung
+    function checkCollision(element1, element2) {
+        const rect1 = element1.getBoundingClientRect();
+        const rect2 = element2.getBoundingClientRect();
+
+        return !(
+            rect1.right < rect2.left ||
+            rect1.left > rect2.right ||
+            rect1.bottom < rect2.top ||
+            rect1.top > rect2.bottom
+        );
+    }
+
+    // Spielschleifen-Funktion
+    function gameLoop() {
+        if (isGameOver) return;
+
+        // Mario-Bewegung
+        if (keys.ArrowLeft) {
+            marioPosition -= 5;
+            mario.style.transform = 'scaleX(-1)';
+        }
+        if (keys.ArrowRight) {
+            marioPosition += 5;
+            mario.style.transform = 'scaleX(1)';
+        }
+        if ((keys.ArrowUp || keys[' ']) && !marioJumping) {
+            marioJumping = true;
+            marioVelocityY = 15;
+        }
+
+        // Grenzen des Spielfelds
+        const containerWidth = gameContainer.offsetWidth;
+        if (marioPosition < 0) marioPosition = 0;
+        if (marioPosition > containerWidth - 40) marioPosition = containerWidth - 40;
+
+        mario.style.left = `${marioPosition}px`;
+
+        // Sprungphysik
+        if (marioJumping) {
+            marioBottom += marioVelocityY;
+            marioVelocityY -= 0.8; // Schwerkraft
+
+            if (marioBottom <= 40) {
+                marioBottom = 40;
+                marioJumping = false;
+                marioVelocityY = 0;
+            }
+        }
+
+        mario.style.bottom = `${marioBottom}px`;
+
+        // Bodenbewegung (Scrolling-Effekt)
+        let groundPos = parseInt(ground.style.left || '0');
+        groundPos -= gameSpeed;
+        if (groundPos <= -gameContainer.offsetWidth) {
+            groundPos = 0;
+        }
+        ground.style.left = `${groundPos}px`;
+
+        // Hindernis- und Münzbewegung
+        document.querySelectorAll('.pipe, .block, .question-block, .coin').forEach(obstacle => {
+            let obstaclePos = parseInt(obstacle.style.left);
+            obstaclePos -= gameSpeed;
+            obstacle.style.left = `${obstaclePos}px`;
+
+            // Kollision mit Münzen
+            if (obstacle.classList.contains('coin') && checkCollision(mario, obstacle)) {
+                score += 100;
+                scoreValue.textContent = score;
+                obstacle.parentNode.removeChild(obstacle);
+            }
+
+            // Kollision mit Hindernissen
+            if ((obstacle.classList.contains('pipe') || obstacle.classList.contains('block') || obstacle.classList.contains('question-block')) && checkCollision(mario, obstacle)) {
+                // Von oben auf Blöcke springen ist erlaubt
+                const marioRect = mario.getBoundingClientRect();
+                const obstacleRect = obstacle.getBoundingClientRect();
+
+                if (marioRect.bottom < obstacleRect.top + 10 && marioVelocityY < 0) {
+                    marioBottom = obstacleRect.height + 40;
+                    marioVelocityY = 0;
+
+                    // Auf Fragezeichen-Block springen gibt Punkte
+                    if (obstacle.classList.contains('question-block')) {
+                        score += 50;
+                        scoreValue.textContent = score;
+                        obstacle.style.backgroundColor = '#bdbdbd';
+                        obstacle.style.animation = 'none';
+                    }
+                } else {
+                    // Seitliche Kollision
+                    if (marioRect.right > obstacleRect.left && marioRect.left < obstacleRect.left) {
+                        marioPosition = obstacleRect.left - 40;
+                    } else if (marioRect.left < obstacleRect.right && marioRect.right > obstacleRect.right) {
+                        marioPosition = obstacleRect.right;
+                    }
+                }
+            }
+        });
+
+        // Goomba-Bewegung und Kollision
+        document.querySelectorAll('.goomba').forEach(goomba => {
+            let goombaPos = parseInt(goomba.style.left);
+            const direction = goomba.dataset.direction;
+            const speed = parseFloat(goomba.dataset.speed);
+
+            if (direction === 'left') {
+                goombaPos -= speed;
+            } else {
+                goombaPos += speed;
+            }
+
+            // Richtungsänderung bei Kollision mit Wänden
+            if (goombaPos <= 0) {
+                goomba.dataset.direction = 'right';
+            } else if (goombaPos >= gameContainer.offsetWidth - 30) {
+                goomba.dataset.direction = 'left';
+            }
+
+            goomba.style.left = `${goombaPos}px`;
+
+            // Kollision mit Mario
+            if (checkCollision(mario, goomba)) {
+                const marioRect = mario.getBoundingClientRect();
+                const goombaRect = goomba.getBoundingClientRect();
+
+                // Von oben auf Goomba springen
+                if (marioRect.bottom < goombaRect.top + 15 && marioVelocityY < 0) {
+                    goomba.parentNode.removeChild(goomba);
+                    marioVelocityY = 10; // Kleiner Sprung nach dem Zertreten
+                    score += 200;
+                    scoreValue.textContent = score;
+                } else {
+                    gameOver();
+                }
+            }
+        });
+
+        // Spielgeschwindigkeit erhöhen mit steigender Punktzahl
+        gameSpeed = 3 + Math.floor(score / 1000);
+    }
+
+    // Spiel starten
+    function startGame() {
+        // Mario initialisieren
+        marioPosition = 50;
+        marioJumping = false;
+        marioVelocityY = 0;
+        marioBottom = 40;
+        isGameOver = false;
+        score = 0;
+        gameSpeed = 3;
+
+        // UI zurücksetzen
+        scoreValue.textContent = '0';
+        gameOverScreen.style.display = 'none';
+
+        // Alle Hindernisse entfernen
+        document.querySelectorAll('.pipe, .block, .question-block, .goomba, .coin').forEach(el => {
+            el.parentNode.removeChild(el);
+        });
+
+        // Intervalle starten
+        gameInterval = setInterval(gameLoop, 20);
+        obstacleInterval = setInterval(createObstacle, 2000);
+        coinInterval = setInterval(createCoin, 3000);
+    }
+
+    // Spiel beenden
+    function gameOver() {
+        isGameOver = true;
+        clearInterval(gameInterval);
+        clearInterval(obstacleInterval);
+        clearInterval(coinInterval);
+
+        finalScore.textContent = score;
+        gameOverScreen.style.display = 'block';
+    }
+
+    // Spiel neustarten
+    function restartGame() {
+        startGame();
+    }
+
+    // Spiel starten, wenn die Seite geladen ist
+    window.onload = startGame;
+</script>
+</body>
+</html>

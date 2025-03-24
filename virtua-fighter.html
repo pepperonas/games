@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtua Fighter</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #222;
+            font-family: Arial, sans-serif;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .game-title {
+            font-size: 2.5rem;
+            margin: 20px 0;
+            color: #ff9900;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .game-container {
+            position: relative;
+            width: 800px;
+            height: 400px;
+            background: linear-gradient(to bottom, #87CEEB, #4682B4);
+            border: 4px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .platform {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(to bottom, #8B4513, #654321);
+        }
+
+        .health-bars {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .health-bar {
+            width: 300px;
+            height: 30px;
+            background-color: #333;
+            border: 2px solid #000;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .health-inner {
+            height: 100%;
+            background-color: #f00;
+            width: 100%;
+            transition: width 0.3s;
+        }
+
+        .player {
+            position: absolute;
+            width: 80px;
+            height: 180px;
+            bottom: 80px;
+        }
+
+        .player-sprite {
+            width: 100%;
+            height: 100%;
+            background-color: #ff9900;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .head {
+            width: 40px;
+            height: 40px;
+            background-color: #ffcc00;
+            border-radius: 50%;
+            margin-top: 10px;
+        }
+
+        .body {
+            width: 60px;
+            height: 70px;
+            background-color: #ff9900;
+            border-radius: 10px;
+            margin-top: 5px;
+        }
+
+        .arm {
+            position: absolute;
+            width: 20px;
+            height: 60px;
+            background-color: #ff9900;
+            border-radius: 10px;
+            top: 55px;
+        }
+
+        .left-arm {
+            left: 5px;
+        }
+
+        .right-arm {
+            right: 5px;
+        }
+
+        .leg {
+            position: absolute;
+            width: 25px;
+            height: 60px;
+            background-color: #ff9900;
+            border-radius: 10px;
+            bottom: 0;
+        }
+
+        .left-leg {
+            left: 15px;
+        }
+
+        .right-leg {
+            right: 15px;
+        }
+
+        .player-1 {
+            left: 150px;
+        }
+
+        .player-2 {
+            right: 150px;
+            transform: scaleX(-1);
+        }
+
+        .player-2 .player-sprite {
+            background-color: #3366ff;
+        }
+
+        .player-2 .head {
+            background-color: #6699ff;
+        }
+
+        .player-2 .body,
+        .player-2 .arm,
+        .player-2 .leg {
+            background-color: #3366ff;
+        }
+
+        .attack {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+        }
+
+        .punch {
+            width: 30px;
+            height: 30px;
+        }
+
+        .kick {
+            width: 40px;
+            height: 40px;
+        }
+
+        .controls {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #333;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            text-align: center;
+            color: #ff9900;
+        }
+
+        .controls-container {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+        }
+
+        .control-section {
+            text-align: center;
+        }
+
+        .key {
+            display: inline-block;
+            background-color: #555;
+            color: white;
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 4px;
+            font-weight: bold;
+            min-width: 20px;
+            text-align: center;
+            box-shadow: 0 2px 0 #222;
+        }
+
+        .result-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            display: none;
+        }
+
+        .result-text {
+            font-size: 3rem;
+            color: #ff9900;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+        }
+
+        .restart-button {
+            padding: 10px 20px;
+            background-color: #ff9900;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .restart-button:hover {
+            background-color: #ffaa33;
+            transform: scale(1.05);
+        }
+
+        .jumping {
+            animation: jump 0.5s ease;
+        }
+
+        @keyframes jump {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-50px);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .punching .right-arm {
+            animation: punch 0.2s ease;
+        }
+
+        @keyframes punch {
+            0% {
+                transform: translateX(0);
+            }
+            50% {
+                transform: translateX(30px);
+            }
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        .kicking .right-leg {
+            animation: kick 0.3s ease;
+        }
+
+        @keyframes kick {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px) translateX(30px) rotate(-30deg);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .hit {
+            animation: hit 0.2s ease;
+        }
+
+        @keyframes hit {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            25%, 75% {
+                transform: translateX(-5px);
+            }
+            50% {
+                transform: translateX(5px);
+            }
+        }
+    </style>
+</head>
+<body>
+<h1 class="game-title">Virtua Fighter</h1>
+
+<div class="health-bars">
+    <div class="health-bar">
+        <div class="health-inner" id="player1-health"></div>
+    </div>
+    <div class="health-bar">
+        <div class="health-inner" id="player2-health" style="float: right;"></div>
+    </div>
+</div>
+
+<div class="game-container">
+    <div class="platform"></div>
+
+    <div class="player player-1" id="player1">
+        <div class="player-sprite">
+            <div class="head"></div>
+            <div class="body"></div>
+            <div class="arm left-arm"></div>
+            <div class="arm right-arm"></div>
+            <div class="leg left-leg"></div>
+            <div class="leg right-leg"></div>
+        </div>
+    </div>
+
+    <div class="player player-2" id="player2">
+        <div class="player-sprite">
+            <div class="head"></div>
+            <div class="body"></div>
+            <div class="arm left-arm"></div>
+            <div class="arm right-arm"></div>
+            <div class="leg left-leg"></div>
+            <div class="leg right-leg"></div>
+        </div>
+    </div>
+
+    <div class="result-screen" id="result-screen">
+        <div class="result-text" id="result-text">Player 1 Wins!</div>
+        <button class="restart-button" id="restart-button">Neustart</button>
+    </div>
+</div>
+
+<div class="controls">
+    <h2>Steuerung</h2>
+    <div class="controls-container">
+        <div class="control-section">
+            <h3>Spieler 1</h3>
+            <p><span class="key">A</span> <span class="key">D</span> Bewegen</p>
+            <p><span class="key">W</span> Springen</p>
+            <p><span class="key">F</span> Schlag</p>
+            <p><span class="key">G</span> Tritt</p>
+        </div>
+        <div class="control-section">
+            <h3>Spieler 2</h3>
+            <p><span class="key">←</span> <span class="key">→</span> Bewegen</p>
+            <p><span class="key">↑</span> Springen</p>
+            <p><span class="key">K</span> Schlag</p>
+            <p><span class="key">L</span> Tritt</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Spieler-Objekte
+    const player1 = {
+        element: document.getElementById('player1'),
+        health: 100,
+        x: 150,
+        isJumping: false,
+        isPunching: false,
+        isKicking: false,
+        facingRight: true,
+        width: 80
+    };
+
+    const player2 = {
+        element: document.getElementById('player2'),
+        health: 100,
+        x: 650,
+        isJumping: false,
+        isPunching: false,
+        isKicking: false,
+        facingRight: false,
+        width: 80
+    };
+
+    // Gesundheitsanzeigen
+    const player1Health = document.getElementById('player1-health');
+    const player2Health = document.getElementById('player2-health');
+
+    // Ergebnisbildschirm
+    const resultScreen = document.getElementById('result-screen');
+    const resultText = document.getElementById('result-text');
+    const restartButton = document.getElementById('restart-button');
+
+    // Spielkonstanten
+    const gameContainer = document.querySelector('.game-container');
+    const gameWidth = 800;
+    const moveSpeed = 5;
+    const punchDamage = 10;
+    const kickDamage = 15;
+
+    // Tasten-Status
+    const keys = {};
+
+    // Event-Listener für Tastendruck
+    document.addEventListener('keydown', function (event) {
+        keys[event.key] = true;
+    });
+
+    document.addEventListener('keyup', function (event) {
+        keys[event.key] = false;
+    });
+
+    // Neustart-Button
+    restartButton.addEventListener('click', function () {
+        resetGame();
+    });
+
+    // Spiel-Schleife
+    function gameLoop() {
+        // Spieler 1 Bewegung
+        movePlayer1();
+
+        // Spieler 2 Bewegung
+        movePlayer2();
+
+        // Kollisionserkennung
+        checkCollision();
+
+        // Spielzustand aktualisieren
+        updateGameState();
+
+        // Nächsten Frame anfordern
+        requestAnimationFrame(gameLoop);
+    }
+
+    // Spieler 1 bewegen
+    function movePlayer1() {
+        if (keys['a'] && player1.x > 0) {
+            player1.x -= moveSpeed;
+            player1.facingRight = false;
+            player1.element.style.transform = 'scaleX(-1)';
+        }
+        if (keys['d'] && player1.x < gameWidth - player1.width) {
+            player1.x += moveSpeed;
+            player1.facingRight = true;
+            player1.element.style.transform = 'scaleX(1)';
+        }
+        if (keys['w'] && !player1.isJumping) {
+            player1.isJumping = true;
+            player1.element.classList.add('jumping');
+            setTimeout(() => {
+                player1.isJumping = false;
+                player1.element.classList.remove('jumping');
+            }, 500);
+        }
+        if (keys['f'] && !player1.isPunching) {
+            player1.isPunching = true;
+            player1.element.classList.add('punching');
+            createAttackEffect(player1, 'punch');
+            setTimeout(() => {
+                player1.isPunching = false;
+                player1.element.classList.remove('punching');
+            }, 200);
+        }
+        if (keys['g'] && !player1.isKicking) {
+            player1.isKicking = true;
+            player1.element.classList.add('kicking');
+            createAttackEffect(player1, 'kick');
+            setTimeout(() => {
+                player1.isKicking = false;
+                player1.element.classList.remove('kicking');
+            }, 300);
+        }
+
+        player1.element.style.left = player1.x + 'px';
+    }
+
+    // Spieler 2 bewegen
+    function movePlayer2() {
+        if (keys['ArrowLeft'] && player2.x > 0) {
+            player2.x -= moveSpeed;
+            player2.facingRight = false;
+            player2.element.style.transform = 'scaleX(-1)';
+        }
+        if (keys['ArrowRight'] && player2.x < gameWidth - player2.width) {
+            player2.x += moveSpeed;
+            player2.facingRight = true;
+            player2.element.style.transform = 'scaleX(1)';
+        }
+        if (keys['ArrowUp'] && !player2.isJumping) {
+            player2.isJumping = true;
+            player2.element.classList.add('jumping');
+            setTimeout(() => {
+                player2.isJumping = false;
+                player2.element.classList.remove('jumping');
+            }, 500);
+        }
+        if (keys['k'] && !player2.isPunching) {
+            player2.isPunching = true;
+            player2.element.classList.add('punching');
+            createAttackEffect(player2, 'punch');
+            setTimeout(() => {
+                player2.isPunching = false;
+                player2.element.classList.remove('punching');
+            }, 200);
+        }
+        if (keys['l'] && !player2.isKicking) {
+            player2.isKicking = true;
+            player2.element.classList.add('kicking');
+            createAttackEffect(player2, 'kick');
+            setTimeout(() => {
+                player2.isKicking = false;
+                player2.element.classList.remove('kicking');
+            }, 300);
+        }
+
+        player2.element.style.left = player2.x + 'px';
+    }
+
+    // Angriffs-Effekt erstellen
+    function createAttackEffect(player, type) {
+        const attack = document.createElement('div');
+        attack.classList.add('attack');
+        attack.classList.add(type);
+
+        const xOffset = type === 'punch' ? 80 : 80;
+        const yOffset = type === 'punch' ? 70 : 120;
+
+        if (player === player1) {
+            if (player.facingRight) {
+                attack.style.left = (player.x + xOffset) + 'px';
+            } else {
+                attack.style.left = (player.x - 30) + 'px';
+            }
+        } else {
+            if (player.facingRight) {
+                attack.style.left = (player.x + xOffset) + 'px';
+            } else {
+                attack.style.left = (player.x - 30) + 'px';
+            }
+        }
+
+        attack.style.top = yOffset + 'px';
+        gameContainer.appendChild(attack);
+
+        setTimeout(() => {
+            attack.remove();
+        }, 200);
+    }
+
+    // Kollisionserkennung
+    function checkCollision() {
+        // Abstand zwischen den Spielern
+        const distance = Math.abs((player1.x + player1.width / 2) - (player2.x + player2.width / 2));
+
+        // Prüfen, ob Spieler 1 Spieler 2 trifft
+        if (player1.isPunching && distance < 120) {
+            if ((player1.facingRight && player1.x < player2.x) || (!player1.facingRight && player1.x > player2.x)) {
+                player2.health -= punchDamage;
+                player2.element.classList.add('hit');
+                setTimeout(() => {
+                    player2.element.classList.remove('hit');
+                }, 200);
+            }
+        }
+
+        if (player1.isKicking && distance < 140) {
+            if ((player1.facingRight && player1.x < player2.x) || (!player1.facingRight && player1.x > player2.x)) {
+                player2.health -= kickDamage;
+                player2.element.classList.add('hit');
+                setTimeout(() => {
+                    player2.element.classList.remove('hit');
+                }, 200);
+            }
+        }
+
+        // Prüfen, ob Spieler 2 Spieler 1 trifft
+        if (player2.isPunching && distance < 120) {
+            if ((player2.facingRight && player2.x < player1.x) || (!player2.facingRight && player2.x > player1.x)) {
+                player1.health -= punchDamage;
+                player1.element.classList.add('hit');
+                setTimeout(() => {
+                    player1.element.classList.remove('hit');
+                }, 200);
+            }
+        }
+
+        if (player2.isKicking && distance < 140) {
+            if ((player2.facingRight && player2.x < player1.x) || (!player2.facingRight && player2.x > player1.x)) {
+                player1.health -= kickDamage;
+                player1.element.classList.add('hit');
+                setTimeout(() => {
+                    player1.element.classList.remove('hit');
+                }, 200);
+            }
+        }
+
+        // Gesundheit auf 0 begrenzen
+        player1.health = Math.max(0, player1.health);
+        player2.health = Math.max(0, player2.health);
+    }
+
+    // Spielzustand aktualisieren
+    function updateGameState() {
+        // Gesundheitsanzeigen aktualisieren
+        player1Health.style.width = player1.health + '%';
+        player2Health.style.width = player2.health + '%';
+
+        // Prüfen, ob ein Spieler verloren hat
+        if (player1.health <= 0) {
+            showResult('Spieler 2 gewinnt!');
+        } else if (player2.health <= 0) {
+            showResult('Spieler 1 gewinnt!');
+        }
+    }
+
+    // Ergebnis anzeigen
+    function showResult(message) {
+        resultText.textContent = message;
+        resultScreen.style.display = 'flex';
+    }
+
+    // Spiel zurücksetzen
+    function resetGame() {
+        player1.health = 100;
+        player2.health = 100;
+        player1.x = 150;
+        player2.x = 650;
+        player1.element.style.left = player1.x + 'px';
+        player2.element.style.left = player2.x + 'px';
+        player1.element.style.transform = 'scaleX(1)';
+        player2.element.style.transform = 'scaleX(-1)';
+        player1.facingRight = true;
+        player2.facingRight = false;
+
+        player1Health.style.width = '100%';
+        player2Health.style.width = '100%';
+
+        resultScreen.style.display = 'none';
+    }
+
+    // Spiel initialisieren
+    function initGame() {
+        resetGame();
+        gameLoop();
+    }
+
+    // Spiel starten
+    window.onload = initGame;
+</script>
+</body>
+</html>

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pong Spiel</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #222;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    #game-container {
+      position: relative;
+      width: 800px;
+      height: 500px;
+    }
+
+    #game-canvas {
+      background-color: #000;
+      border: 2px solid #fff;
+    }
+
+    #score-display {
+      position: absolute;
+      top: 10px;
+      left: 0;
+      width: 100%;
+      color: white;
+      font-size: 24px;
+      text-align: center;
+    }
+
+    #start-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+    }
+
+    #start-screen h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    #start-screen button {
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      padding: 15px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 10px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    #start-screen button:hover {
+      background-color: #45a049;
+    }
+
+    #game-over {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+    }
+
+    #game-over h2 {
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+
+    #game-over button {
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      padding: 15px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 10px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    #game-over button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+<div id="game-container">
+  <canvas id="game-canvas" width="800" height="500"></canvas>
+  <div id="score-display">Spieler: 0 | Computer: 0</div>
+
+  <div id="start-screen">
+    <h1>PONG</h1>
+    <div>
+      <button id="easy-btn">Einfach</button>
+      <button id="medium-btn">Mittel</button>
+      <button id="hard-btn">Schwer</button>
+    </div>
+    <p>Steuerung: Maus oder Pfeiltasten (Hoch/Runter)</p>
+  </div>
+
+  <div id="game-over">
+    <h2 id="winner-text">Spiel vorbei!</h2>
+    <button id="restart-btn">Neu starten</button>
+  </div>
+</div>
+
+<script>
+  // Canvas und Kontext einholen
+  const canvas = document.getElementById('game-canvas');
+  const ctx = canvas.getContext('2d');
+
+  // HTML-Elemente
+  const scoreDisplay = document.getElementById('score-display');
+  const startScreen = document.getElementById('start-screen');
+  const gameOverScreen = document.getElementById('game-over');
+  const winnerText = document.getElementById('winner-text');
+  const restartBtn = document.getElementById('restart-btn');
+  const easyBtn = document.getElementById('easy-btn');
+  const mediumBtn = document.getElementById('medium-btn');
+  const hardBtn = document.getElementById('hard-btn');
+
+  // Spielkonstanten
+  const PADDLE_HEIGHT = 100;
+  const PADDLE_WIDTH = 15;
+  const BALL_RADIUS = 10;
+  const WINNING_SCORE = 5;
+
+  // Spielvariablen
+  let ballX = canvas.width / 2;
+  let ballY = canvas.height / 2;
+  let ballSpeedX = 5;
+  let ballSpeedY = 2;
+  let playerPaddleY = canvas.height / 2 - PADDLE_HEIGHT / 2;
+  let computerPaddleY = canvas.height / 2 - PADDLE_HEIGHT / 2;
+  let playerScore = 0;
+  let computerScore = 0;
+  let isGameRunning = false;
+  let computerSpeed = 3; // Standard-Schwierigkeit: Mittel
+
+  // Steuerungsvariablen
+  let upPressed = false;
+  let downPressed = false;
+  let mousePosition = {
+    y: canvas.height / 2
+  };
+
+  // Event-Listener für Tastatursteuerung
+  document.addEventListener('keydown', keyDownHandler);
+  document.addEventListener('keyup', keyUpHandler);
+
+  // Event-Listener für Maussteuerung
+  canvas.addEventListener('mousemove', mouseMoveHandler);
+
+  // Event-Listener für Schwierigkeitsgrade und Neustart
+  easyBtn.addEventListener('click', () => startGame(2));
+  mediumBtn.addEventListener('click', () => startGame(3));
+  hardBtn.addEventListener('click', () => startGame(5));
+  restartBtn.addEventListener('click', resetGame);
+
+  // Startfunktion
+  function startGame(difficulty) {
+    computerSpeed = difficulty;
+    isGameRunning = true;
+    startScreen.style.display = 'none';
+    gameLoop();
+  }
+
+  // Steuerungsfunktionen
+  function keyDownHandler(e) {
+    if (e.key === 'ArrowUp' || e.key === 'Up') {
+      upPressed = true;
+    } else if (e.key === 'ArrowDown' || e.key === 'Down') {
+      downPressed = true;
+    }
+  }
+
+  function keyUpHandler(e) {
+    if (e.key === 'ArrowUp' || e.key === 'Up') {
+      upPressed = false;
+    } else if (e.key === 'ArrowDown' || e.key === 'Down') {
+      downPressed = false;
+    }
+  }
+
+  function mouseMoveHandler(e) {
+    const relativeY = e.clientY - canvas.getBoundingClientRect().top;
+    mousePosition.y = relativeY;
+  }
+
+  // Funktion zum Zurücksetzen des Spiels
+  function resetGame() {
+    playerScore = 0;
+    computerScore = 0;
+    resetBall();
+    gameOverScreen.style.display = 'none';
+    isGameRunning = true;
+    updateScore();
+    gameLoop();
+  }
+
+  // Funktion zum Zurücksetzen des Balls
+  function resetBall() {
+    ballX = canvas.width / 2;
+    ballY = canvas.height / 2;
+
+    // Zufällige Richtung beim Neustart
+    ballSpeedX = Math.random() > 0.5 ? 5 : -5;
+    ballSpeedY = Math.random() * 4 - 2;
+  }
+
+  // Funktion zum Aktualisieren des Punktestands
+  function updateScore() {
+    scoreDisplay.textContent = `Spieler: ${playerScore} | Computer: ${computerScore}`;
+  }
+
+  // Hauptspielschleife
+  function gameLoop() {
+    if (!isGameRunning) return;
+
+    updatePaddles();
+    updateBall();
+    checkCollisions();
+    checkScore();
+    drawEverything();
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  // Aktualisierung der Schläger
+  function updatePaddles() {
+    // Spielersteuerung mit Tastatur
+    if (upPressed && playerPaddleY > 0) {
+      playerPaddleY -= 8;
+    } else if (downPressed && playerPaddleY < canvas.height - PADDLE_HEIGHT) {
+      playerPaddleY += 8;
+    }
+
+    // Spielersteuerung mit Maus
+    if (!upPressed && !downPressed) {
+      playerPaddleY = Math.min(Math.max(mousePosition.y - PADDLE_HEIGHT / 2, 0), canvas.height - PADDLE_HEIGHT);
+    }
+
+    // Computersteuerung mit Schwierigkeit
+    const computerPaddleCenter = computerPaddleY + PADDLE_HEIGHT / 2;
+    const distanceToMove = ballY - computerPaddleCenter;
+
+    // Einfache KI mit verzögerter Reaktion
+    if (Math.abs(distanceToMove) > PADDLE_HEIGHT / 4) {
+      if (distanceToMove > 0) {
+        computerPaddleY += computerSpeed;
+      } else {
+        computerPaddleY -= computerSpeed;
+      }
+    }
+
+    // Begrenzung des Computer-Schlägers
+    computerPaddleY = Math.min(Math.max(computerPaddleY, 0), canvas.height - PADDLE_HEIGHT);
+  }
+
+  // Aktualisierung des Balls
+  function updateBall() {
+    ballX += ballSpeedX;
+    ballY += ballSpeedY;
+
+    // Kollision mit oberer/unterer Wand
+    if (ballY < BALL_RADIUS || ballY > canvas.height - BALL_RADIUS) {
+      ballSpeedY = -ballSpeedY;
+    }
+  }
+
+  // Kollisionsprüfung
+  function checkCollisions() {
+    // Kollision mit Spielerschläger
+    if (ballX < PADDLE_WIDTH + BALL_RADIUS) {
+      if (ballY > playerPaddleY && ballY < playerPaddleY + PADDLE_HEIGHT) {
+        ballSpeedX = -ballSpeedX;
+
+        // Abprallwinkel basierend auf Trefferpunkt
+        const deltaY = ballY - (playerPaddleY + PADDLE_HEIGHT / 2);
+        ballSpeedY = deltaY * 0.2;
+
+        // Erhöhung der Geschwindigkeit
+        ballSpeedX *= 1.05;
+        if (Math.abs(ballSpeedX) > 12) ballSpeedX = ballSpeedX > 0 ? 12 : -12;
+      }
+    }
+
+    // Kollision mit Computerschläger
+    if (ballX > canvas.width - PADDLE_WIDTH - BALL_RADIUS) {
+      if (ballY > computerPaddleY && ballY < computerPaddleY + PADDLE_HEIGHT) {
+        ballSpeedX = -ballSpeedX;
+
+        // Abprallwinkel basierend auf Trefferpunkt
+        const deltaY = ballY - (computerPaddleY + PADDLE_HEIGHT / 2);
+        ballSpeedY = deltaY * 0.2;
+
+        // Erhöhung der Geschwindigkeit
+        ballSpeedX *= 1.05;
+        if (Math.abs(ballSpeedX) > 12) ballSpeedX = ballSpeedX > 0 ? 12 : -12;
+      }
+    }
+  }
+
+  // Punktestand überprüfen
+  function checkScore() {
+    if (ballX < 0) {
+      computerScore++;
+      updateScore();
+      resetBall();
+      checkWinner();
+    } else if (ballX > canvas.width) {
+      playerScore++;
+      updateScore();
+      resetBall();
+      checkWinner();
+    }
+  }
+
+  // Überprüfen, ob ein Spieler gewonnen hat
+  function checkWinner() {
+    if (playerScore >= WINNING_SCORE || computerScore >= WINNING_SCORE) {
+      isGameRunning = false;
+
+      if (playerScore >= WINNING_SCORE) {
+        winnerText.textContent = "Du hast gewonnen!";
+      } else {
+        winnerText.textContent = "Computer hat gewonnen!";
+      }
+
+      gameOverScreen.style.display = 'flex';
+    }
+  }
+
+  // Alles zeichnen
+  function drawEverything() {
+    // Canvas löschen
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Mittellinie zeichnen
+    ctx.beginPath();
+    ctx.setLineDash([10, 10]);
+    ctx.moveTo(canvas.width / 2, 0);
+    ctx.lineTo(canvas.width / 2, canvas.height);
+    ctx.strokeStyle = "white";
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Spielerschläger zeichnen
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, playerPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT);
+
+    // Computerschläger zeichnen
+    ctx.fillRect(canvas.width - PADDLE_WIDTH, computerPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT);
+
+    // Ball zeichnen
+    ctx.beginPath();
+    ctx.arc(ballX, ballY, BALL_RADIUS, 0, Math.PI * 2);
+    ctx.fillStyle = "white";
+    ctx.fill();
+    ctx.closePath();
+  }
+</script>
+</body>
+</html>
