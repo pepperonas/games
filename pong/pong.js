@@ -67,16 +67,21 @@ let wPressed = false;
 let sPressed = false;
 let upPressed = false;
 let downPressed = false;
-let mousePosition = {
-    y: canvas.height / 2
-};
+
+// Neue Variablen für die Gewinner-Animation
+let showWinAnimation = false;
+let winAnimationStartTime = 0;
+let winAnimationDuration = 3000; // 3 Sekunden
+let winningPlayer = ''; // 'left' oder 'right'
+
+// Variablen für das Ball-Reset
+let ballInResetState = false;
+let ballResetStartTime = 0;
+let ballResetDuration = 2000; // 2 Sekunden Pause vor Neustart
 
 // Event-Listener für Tastatursteuerung
 document.addEventListener('keydown', keyDownHandler);
 document.addEventListener('keyup', keyUpHandler);
-
-// Event-Listener für Maussteuerung
-canvas.addEventListener('mousemove', mouseMoveHandler);
 
 // Event-Listener für Schwierigkeitsgrade und Spielmodi
 easyBtn.addEventListener('click', () => startSinglePlayerGame(2));
@@ -785,11 +790,6 @@ function keyUpHandler(e) {
     }
 }
 
-function mouseMoveHandler(e) {
-    const relativeY = e.clientY - canvas.getBoundingClientRect().top;
-    mousePosition.y = relativeY;
-}
-
 // Funktion zum Zurücksetzen des Spiels
 function resetGame() {
     // Stoppe die aktuelle Spielschleife, falls sie läuft
@@ -823,11 +823,7 @@ function resetGame() {
     }, 0);
 }
 
-let ballInResetState = false;
-let ballResetStartTime = 0;
-let ballResetDuration = 2000; // 2 Sekunden Pause vor Neustart
-
-// Funktion zum Zurücksetzen des Balls anpassen
+// Funktion zum Zurücksetzen des Balls
 function resetBall() {
     ballX = canvas.width / 2;
     ballY = canvas.height / 2;
@@ -840,23 +836,17 @@ function resetBall() {
 }
 
 // Neue Funktion für die Aktualisierung des Ball-Reset-Zustands
-function updateBall() {
-    // Im Online-Modus aktualisiert nur der Host den Ball
-    if (gameMode === 'online-multiplayer' && !isHost) {
-        return; // Nicht-Host verwendet die vom Host empfangenen Ball-Daten
-    }
-
-    // Nicht bewegen, wenn im Reset-Zustand
+function updateBallResetState() {
     if (ballInResetState) {
-        return;
-    }
+        // Überprüfe, ob die Reset-Dauer abgelaufen ist
+        if (Date.now() - ballResetStartTime >= ballResetDuration) {
+            // Reset beenden und Ball bewegen
+            ballInResetState = false;
 
-    ballX += ballSpeedX;
-    ballY += ballSpeedY;
-
-    // Kollision mit oberer/unterer Wand
-    if (ballY < BALL_RADIUS || ballY > canvas.height - BALL_RADIUS) {
-        ballSpeedY = -ballSpeedY;
+            // Zufällige Richtung beim Neustart
+            ballSpeedX = Math.random() > 0.5 ? 5 : -5;
+            ballSpeedY = Math.random() * 4 - 2;
+        }
     }
 }
 
@@ -864,16 +854,11 @@ function updateBall() {
 function updatePaddles() {
     // Steuerung basierend auf Spielmodus
     if (gameMode === 'singleplayer') {
-        // Spieler: Linker Schläger mit Maus oder Tastatur
+        // Spieler: Linker Schläger nur mit Tastatur (Maussteuerung entfernt)
         if (upPressed && leftPaddleY > 0) {
             leftPaddleY -= 8;
         } else if (downPressed && leftPaddleY < canvas.height - PADDLE_HEIGHT) {
             leftPaddleY += 8;
-        }
-
-        // Maussteuerung, wenn keine Tasten gedrückt sind
-        if (!upPressed && !downPressed) {
-            leftPaddleY = Math.min(Math.max(mousePosition.y - PADDLE_HEIGHT / 2, 0), canvas.height - PADDLE_HEIGHT);
         }
 
         // Computer: Rechter Schläger KI
@@ -912,8 +897,6 @@ function updatePaddles() {
             } else if ((sPressed || (useArrowKeys && downPressed)) && leftPaddleY < canvas.height - PADDLE_HEIGHT) {
                 leftPaddleY += 8;
             }
-
-            // Rechter Schläger wird vom Gegner gesteuert (über WebRTC)
         } else {
             // Gast steuert den rechten Schläger mit W/S oder Pfeiltasten
             const useArrowKeys = !wPressed && !sPressed;
@@ -923,14 +906,33 @@ function updatePaddles() {
             } else if ((sPressed || (useArrowKeys && downPressed)) && rightPaddleY < canvas.height - PADDLE_HEIGHT) {
                 rightPaddleY += 8;
             }
-
-            // Linker Schläger wird vom Gegner gesteuert (über WebRTC)
         }
     }
 
     // Begrenzung der Schläger
     leftPaddleY = Math.min(Math.max(leftPaddleY, 0), canvas.height - PADDLE_HEIGHT);
     rightPaddleY = Math.min(Math.max(rightPaddleY, 0), canvas.height - PADDLE_HEIGHT);
+}
+
+// Aktualisierung des Balls
+function updateBall() {
+    // Im Online-Modus aktualisiert nur der Host den Ball
+    if (gameMode === 'online-multiplayer' && !isHost) {
+        return; // Nicht-Host verwendet die vom Host empfangenen Ball-Daten
+    }
+
+    // Nicht bewegen, wenn im Reset-Zustand
+    if (ballInResetState) {
+        return;
+    }
+
+    ballX += ballSpeedX;
+    ballY += ballSpeedY;
+
+    // Kollision mit oberer/unterer Wand
+    if (ballY < BALL_RADIUS || ballY > canvas.height - BALL_RADIUS) {
+        ballSpeedY = -ballSpeedY;
+    }
 }
 
 // Kollisionsprüfung
@@ -971,27 +973,36 @@ function checkCollisions() {
     }
 }
 
-// In der gameLoop-Funktion, updateBallResetState aufrufen (nach der if (!isGameRunning) Zeile)
+// Modifizierte gameLoop-Funktion, um die Animation zu zeichnen
 function gameLoop() {
-    if (!isGameRunning) return;
+    if (!isGameRunning && !showWinAnimation) return;
 
     gameLoop.isRunning = true;
 
-    // Nur der Host oder lokale Spieler aktualisieren den Ball-Reset-Zustand
-    if (gameMode !== 'online-multiplayer' || isHost) {
-        updateBallResetState();
+    // Nur Spiellogik ausführen, wenn das Spiel läuft
+    if (isGameRunning) {
+        // Nur der Host oder lokale Spieler aktualisieren den Ball-Reset-Zustand
+        if (gameMode !== 'online-multiplayer' || isHost) {
+            updateBallResetState();
+        }
+
+        updatePaddles();
+        updateBall();
+        checkCollisions();
+
+        // Im Online-Modus aktualisiert nur der Host den Punktestand
+        if (gameMode !== 'online-multiplayer' || isHost) {
+            checkScore();
+        }
     }
 
-    updatePaddles();
-    updateBall();
-    checkCollisions();
-
-    // Im Online-Modus aktualisiert nur der Host den Punktestand
-    if (gameMode !== 'online-multiplayer' || isHost) {
-        checkScore();
-    }
-
+    // Zeichnen immer ausführen (auch während der Animation)
     drawEverything();
+
+    // Wenn die Gewinner-Animation aktiv ist, zeichne sie
+    if (showWinAnimation) {
+        drawWinAnimation();
+    }
 
     requestAnimationFrame(gameLoop);
 }
@@ -1073,6 +1084,116 @@ function drawEverything() {
     }
 }
 
+// Funktion zum Zeichnen der Gewinner-Animation
+function drawWinAnimation() {
+    if (!showWinAnimation) return;
+
+    const elapsed = Date.now() - winAnimationStartTime;
+    const progress = Math.min(elapsed / winAnimationDuration, 1);
+
+    // Hintergrund-Flash-Effekt
+    const flashIntensity = (Math.sin(elapsed * 0.01) + 1) / 2;
+    ctx.fillStyle = `rgba(100, 100, 255, ${flashIntensity * 0.3})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Textanimation
+    ctx.save();
+    ctx.font = "bold 48px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    // Pulsierender Effekt für den Text
+    const scale = 1 + Math.sin(elapsed * 0.01) * 0.1;
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.scale(scale, scale);
+
+    // Text basierend auf Spielmodus und Gewinner
+    let winText = '';
+    if (winningPlayer === 'left') {
+        if (gameMode === 'singleplayer') {
+            winText = 'Du hast gewonnen!';
+            ctx.fillStyle = 'rgba(50, 255, 50, ' + (0.7 + flashIntensity * 0.3) + ')';
+        } else if (gameMode === 'local-multiplayer') {
+            winText = 'Spieler 1 gewinnt!';
+            ctx.fillStyle = 'rgba(50, 255, 50, ' + (0.7 + flashIntensity * 0.3) + ')';
+        } else if (gameMode === 'online-multiplayer') {
+            winText = isHost ? 'Du hast gewonnen!' : 'Gegner gewinnt!';
+            ctx.fillStyle = isHost ? 'rgba(50, 255, 50, ' + (0.7 + flashIntensity * 0.3) + ')'
+                : 'rgba(255, 50, 50, ' + (0.7 + flashIntensity * 0.3) + ')';
+        }
+    } else {
+        if (gameMode === 'singleplayer') {
+            winText = 'Computer gewinnt!';
+            ctx.fillStyle = 'rgba(255, 50, 50, ' + (0.7 + flashIntensity * 0.3) + ')';
+        } else if (gameMode === 'local-multiplayer') {
+            winText = 'Spieler 2 gewinnt!';
+            ctx.fillStyle = 'rgba(50, 50, 255, ' + (0.7 + flashIntensity * 0.3) + ')';
+        } else if (gameMode === 'online-multiplayer') {
+            winText = isHost ? 'Gegner gewinnt!' : 'Du hast gewonnen!';
+            ctx.fillStyle = isHost ? 'rgba(255, 50, 50, ' + (0.7 + flashIntensity * 0.3) + ')'
+                : 'rgba(50, 255, 50, ' + (0.7 + flashIntensity * 0.3) + ')';
+        }
+    }
+
+    // Schatten für bessere Lesbarkeit
+    ctx.shadowColor = "black";
+    ctx.shadowBlur = 10;
+    ctx.fillText(winText, 0, 0);
+
+    // Zeichne Sterneneffekt um den Text
+    for (let i = 0; i < 20; i++) {
+        const angle = progress * 10 + i * Math.PI / 10;
+        const distance = 80 + Math.sin(elapsed * 0.005 + i) * 20;
+        const x = Math.cos(angle) * distance;
+        const y = Math.sin(angle) * distance;
+        const size = 5 + Math.sin(elapsed * 0.01 + i) * 3;
+
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 50, ${0.7 + flashIntensity * 0.3})`;
+        ctx.fill();
+    }
+
+    ctx.restore();
+}
+
+// Überarbeitete checkWinner Funktion mit Animation
+function checkWinner() {
+    if (leftScore >= WINNING_SCORE || rightScore >= WINNING_SCORE) {
+        isGameRunning = false;
+
+        // Starte die Gewinner-Animation
+        showWinAnimation = true;
+        winAnimationStartTime = Date.now();
+        winningPlayer = leftScore > rightScore ? 'left' : 'right';
+
+        // Animation im gameLoop weiterlaufen lassen, aber keine Spiellogik mehr
+        // Das Game-Over-Screen wird erst nach der Animation angezeigt
+        setTimeout(() => {
+            showWinAnimation = false;
+            gameOverScreen.style.display = 'flex';
+
+            if (leftScore > rightScore) {
+                if (gameMode === 'singleplayer') {
+                    winnerText.textContent = 'Du hast gewonnen!';
+                } else if (gameMode === 'local-multiplayer') {
+                    winnerText.textContent = 'Spieler 1 hat gewonnen!';
+                } else if (gameMode === 'online-multiplayer') {
+                    winnerText.textContent = isHost ? 'Du hast gewonnen!' : 'Gegner hat gewonnen!';
+                }
+            } else {
+                if (gameMode === 'singleplayer') {
+                    winnerText.textContent = 'Computer hat gewonnen!';
+                } else if (gameMode === 'local-multiplayer') {
+                    winnerText.textContent = 'Spieler 2 hat gewonnen!';
+                } else if (gameMode === 'online-multiplayer') {
+                    winnerText.textContent = isHost ? 'Gegner hat gewonnen!' : 'Du hast gewonnen!';
+                }
+            }
+        }, winAnimationDuration);
+    }
+}
+
 // Funktion zur Überwachung und Aktualisierung des Verbindungsstatus
 function updateConnectionStatus(state, details = '') {
     connectionStatusValue.textContent = state;
@@ -1113,45 +1234,6 @@ function setupConnectionTimeout() {
         connectBtn.disabled = false;
         connectBtn.textContent = 'Verbinden';
     }, 15000);
-}
-
-function updateBallResetState() {
-    if (ballInResetState) {
-        // Überprüfe, ob die Reset-Dauer abgelaufen ist
-        if (Date.now() - ballResetStartTime >= ballResetDuration) {
-            // Reset beenden und Ball bewegen
-            ballInResetState = false;
-
-            // Zufällige Richtung beim Neustart
-            ballSpeedX = Math.random() > 0.5 ? 5 : -5;
-            ballSpeedY = Math.random() * 4 - 2;
-        }
-    }
-}
-
-function checkWinner() {
-    if (leftScore >= WINNING_SCORE || rightScore >= WINNING_SCORE) {
-        isGameRunning = false;
-        gameOverScreen.style.display = 'flex';
-
-        if (leftScore > rightScore) {
-            if (gameMode === 'singleplayer') {
-                winnerText.textContent = 'Du hast gewonnen!';
-            } else if (gameMode === 'local-multiplayer') {
-                winnerText.textContent = 'Spieler 1 hat gewonnen!';
-            } else if (gameMode === 'online-multiplayer') {
-                winnerText.textContent = isHost ? 'Du hast gewonnen!' : 'Gegner hat gewonnen!';
-            }
-        } else {
-            if (gameMode === 'singleplayer') {
-                winnerText.textContent = 'Computer hat gewonnen!';
-            } else if (gameMode === 'local-multiplayer') {
-                winnerText.textContent = 'Spieler 2 hat gewonnen!';
-            } else if (gameMode === 'online-multiplayer') {
-                winnerText.textContent = isHost ? 'Gegner hat gewonnen!' : 'Du hast gewonnen!';
-            }
-        }
-    }
 }
 
 // Event-Listener für Browser-Tab-Schließen
