@@ -44,7 +44,7 @@ if (directories.length === 0) {
     directories.forEach(dir => {
         gameCardsHtml += `
       <div class="game-card">
-        <a href="${dir.path}/index.html">
+        <a href="${dir.path}/">
           <div class="game-icon">🎮</div>
           <div class="game-title">${dir.name}</div>
         </a>
