@@ -2,6 +2,8 @@
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
 
+const relightSound = document.getElementById('relight-sound');
+
 // HTML-Elemente
 const scoreDisplay = document.getElementById('score-display');
 const connectionStatus = document.getElementById('connection-status');
@@ -1306,6 +1308,22 @@ function checkWinner() {
                 isLocalPlayerWinner = (leftScore > rightScore);
             } else {
                 isLocalPlayerWinner = (rightScore > leftScore);
+            }
+        }
+
+        // Spiele den Gewinner-Sound ab, wenn der lokale Spieler gewonnen hat
+        if (isLocalPlayerWinner) {
+            if (relightSound) {
+                relightSound.currentTime = 0; // Sound zurücksetzen, falls er bereits gespielt wurde
+
+                // Promise-basierte Wiedergabe mit Fehlerbehandlung
+                const playPromise = relightSound.play();
+
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.error('Fehler beim Abspielen des Sounds:', error);
+                    });
+                }
             }
         }
 
