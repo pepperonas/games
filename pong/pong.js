@@ -89,8 +89,6 @@ mainMenuBtn.addEventListener('click', returnToMainMenu);
 backBtn.addEventListener('click', returnToMainMenu);
 connectBtn.addEventListener('click', connectToRoom);
 copyBtn.addEventListener('click', copyRoomIdToClipboard);
-document.getElementById('reset-connection-btn').addEventListener('click', resetSocketConnection);
-forceStartBtn.addEventListener('click', forceStartGame);
 
 // Debug-Funktion für Logging
 function logDebug(message) {
@@ -155,6 +153,8 @@ function setupOnlineMultiplayer() {
     startScreen.style.display = 'none';
     onlineConnectionScreen.style.display = 'flex';
 
+    // Fügen Sie diese Zeile hinzu, um die Rolle zurückzusetzen
+    isHost = null;
     // Wenn es eine alte Verbindung gibt, diese zuerst trennen
     if (socket && socket.connected) {
         logDebug('🔌 Trenne bestehende Socket.io-Verbindung');
@@ -203,17 +203,34 @@ function setupOnlineMultiplayer() {
         waitingMessage.textContent = 'Verbunden! Spiel startet...';
         waitingMessage.classList.remove('pulse');
 
+        // WICHTIG: Wir warten hier, bis wir sicher die Rolle kennen
+        if (isHost === null || isHost === undefined) {
+            logDebug('⏳ Warte auf Rollenzuweisung...');
+            // Wir fügen einen kurzen Timeout hinzu, um auf den playerRole-Event zu warten
+            setTimeout(() => {
+                initializeConnectionAfterRoleAssignment(data);
+            }, 500);
+        } else {
+            // Rolle ist bereits bekannt, fahre fort
+            initializeConnectionAfterRoleAssignment(data);
+        }
+    });
+
+    function initializeConnectionAfterRoleAssignment(data) {
+        logDebug(`🔍 Starte Verbindung mit Rolle: ${isHost ? 'Host' : 'Gast'}`);
+
         // WebRTC-Verbindung initialisieren
         initializePeerConnection();
 
         // Wenn Host, SDP-Angebot senden
         if (isHost) {
-            logDebug('⭐ Ich bin Host, erstelle Angebot');
+            logDebug('📤 Als Host erstelle ich jetzt ein Angebot');
             createOffer();
         } else {
-            logDebug('⭐ Ich bin Gast, warte auf Angebot');
+            logDebug('📥 Als Gast warte ich jetzt auf ein Angebot');
+            // Der Gast muss nichts tun, er wartet auf das Angebot
         }
-    });
+    }
 
     socket.on('playerRole', ({isHost: role}) => {
         isHost = role;
@@ -506,6 +523,8 @@ function setupDataChannel() {
                     ballSpeedY = data.ballSpeedY;
                     leftScore = data.leftScore;
                     rightScore = data.rightScore;
+                    ballInResetState = data.ballInResetState;
+                    ballResetStartTime = data.ballResetStartTime;
 
                     updateScore();
                 }
@@ -575,6 +594,8 @@ function sendGameState() {
         gameState.ballSpeedY = ballSpeedY;
         gameState.leftScore = leftScore;
         gameState.rightScore = rightScore;
+        gameState.ballInResetState = ballInResetState;
+        gameState.ballResetStartTime = ballResetStartTime;
     }
 
     sendData(gameState);
@@ -802,14 +823,41 @@ function resetGame() {
     }, 0);
 }
 
-// Funktion zum Zurücksetzen des Balls
+let ballInResetState = false;
+let ballResetStartTime = 0;
+let ballResetDuration = 2000; // 2 Sekunden Pause vor Neustart
+
+// Funktion zum Zurücksetzen des Balls anpassen
 function resetBall() {
     ballX = canvas.width / 2;
     ballY = canvas.height / 2;
 
-    // Zufällige Richtung beim Neustart
-    ballSpeedX = Math.random() > 0.5 ? 5 : -5;
-    ballSpeedY = Math.random() * 4 - 2;
+    // Ball in Pause-Zustand versetzen
+    ballInResetState = true;
+    ballResetStartTime = Date.now();
+    ballSpeedX = 0;
+    ballSpeedY = 0;
+}
+
+// Neue Funktion für die Aktualisierung des Ball-Reset-Zustands
+function updateBall() {
+    // Im Online-Modus aktualisiert nur der Host den Ball
+    if (gameMode === 'online-multiplayer' && !isHost) {
+        return; // Nicht-Host verwendet die vom Host empfangenen Ball-Daten
+    }
+
+    // Nicht bewegen, wenn im Reset-Zustand
+    if (ballInResetState) {
+        return;
+    }
+
+    ballX += ballSpeedX;
+    ballY += ballSpeedY;
+
+    // Kollision mit oberer/unterer Wand
+    if (ballY < BALL_RADIUS || ballY > canvas.height - BALL_RADIUS) {
+        ballSpeedY = -ballSpeedY;
+    }
 }
 
 // Aktualisierung der Schläger
@@ -885,22 +933,6 @@ function updatePaddles() {
     rightPaddleY = Math.min(Math.max(rightPaddleY, 0), canvas.height - PADDLE_HEIGHT);
 }
 
-// Aktualisierung des Balls
-function updateBall() {
-    // Im Online-Modus aktualisiert nur der Host den Ball
-    if (gameMode === 'online-multiplayer' && !isHost) {
-        return; // Nicht-Host verwendet die vom Host empfangenen Ball-Daten
-    }
-
-    ballX += ballSpeedX;
-    ballY += ballSpeedY;
-
-    // Kollision mit oberer/unterer Wand
-    if (ballY < BALL_RADIUS || ballY > canvas.height - BALL_RADIUS) {
-        ballSpeedY = -ballSpeedY;
-    }
-}
-
 // Kollisionsprüfung
 function checkCollisions() {
     // Im Online-Modus prüft nur der Host auf Kollisionen
@@ -939,11 +971,16 @@ function checkCollisions() {
     }
 }
 
-// Hauptspielschleife
+// In der gameLoop-Funktion, updateBallResetState aufrufen (nach der if (!isGameRunning) Zeile)
 function gameLoop() {
     if (!isGameRunning) return;
 
     gameLoop.isRunning = true;
+
+    // Nur der Host oder lokale Spieler aktualisieren den Ball-Reset-Zustand
+    if (gameMode !== 'online-multiplayer' || isHost) {
+        updateBallResetState();
+    }
 
     updatePaddles();
     updateBall();
@@ -1018,6 +1055,22 @@ function drawEverything() {
     ctx.fillStyle = "white";
     ctx.fill();
     ctx.closePath();
+
+    // Countdown während Reset-Zustand anzeigen
+    if (ballInResetState) {
+        ctx.font = "30px Arial";
+        ctx.fillStyle = "white";
+        ctx.textAlign = "center";
+
+        // Berechne verbleibende Zeit
+        const timeElapsed = Date.now() - ballResetStartTime;
+        const timeLeft = Math.ceil((ballResetDuration - timeElapsed) / 1000);
+
+        // Zeige Countdown nur, wenn noch Zeit übrig ist
+        if (timeLeft > 0) {
+            ctx.fillText(`${timeLeft}`, canvas.width / 2, canvas.height / 2 - 50);
+        }
+    }
 }
 
 // Funktion zur Überwachung und Aktualisierung des Verbindungsstatus
@@ -1060,6 +1113,45 @@ function setupConnectionTimeout() {
         connectBtn.disabled = false;
         connectBtn.textContent = 'Verbinden';
     }, 15000);
+}
+
+function updateBallResetState() {
+    if (ballInResetState) {
+        // Überprüfe, ob die Reset-Dauer abgelaufen ist
+        if (Date.now() - ballResetStartTime >= ballResetDuration) {
+            // Reset beenden und Ball bewegen
+            ballInResetState = false;
+
+            // Zufällige Richtung beim Neustart
+            ballSpeedX = Math.random() > 0.5 ? 5 : -5;
+            ballSpeedY = Math.random() * 4 - 2;
+        }
+    }
+}
+
+function checkWinner() {
+    if (leftScore >= WINNING_SCORE || rightScore >= WINNING_SCORE) {
+        isGameRunning = false;
+        gameOverScreen.style.display = 'flex';
+
+        if (leftScore > rightScore) {
+            if (gameMode === 'singleplayer') {
+                winnerText.textContent = 'Du hast gewonnen!';
+            } else if (gameMode === 'local-multiplayer') {
+                winnerText.textContent = 'Spieler 1 hat gewonnen!';
+            } else if (gameMode === 'online-multiplayer') {
+                winnerText.textContent = isHost ? 'Du hast gewonnen!' : 'Gegner hat gewonnen!';
+            }
+        } else {
+            if (gameMode === 'singleplayer') {
+                winnerText.textContent = 'Computer hat gewonnen!';
+            } else if (gameMode === 'local-multiplayer') {
+                winnerText.textContent = 'Spieler 2 hat gewonnen!';
+            } else if (gameMode === 'online-multiplayer') {
+                winnerText.textContent = isHost ? 'Gegner hat gewonnen!' : 'Du hast gewonnen!';
+            }
+        }
+    }
 }
 
 // Event-Listener für Browser-Tab-Schließen
