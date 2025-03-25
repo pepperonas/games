@@ -73,6 +73,11 @@ let showWinAnimation = false;
 let winAnimationStartTime = 0;
 let winAnimationDuration = 3000; // 3 Sekunden
 let winningPlayer = ''; // 'left' oder 'right'
+let isLocalPlayerWinner = false; // Zeigt an, ob der lokale Spieler gewonnen hat
+
+// Verlierer-Animation-Variablen
+let raindrops = []; // Array für Regentropfen
+const RAINDROP_COUNT = 100; // Anzahl der Regentropfen
 
 // Variablen für das Ball-Reset
 let ballInResetState = false;
@@ -533,6 +538,32 @@ function setupDataChannel() {
 
                     updateScore();
                 }
+            } else if (data.type === 'gameOver') {
+                // Spiel ist vorbei, Animation starten
+                console.log('Spielende-Nachricht empfangen', data);
+                isGameRunning = false;
+                showWinAnimation = true;
+                winAnimationStartTime = Date.now();
+                winningPlayer = data.winner;
+                isLocalPlayerWinner = (isHost && data.winner === 'left') || (!isHost && data.winner === 'right');
+
+                // Initialisiere Regentropfen für Verlierer-Animation
+                if (!isLocalPlayerWinner) {
+                    initializeRaindrops();
+                }
+
+                // Animation im gameLoop weiterlaufen lassen, aber keine Spiellogik mehr
+                // Das Game-Over-Screen wird erst nach der Animation angezeigt
+                setTimeout(() => {
+                    showWinAnimation = false;
+                    gameOverScreen.style.display = 'flex';
+
+                    if (data.winner === 'left') {
+                        winnerText.textContent = isHost ? 'Du hast gewonnen!' : 'Gegner hat gewonnen!';
+                    } else {
+                        winnerText.textContent = isHost ? 'Gegner hat gewonnen!' : 'Du hast gewonnen!';
+                    }
+                }, winAnimationDuration);
             }
         } catch (error) {
             console.error('📢 Fehler beim Verarbeiten der Nachricht:', error);
@@ -973,6 +1004,19 @@ function checkCollisions() {
     }
 }
 
+// Funktion zur Initialisierung der Regentropfen für die Verlierer-Animation
+function initializeRaindrops() {
+    raindrops = [];
+    for (let i = 0; i < RAINDROP_COUNT; i++) {
+        raindrops.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height - canvas.height, // Start above the canvas
+            length: 10 + Math.random() * 20,
+            speed: 5 + Math.random() * 10
+        });
+    }
+}
+
 // Modifizierte gameLoop-Funktion, um die Animation zu zeichnen
 function gameLoop() {
     if (!isGameRunning && !showWinAnimation) return;
@@ -999,9 +1043,13 @@ function gameLoop() {
     // Zeichnen immer ausführen (auch während der Animation)
     drawEverything();
 
-    // Wenn die Gewinner-Animation aktiv ist, zeichne sie
+    // Wenn die Animation aktiv ist, zeichne die entsprechende Animation
     if (showWinAnimation) {
-        drawWinAnimation();
+        if (isLocalPlayerWinner) {
+            drawWinAnimation();
+        } else {
+            drawLoserAnimation();
+        }
     }
 
     requestAnimationFrame(gameLoop);
@@ -1157,15 +1205,119 @@ function drawWinAnimation() {
     ctx.restore();
 }
 
+// Funktion zum Zeichnen der Verlierer-Animation
+function drawLoserAnimation() {
+    if (!showWinAnimation) return;
+
+    const elapsed = Date.now() - winAnimationStartTime;
+    const progress = Math.min(elapsed / winAnimationDuration, 1);
+
+    // Dunkler Hintergrund-Effekt
+    ctx.fillStyle = `rgba(0, 0, 0, 0.3)`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Wackeleffekt für die gesamte Szene
+    ctx.save();
+    const shakeAmount = Math.sin(elapsed * 0.02) * 5;
+    ctx.translate(shakeAmount, 0);
+
+    // Regentropfen zeichnen
+    if (raindrops.length === 0) {
+        initializeRaindrops();
+    }
+
+    ctx.strokeStyle = 'rgba(70, 130, 180, 0.7)'; // Bläuliche Regentropfen
+    ctx.lineWidth = 2;
+
+    for (let i = 0; i < raindrops.length; i++) {
+        const drop = raindrops[i];
+
+        ctx.beginPath();
+        ctx.moveTo(drop.x, drop.y);
+        ctx.lineTo(drop.x, drop.y + drop.length);
+        ctx.stroke();
+
+        // Regentropfen bewegen
+        drop.y += drop.speed;
+
+        // Regentropfen zurücksetzen, wenn sie unten rausfallen
+        if (drop.y > canvas.height) {
+            drop.y = -drop.length;
+            drop.x = Math.random() * canvas.width;
+        }
+    }
+
+    // "Verloren" Text zeichnen
+    ctx.font = "bold 48px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    // Text mit Wackeleffekt
+    const textShakeX = Math.sin(elapsed * 0.02) * 3;
+    const textShakeY = Math.cos(elapsed * 0.02) * 3;
+
+    // Text basierend auf Spielmodus
+    let loseText = '';
+    if (gameMode === 'singleplayer') {
+        loseText = 'Verloren!';
+    } else if (gameMode === 'local-multiplayer') {
+        loseText = (winningPlayer === 'left') ? 'Spieler 2 verliert!' : 'Spieler 1 verliert!';
+    } else if (gameMode === 'online-multiplayer') {
+        loseText = 'Verloren!';
+    }
+
+    // Schatten für bessere Lesbarkeit
+    ctx.shadowColor = "black";
+    ctx.shadowBlur = 15;
+    ctx.fillStyle = 'rgba(220, 20, 60, 0.8)'; // Rötlicher Text für Verlierer
+    ctx.fillText(loseText, canvas.width / 2 + textShakeX, canvas.height / 2 + textShakeY);
+
+    // "Game Over" Text mit Fade-In-Effekt
+    ctx.font = "bold 28px Arial";
+    ctx.fillStyle = `rgba(150, 150, 150, ${progress * 0.8})`;
+    ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2 + 60);
+
+    ctx.restore();
+}
+
 // Überarbeitete checkWinner Funktion mit Animation
 function checkWinner() {
     if (leftScore >= WINNING_SCORE || rightScore >= WINNING_SCORE) {
         isGameRunning = false;
+        const winner = leftScore > rightScore ? 'left' : 'right';
+
+        // Im Online-Multiplayer: informiere den Gegner über das Spielende
+        if (gameMode === 'online-multiplayer' && isHost) {
+            console.log('Sende Spielende-Nachricht an Gegner');
+            sendData({
+                type: 'gameOver',
+                winner: winner
+            });
+        }
+
+        // Bestimme, ob der lokale Spieler gewonnen hat
+        if (gameMode === 'singleplayer') {
+            isLocalPlayerWinner = (leftScore > rightScore);
+        } else if (gameMode === 'local-multiplayer') {
+            // Bei lokalem Multiplayer zeigen wir immer die Gewinner-Animation
+            isLocalPlayerWinner = true;
+        } else if (gameMode === 'online-multiplayer') {
+            if (isHost) {
+                isLocalPlayerWinner = (leftScore > rightScore);
+            } else {
+                isLocalPlayerWinner = (rightScore > leftScore);
+            }
+        }
 
         // Starte die Gewinner-Animation
         showWinAnimation = true;
         winAnimationStartTime = Date.now();
-        winningPlayer = leftScore > rightScore ? 'left' : 'right';
+        winningPlayer = winner;
+
+        // Initialisiere Regentropfen für Verlierer-Animation
+        if (!isLocalPlayerWinner) {
+            initializeRaindrops();
+        }
 
         // Animation im gameLoop weiterlaufen lassen, aber keine Spiellogik mehr
         // Das Game-Over-Screen wird erst nach der Animation angezeigt
