@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong Spiel</title>
+    <link rel="stylesheet" href="pong.css">
+</head>
+<body>
+<div id="game-container">
+    <canvas id="game-canvas" width="800" height="500"></canvas>
+    <div id="score-display">Spieler 1: 0 | Spieler 2: 0</div>
+    <div id="connection-status">Verbindung: <span id="connection-status-value">-</span></div>
+    <div id="ping-display">Ping: <span id="ping-value">-</span> ms</div>
+
+    <div id="start-screen">
+        <h1>PONG</h1>
+        <div class="button-group">
+            <div>
+                <button id="easy-btn">Einfach</button>
+                <button id="medium-btn">Mittel</button>
+                <button id="hard-btn">Schwer</button>
+            </div>
+            <div>
+                <button id="multiplayer-local-btn">Multiplayer (Lokal)</button>
+                <button id="multiplayer-online-btn">Multiplayer (Online)</button>
+            </div>
+        </div>
+        <div id="controls-info">
+            <p>Einzelspieler: Maus oder Pfeiltasten (Hoch/Runter)</p>
+            <p>Multiplayer (Lokal): Spieler 1 - W/S Tasten, Spieler 2 - Pfeiltasten
+                (Hoch/Runter)</p>
+            <p>Multiplayer (Online): W/S oder Pfeiltasten (Hoch/Runter)</p>
+        </div>
+    </div>
+
+    <div id="game-over">
+        <h2 id="winner-text">Spiel vorbei!</h2>
+        <button id="restart-btn">Neu starten</button>
+        <button id="main-menu-btn">Hauptmenü</button>
+    </div>
+
+    <div id="online-connection">
+        <h2>Multiplayer (Online)</h2>
+        <div id="host-section">
+            <p>Deine Verbindungs-ID:</p>
+            <div id="connection-id">Wird generiert...</div>
+            <button id="copy-btn">Kopieren</button>
+            <div id="waiting-message" class="pulse">Warte auf Verbindung...</div>
+        </div>
+        <div id="join-section">
+            <p>Gib die Verbindungs-ID deines Gegners ein:</p>
+            <input type="text" id="connection-input" placeholder="Verbindungs-ID">
+            <button id="connect-btn">Verbinden</button>
+        </div>
+        <div id="error-message"></div>
+        <button id="back-btn">Zurück</button>
+
+        <div id="debug-info"></div>
+    </div>
+</div>
+
+<!-- Socket.io Client -->
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script src="pong.js"></script>
+</body>
+</html>

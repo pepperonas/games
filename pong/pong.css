@@ -1,0 +1,276 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #222;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+
+#game-container {
+    position: relative;
+    width: 800px;
+    height: 500px;
+}
+
+#game-canvas {
+    background-color: #000;
+    border: 2px solid #fff;
+}
+
+#score-display {
+    position: absolute;
+    top: 10px;
+    left: 0;
+    width: 100%;
+    color: white;
+    font-size: 24px;
+    text-align: center;
+}
+
+#connection-status {
+    position: absolute;
+    top: 40px;
+    right: 20px;
+    color: white;
+    font-size: 14px;
+    text-align: right;
+    display: none;
+}
+
+#ping-display {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    color: white;
+    font-size: 14px;
+    text-align: right;
+    display: none;
+}
+
+#start-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+#start-screen h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+.button-group {
+    margin-bottom: 20px;
+}
+
+#start-screen button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#start-screen button:hover {
+    background-color: #45a049;
+}
+
+#multiplayer-local-btn {
+    background-color: #2196F3 !important;
+}
+
+#multiplayer-local-btn:hover {
+    background-color: #0b7dda !important;
+}
+
+#multiplayer-online-btn {
+    background-color: #9C27B0 !important;
+}
+
+#multiplayer-online-btn:hover {
+    background-color: #7B1FA2 !important;
+}
+
+#game-over {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+#game-over h2 {
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+#game-over button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#game-over button:hover {
+    background-color: #45a049;
+}
+
+#controls-info {
+    margin-top: 20px;
+    font-size: 16px;
+    text-align: center;
+    color: #ddd;
+}
+
+#online-connection {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+#online-connection h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+#connection-id {
+    font-size: 24px;
+    background-color: #333;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+#copy-btn {
+    background-color: #2196F3;
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin: 0 0 20px 0;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#connection-input {
+    padding: 10px;
+    font-size: 16px;
+    width: 200px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: none;
+}
+
+#online-connection button {
+    background-color: #2196F3;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#online-connection button:hover {
+    background-color: #0b7dda;
+}
+
+#waiting-message {
+    margin-top: 20px;
+    font-style: italic;
+    color: #ddd;
+}
+
+#error-message {
+    color: #ff6b6b;
+    margin-top: 15px;
+    font-weight: bold;
+    display: none;
+}
+
+.pulse {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.4;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+#force-start-btn {
+    background-color: #FF9800 !important;
+    margin-top: 10px;
+}
+
+#force-start-btn:hover {
+    background-color: #F57C00 !important;
+}
+
+#reset-connection-btn {
+    background-color: #ff5722 !important;
+}
+
+#reset-connection-btn:hover {
+    background-color: #e64a19 !important;
+}
+
+#debug-info {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    color: #888;
+    font-size: 12px;
+    text-align: left;
+}
