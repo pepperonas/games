@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dart-Zähler</title>
     <link rel="stylesheet" href="styles.css">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dart-Zähler</title>
-    <link rel="stylesheet" href="styles.css">
 
     <!-- Open Graph Meta Tags für Link-Vorschau -->
     <meta property="og:title" content="Dart-Zähler">
@@ -33,8 +29,8 @@
 <body>
 <div class="container">
     <header>
-        <h1>Dart-Zähler</h1>
-        <p>Behalte den Überblick über dein Dart-Spiel</p>
+        <h1>🎯 Dart-Zähler</h1>
+        <p></p>
     </header>
 
     <div class="setup-container" id="setup">
@@ -100,17 +96,9 @@
             <div class="player-cards" id="player-cards">
                 <!-- Player cards will be generated here -->
             </div>
-        </div>
 
-        <div class="input-area">
-            <div class="dart-input">
-                <h3>Statistiken</h3>
-                <div class="statistics-container">
-                    <div id="player-statistics">
-                        <!-- Player statistics will be generated here -->
-                    </div>
-                </div>
-
+            <!-- Punkteeingabe direkt unter Punktestand -->
+            <div class="eingabe-section">
                 <h3>Punkteeingabe</h3>
                 <div class="input-container">
                     <div class="input-group">
@@ -118,16 +106,26 @@
                                placeholder="Gesamtpunkte für 3 Würfe" min="0" max="180">
                         <button id="clear-input" class="accent">Löschen</button>
                     </div>
-
                     <button id="submit-score">Punkte eingeben</button>
                 </div>
             </div>
+        </div>
 
+        <div class="input-area">
             <div class="history">
                 <h3>Verlauf</h3>
                 <div class="history-container">
                     <div id="history-container">
                         <!-- History entries will be added here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="dart-input">
+                <h3>Statistiken</h3>
+                <div class="statistics-container">
+                    <div id="player-statistics">
+                        <!-- Player statistics will be generated here -->
                     </div>
                 </div>
             </div>
