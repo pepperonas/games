@@ -249,6 +249,17 @@ body {
     }
 }
 
+.footer {
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    color: #fff;
+    font-size: 14px;
+    z-index: 100;
+}
+
 #force-start-btn {
     background-color: #FF9800 !important;
     margin-top: 10px;

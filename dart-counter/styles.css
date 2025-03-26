@@ -426,3 +426,13 @@ h3 {
         flex-direction: column;
     }
 }
+
+.footer {
+    text-align: center;
+    padding: 15px;
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    margin: 10px auto 30px;
+    width: 100%;
+    max-width: 960px;
+}
