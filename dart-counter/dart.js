@@ -1,4 +1,37 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Theme Toggle
+    const themeToggleCheckbox = document.getElementById('theme-toggle-checkbox');
+    const lightIcon = document.getElementById('light-icon');
+    const darkIcon = document.getElementById('dark-icon');
+
+    // Check if user already has a theme preference stored
+    const savedTheme = localStorage.getItem('dartTheme');
+
+    if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark-theme');
+        themeToggleCheckbox.checked = true;
+        lightIcon.style.display = 'block';
+        darkIcon.style.display = 'none';
+    } else {
+        lightIcon.style.display = 'none';
+        darkIcon.style.display = 'block';
+    }
+
+    // Theme toggle event listener
+    themeToggleCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            document.documentElement.classList.add('dark-theme');
+            localStorage.setItem('dartTheme', 'dark');
+            lightIcon.style.display = 'block';
+            darkIcon.style.display = 'none';
+        } else {
+            document.documentElement.classList.remove('dark-theme');
+            localStorage.setItem('dartTheme', 'light');
+            lightIcon.style.display = 'none';
+            darkIcon.style.display = 'block';
+        }
+    });
+
     // DOM Elements
     const setupContainer = document.getElementById('setup');
     const gameContainer = document.getElementById('game');
