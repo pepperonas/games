@@ -6,7 +6,7 @@
 - in Ordner index.html hinzufügen
 - node generate.js ausführen um Spiel auf Landing-Page anzuzeigen
 
-# Server Konfig
+# Server Konfiguration
 
 ```shell
 server {
@@ -33,6 +33,11 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
+    }
+
+    location /stuff/linux-terminal-simulator/ {
+        alias /var/www/html/stuff/linux-terminal-simulator/build/;
+        try_files $uri $uri/ /stuff/linux-terminal-simulator/index.html;
     }
 
     location /greystone/ {
