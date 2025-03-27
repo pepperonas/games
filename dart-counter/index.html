@@ -30,10 +30,12 @@
 <div class="theme-toggle">
     <div class="theme-toggle-icon">
         <svg id="light-icon" viewBox="0 0 24 24" style="display: none;">
-            <path fill="currentColor" d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5s5-2.24 5-5s-2.24-5-5-5zm0 8c-1.65 0-3-1.35-3-3s1.35-3 3-3s3 1.35 3 3s-1.35 3-3 3zm1-13h-2v3h2V2zm0 17h-2v3h2v-3zm8-9h-3v2h3v-2zM6 12H3v2h3v-2zm12.88 5.88l-2.12-2.12l-1.41 1.41l2.12 2.12l1.41-1.41zM7.65 6.94L5.53 4.82L4.12 6.23l2.12 2.12l1.41-1.41zm.71 10.71l-2.12 2.12l1.41 1.41l2.12-2.12l-1.41-1.41zM16.36 7.65l2.12-2.12l-1.41-1.41l-2.12 2.12l1.41 1.41z"/>
+            <path fill="currentColor"
+                  d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5s5-2.24 5-5s-2.24-5-5-5zm0 8c-1.65 0-3-1.35-3-3s1.35-3 3-3s3 1.35 3 3s-1.35 3-3 3zm1-13h-2v3h2V2zm0 17h-2v3h2v-3zm8-9h-3v2h3v-2zM6 12H3v2h3v-2zm12.88 5.88l-2.12-2.12l-1.41 1.41l2.12 2.12l1.41-1.41zM7.65 6.94L5.53 4.82L4.12 6.23l2.12 2.12l1.41-1.41zm.71 10.71l-2.12 2.12l1.41 1.41l2.12-2.12l-1.41-1.41zM16.36 7.65l2.12-2.12l-1.41-1.41l-2.12 2.12l1.41 1.41z"/>
         </svg>
         <svg id="dark-icon" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9s9-4.03 9-9c0-.46-.04-.92-.1-1.36c-.98 1.37-2.58 2.26-4.4 2.26c-2.98 0-5.4-2.42-5.4-5.4c0-1.81.89-3.42 2.26-4.4c-.44-.06-.9-.1-1.36-.1z"/>
+            <path fill="currentColor"
+                  d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9s9-4.03 9-9c0-.46-.04-.92-.1-1.36c-.98 1.37-2.58 2.26-4.4 2.26c-2.98 0-5.4-2.42-5.4-5.4c0-1.81.89-3.42 2.26-4.4c-.44-.06-.9-.1-1.36-.1z"/>
         </svg>
     </div>
     <label class="switch">
@@ -152,11 +154,45 @@
         Ihr Browser unterstützt das Audio-Element nicht.
     </audio>
 
-    <footer class="footer">
-        Made with ❤️ by Martin Pfeffer
-    </footer>
+    <div class="data-section" id="data-section">
+        <h3>Datenbank</h3>
+        <div class="data-controls">
+            <button id="view-stats">Statistiken anzeigen</button>
+            <button id="export-data">Spieldaten exportieren</button>
+            <button id="import-data">Daten importieren</button>
+            <button id="reset-data" class="btn-danger">Alle Daten zurücksetzen</button>
+        </div>
+        <!-- Verstecktes File-Input-Element -->
+        <input type="file" id="file-input" accept=".json" class="hidden">
+    </div>
+
 </div>
 
 <script src="dart.js"></script>
+
+<div class="modal" id="import-modal">
+    <div class="modal-content">
+        <div class="modal-title">Daten importieren</div>
+        <p>Um ein vorher exportiertes Spiel zu importieren, wähle eine JSON-Datei aus:</p>
+
+        <div class="file-drop-area" id="file-drop-area">
+            <span class="file-message">Datei hier ablegen oder</span>
+            <button class="file-select-button">Datei auswählen</button>
+        </div>
+
+        <div class="import-status" id="import-status"></div>
+
+        <div class="modal-actions">
+            <button id="close-import-modal">Abbrechen</button>
+        </div>
+    </div>
+</div>
+
+<div class="database-status" id="db-status">DB: Verbindung wird hergestellt...</div>
+
+<footer class="footer">
+    Made with ❤️ by Martin Pfeffer
+</footer>
+
 </body>
 </html>

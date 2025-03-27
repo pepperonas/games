@@ -1,4 +1,477 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Database functionality
+    let db;
+
+    // Initialize the database on page load
+    function initDatabase() {
+        const request = indexedDB.open('DartCounterDB', 1);
+
+        // Handle database upgrade/creation
+        request.onupgradeneeded = function (event) {
+            db = event.target.result;
+
+            // Create throws store
+            if (!db.objectStoreNames.contains('throws')) {
+                const throwsStore = db.createObjectStore('throws', {
+                    keyPath: 'id',
+                    autoIncrement: true
+                });
+                throwsStore.createIndex('gameId', 'gameId', {unique: false});
+                throwsStore.createIndex('playerId', 'playerId', {unique: false});
+                throwsStore.createIndex('timestamp', 'timestamp', {unique: false});
+            }
+
+            // Create games store
+            if (!db.objectStoreNames.contains('games')) {
+                const gamesStore = db.createObjectStore('games', {
+                    keyPath: 'id',
+                    autoIncrement: true
+                });
+                gamesStore.createIndex('timestamp', 'timestamp', {unique: false});
+            }
+
+            // Create players store
+            if (!db.objectStoreNames.contains('players')) {
+                const playersStore = db.createObjectStore('players', {
+                    keyPath: 'id',
+                    autoIncrement: true
+                });
+                playersStore.createIndex('name', 'name', {unique: false});
+            }
+        };
+
+        request.onsuccess = function (event) {
+            db = event.target.result;
+            console.log('Database initialized successfully');
+
+            // Update database status indicator
+            const dbStatus = document.getElementById('db-status');
+            if (dbStatus) {
+                dbStatus.textContent = 'DB: Verbunden';
+                dbStatus.classList.add('connected');
+
+                // Hide status after 3 seconds
+                setTimeout(() => {
+                    dbStatus.style.opacity = '0';
+                    setTimeout(() => {
+                        dbStatus.style.display = 'none';
+                    }, 1000);
+                }, 3000);
+            }
+        };
+
+        request.onerror = function (event) {
+            console.error('Database error:', event.target.error);
+            alert('Datenbank-Fehler: ' + event.target.error);
+
+            // Update database status indicator
+            const dbStatus = document.getElementById('db-status');
+            if (dbStatus) {
+                dbStatus.textContent = 'DB: Fehler';
+                dbStatus.classList.add('error');
+            }
+        };
+    }
+
+    // Save game to database
+    function saveGameToDatabase() {
+        if (!db) return;
+
+        const transaction = db.transaction(['games'], 'readwrite');
+        const gamesStore = transaction.objectStore('games');
+
+        const gameData = {
+            gameType: gameState.gameType,
+            numSets: gameState.numSets,
+            numLegs: gameState.numLegs,
+            startTime: gameState.gameStartTime,
+            timestamp: new Date(),
+            players: gameState.players.map(player => ({
+                name: player.name,
+                finalScore: player.score,
+                legsWon: player.legsWon,
+                setsWon: player.setsWon
+            }))
+        };
+
+        const request = gamesStore.add(gameData);
+
+        request.onsuccess = function (event) {
+            gameState.gameId = event.target.result;
+            console.log('Game saved to database with ID:', gameState.gameId);
+
+            // Save initial player entries
+            savePlayersToDatabase();
+        };
+
+        request.onerror = function (event) {
+            console.error('Error saving game:', event.target.error);
+        };
+    }
+
+    // Save players to database
+    function savePlayersToDatabase() {
+        if (!db || !gameState.gameId) return;
+
+        const transaction = db.transaction(['players'], 'readwrite');
+        const playersStore = transaction.objectStore('players');
+
+        gameState.players.forEach((player, index) => {
+            // Check if player already exists by name
+            const nameIndex = playersStore.index('name');
+            const nameRequest = nameIndex.get(player.name);
+
+            nameRequest.onsuccess = function (event) {
+                const existingPlayer = event.target.result;
+
+                if (existingPlayer) {
+                    // Player exists, store ID reference
+                    player.id = existingPlayer.id;
+                } else {
+                    // Player doesn't exist, add new player
+                    const playerData = {
+                        name: player.name,
+                        firstSeen: new Date()
+                    };
+
+                    const addRequest = playersStore.add(playerData);
+
+                    addRequest.onsuccess = function (event) {
+                        player.id = event.target.result;
+                        console.log('Player saved to database:', player.name, player.id);
+                    };
+                }
+            };
+        });
+    }
+
+    // Save throw to database
+    function saveThrowToDatabase(playerIndex, scoreValue) {
+        if (!db || !gameState.gameId) return;
+
+        const player = gameState.players[playerIndex];
+        if (!player || !player.id) return;
+
+        const transaction = db.transaction(['throws'], 'readwrite');
+        const throwsStore = transaction.objectStore('throws');
+
+        const throwData = {
+            gameId: gameState.gameId,
+            playerId: player.id,
+            playerName: player.name,
+            score: scoreValue,
+            remainingScore: player.score,
+            timestamp: new Date(),
+            set: gameState.currentSet,
+            leg: gameState.currentLeg,
+            throwNumber: player.dartsThrown / 3
+        };
+
+        const request = throwsStore.add(throwData);
+
+        request.onsuccess = function (event) {
+            console.log('Throw saved to database:', throwData);
+        };
+
+        request.onerror = function (event) {
+            console.error('Error saving throw:', event.target.error);
+        };
+    }
+
+    // Export game data as JSON
+    function exportGameData() {
+        if (!db) return;
+
+        const transaction = db.transaction(['games', 'throws'], 'readonly');
+        const gamesStore = transaction.objectStore('games');
+        const throwsStore = transaction.objectStore('throws');
+
+        const gameId = gameState.gameId;
+        if (!gameId) return;
+
+        // Get game data
+        const gameRequest = gamesStore.get(gameId);
+
+        gameRequest.onsuccess = function (event) {
+            const gameData = event.target.result;
+
+            // Get all throws for this game
+            const throwsIndex = throwsStore.index('gameId');
+            const throwsRequest = throwsIndex.getAll(gameId);
+
+            throwsRequest.onsuccess = function (event) {
+                const throwsData = event.target.result;
+
+                // Combine data
+                const exportData = {
+                    game: gameData,
+                    throws: throwsData,
+                    exportVersion: "1.0",
+                    exportDate: new Date().toISOString()
+                };
+
+                // Create download
+                const dataStr = JSON.stringify(exportData, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+
+                const exportFileName = 'dart-game-' + new Date().toISOString().slice(0, 19).replace(/:/g, '-') + '.json';
+
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileName);
+                linkElement.click();
+            };
+        };
+    }
+
+    // Importieren von JSON-Daten
+    function importGameData(jsonData) {
+        if (!db) {
+            alert('Keine Datenbankverbindung vorhanden.');
+            return;
+        }
+
+        try {
+            // Parse JSON wenn es als String übergeben wurde
+            const data = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
+
+            if (!data.game || !data.throws) {
+                throw new Error('Ungültiges Datenformat');
+            }
+
+            const transaction = db.transaction(['games', 'throws', 'players'], 'readwrite');
+            const gamesStore = transaction.objectStore('games');
+            const throwsStore = transaction.objectStore('throws');
+            const playersStore = transaction.objectStore('players');
+
+            // Zuerst das Spiel speichern
+            const game = data.game;
+            const gameRequest = gamesStore.add(game);
+
+            gameRequest.onsuccess = function (event) {
+                const gameId = event.target.result;
+                console.log('Spiel importiert mit ID:', gameId);
+
+                // Dann Spieler prüfen/anlegen
+                const playerPromises = [];
+                const playerIds = {};
+
+                game.players.forEach(player => {
+                    playerPromises.push(new Promise((resolve) => {
+                        // Suche nach Spieler mit gleichem Namen
+                        const nameIndex = playersStore.index('name');
+                        const nameRequest = nameIndex.get(player.name);
+
+                        nameRequest.onsuccess = function (event) {
+                            const existingPlayer = event.target.result;
+
+                            if (existingPlayer) {
+                                // Spieler existiert bereits
+                                playerIds[player.name] = existingPlayer.id;
+                                resolve();
+                            } else {
+                                // Neuen Spieler anlegen
+                                const playerData = {
+                                    name: player.name,
+                                    firstSeen: new Date()
+                                };
+
+                                const addRequest = playersStore.add(playerData);
+
+                                addRequest.onsuccess = function (event) {
+                                    playerIds[player.name] = event.target.result;
+                                    resolve();
+                                };
+
+                                addRequest.onerror = function () {
+                                    resolve(); // Trotzdem fortfahren
+                                };
+                            }
+                        };
+
+                        nameRequest.onerror = function () {
+                            resolve(); // Trotzdem fortfahren
+                        };
+                    }));
+                });
+
+                // Wenn alle Spieler bearbeitet wurden, die Würfe importieren
+                Promise.all(playerPromises).then(() => {
+                    let importedThrows = 0;
+
+                    // Alle Würfe mit den neuen IDs speichern
+                    data.throws.forEach(throwData => {
+                        // Aktualisiere GameID und PlayerID
+                        throwData.gameId = gameId;
+
+                        if (playerIds[throwData.playerName]) {
+                            throwData.playerId = playerIds[throwData.playerName];
+                        }
+
+                        // ID entfernen, damit eine neue generiert wird
+                        delete throwData.id;
+
+                        // Wurf speichern
+                        const throwRequest = throwsStore.add(throwData);
+
+                        throwRequest.onsuccess = function () {
+                            importedThrows++;
+
+                            if (importedThrows === data.throws.length) {
+                                alert(`Import abgeschlossen: 1 Spiel und ${importedThrows} Würfe importiert.`);
+                            }
+                        };
+                    });
+                });
+            };
+
+            gameRequest.onerror = function (event) {
+                console.error('Fehler beim Importieren des Spiels:', event.target.error);
+                alert('Beim Importieren ist ein Fehler aufgetreten.');
+            };
+
+        } catch (error) {
+            console.error('Fehler beim Parsen oder Importieren:', error);
+            alert('Die Datei konnte nicht importiert werden. Bitte überprüfe das Format.');
+        }
+    }
+
+    // Funktion zum Verarbeiten der importierten Datei
+    function handleImportFile(file) {
+        if (!file) {
+            return;
+        }
+
+        if (file.type !== 'application/json') {
+            importStatus.textContent = 'Fehler: Bitte wähle eine JSON-Datei aus.';
+            importStatus.style.color = '#e74c3c';
+            return;
+        }
+
+        importStatus.textContent = 'Datei wird verarbeitet...';
+        importStatus.style.color = '';
+
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+            try {
+                const jsonData = event.target.result;
+                importGameData(jsonData);
+
+                // Erfolgreich importiert, schließe Modal nach kurzer Verzögerung
+                setTimeout(() => {
+                    importModal.style.display = 'none';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Fehler beim Lesen der Datei:', error);
+                importStatus.textContent = 'Die Datei konnte nicht gelesen werden.';
+                importStatus.style.color = '#e74c3c';
+            }
+        };
+
+        reader.onerror = function () {
+            importStatus.textContent = 'Fehler beim Lesen der Datei.';
+            importStatus.style.color = '#e74c3c';
+        };
+
+        reader.readAsText(file);
+    }
+
+    // Reset aller Daten in der Datenbank
+    function resetAllData() {
+        if (!db) {
+            alert('Keine Datenbankverbindung vorhanden.');
+            return;
+        }
+
+        if (!confirm('Möchtest du wirklich ALLE Daten löschen? Diese Aktion kann nicht rückgängig gemacht werden!')) {
+            return;
+        }
+
+        const transaction = db.transaction(['throws', 'games', 'players'], 'readwrite');
+        const throwsStore = transaction.objectStore('throws');
+        const gamesStore = transaction.objectStore('games');
+        const playersStore = transaction.objectStore('players');
+
+        // Alle Object Stores leeren
+        throwsStore.clear();
+        gamesStore.clear();
+        playersStore.clear();
+
+        transaction.oncomplete = function () {
+            alert('Alle Daten wurden erfolgreich gelöscht!');
+
+            // Lösche auch den gespeicherten Spielstand
+            sessionStorage.removeItem('dartGameState');
+
+            // Setze die Anwendung zurück
+            restartGame();
+        };
+
+        transaction.onerror = function (event) {
+            console.error('Fehler beim Löschen aller Daten:', event.target.error);
+            alert('Beim Löschen der Daten ist ein Fehler aufgetreten.');
+        };
+    }
+
+    // Spielstand speichern bevor wir zur Statistikseite gehen
+    function saveGameStateBeforeNavigation() {
+        if (gameState.players.length > 0) {
+            // Entferne timerInterval, da wir das nicht serialisieren können
+            const timerInterval = gameState.timerInterval;
+            gameState.timerInterval = null;
+
+            // Speichere den Spielstand in sessionStorage
+            sessionStorage.setItem('dartGameState', JSON.stringify(gameState));
+
+            // Stelle timerInterval wieder her
+            gameState.timerInterval = timerInterval;
+        }
+    }
+
+    // Spielstand laden wenn wir zur Spielseite zurückkehren
+    function loadGameStateAfterNavigation() {
+        const savedState = sessionStorage.getItem('dartGameState');
+        if (savedState) {
+            try {
+                const parsedState = JSON.parse(savedState);
+
+                // Stelle das gameState-Objekt wieder her
+                gameState = parsedState;
+
+                // Konvertiere Datumsstrings zurück in Date-Objekte
+                gameState.turnStartTime = new Date(gameState.turnStartTime);
+                gameState.gameStartTime = new Date(gameState.gameStartTime);
+
+                // Konvertiere history timestamps zurück in Date-Objekte
+                gameState.history.forEach(entry => {
+                    entry.timestamp = new Date(entry.timestamp);
+                });
+
+                // Starte den Timer neu
+                startTurnTimer();
+
+                // UI aktualisieren
+                renderPlayerCards();
+                renderHistory();
+                renderPlayerStatistics();
+
+                // Setup verstecken, Spiel anzeigen
+                setupContainer.classList.add('hidden');
+                gameContainer.classList.remove('hidden');
+                restartGameButton.classList.remove('hidden');
+
+                console.log('Spielstand wiederhergestellt');
+                return true;
+            } catch (error) {
+                console.error('Fehler beim Wiederherstellen des Spielstands:', error);
+                sessionStorage.removeItem('dartGameState');
+            }
+        }
+        return false;
+    }
+
     // Theme Toggle
     const themeToggleCheckbox = document.getElementById('theme-toggle-checkbox');
     const lightIcon = document.getElementById('light-icon');
@@ -18,7 +491,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Theme toggle event listener
-    themeToggleCheckbox.addEventListener('change', function() {
+    themeToggleCheckbox.addEventListener('change', function () {
         if (this.checked) {
             document.documentElement.classList.add('dark-theme');
             localStorage.setItem('dartTheme', 'dark');
@@ -49,6 +522,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const submitScoreButton = document.getElementById('submit-score');
     const undoThrowButton = document.getElementById('undo-throw');
     const historyContainer = document.getElementById('history-container');
+    const viewStatsButton = document.getElementById('view-stats');
+
+    // Import-related DOM elements
+    const importDataButton = document.getElementById('import-data');
+    const fileInput = document.getElementById('file-input');
+    const importModal = document.getElementById('import-modal');
+    const closeImportModalButton = document.getElementById('close-import-modal');
+    const fileDropArea = document.getElementById('file-drop-area');
+    const importStatus = document.getElementById('import-status');
 
     // Game state
     let gameState = {
@@ -63,7 +545,8 @@ document.addEventListener('DOMContentLoaded', function () {
         history: [],
         turnStartTime: null,
         gameStartTime: null,
-        timerInterval: null
+        timerInterval: null,
+        gameId: null // Add gameId for database reference
     };
 
     // Initialize player name inputs
@@ -110,7 +593,8 @@ document.addEventListener('DOMContentLoaded', function () {
             history: [],
             turnStartTime: new Date(),
             gameStartTime: new Date(),
-            timerInterval: null
+            timerInterval: null,
+            gameId: null // Add gameId for database reference
         };
 
         // Initialize players
@@ -129,13 +613,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 highestScore: 0,
                 turnTime: 0,
                 turnCount: 0,
-                averageTurnTime: 0
+                averageTurnTime: 0,
+                id: null // Add id for database reference
             });
         }
 
         renderPlayerCards();
         renderHistory();
         renderPlayerStatistics();
+
+        // Save game to database
+        saveGameToDatabase();
 
         // Start the turn timer
         startTurnTimer();
@@ -257,6 +745,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (scoreValue > currentPlayer.highestScore) {
             currentPlayer.highestScore = scoreValue;
         }
+
+        // Save throw to database
+        saveThrowToDatabase(gameState.currentPlayerIndex, scoreValue);
 
         // Check for checkout
         if (currentPlayer.score - scoreValue === 0) {
@@ -506,6 +997,9 @@ document.addEventListener('DOMContentLoaded', function () {
             clearInterval(gameState.timerInterval);
         }
 
+        // Löschen des gespeicherten Spielstands
+        sessionStorage.removeItem('dartGameState');
+
         setupContainer.classList.remove('hidden');
         gameContainer.classList.add('hidden');
         restartGameButton.classList.add('hidden');
@@ -515,6 +1009,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Start turn timer
     function startTurnTimer() {
+        // Clear existing timer if any
+        if (gameState.timerInterval) {
+            clearInterval(gameState.timerInterval);
+        }
+
         // Set initial turn time
         gameState.turnStartTime = new Date();
 
@@ -665,6 +1164,20 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Open statistics page
+    function openStatisticsPage() {
+        saveGameStateBeforeNavigation();
+        window.location.href = 'statistics.html';
+    }
+
+    // Check if there's a saved game state to restore
+    function checkForSavedGameState() {
+        if (!loadGameStateAfterNavigation()) {
+            // Kein gespeicherter Spielstand, normale Initialisierung fortsetzen
+            initPlayerNameInputs();
+        }
+    }
+
     // Event listeners
     numPlayersSelect.addEventListener('change', initPlayerNameInputs);
     startGameButton.addEventListener('click', initGame);
@@ -683,6 +1196,92 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Initialize on page load
-    initPlayerNameInputs();
+    // Add export button and view stats button event listeners
+    const exportButton = document.getElementById('export-data');
+    if (exportButton) {
+        exportButton.addEventListener('click', exportGameData);
+    }
+
+    if (viewStatsButton) {
+        viewStatsButton.addEventListener('click', openStatisticsPage);
+    }
+
+    // Add event listener for reset data button
+    const resetDataButton = document.getElementById('reset-data');
+    if (resetDataButton) {
+        resetDataButton.addEventListener('click', resetAllData);
+    }
+
+    // Import-related event listeners
+    if (importDataButton) {
+        importDataButton.addEventListener('click', function () {
+            // Modal öffnen
+            importModal.style.display = 'block';
+            importStatus.textContent = '';
+        });
+    }
+
+    if (closeImportModalButton) {
+        closeImportModalButton.addEventListener('click', function () {
+            importModal.style.display = 'none';
+        });
+    }
+
+    // Schließe Modal wenn außerhalb geklickt wird
+    window.addEventListener('click', function (event) {
+        if (event.target === importModal) {
+            importModal.style.display = 'none';
+        }
+    });
+
+    // File Input Event-Listener
+    if (fileInput) {
+        fileInput.addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            handleImportFile(file);
+        });
+    }
+
+    // Drag & Drop für Dateiupload
+    if (fileDropArea) {
+        // Verbinde den Button mit dem versteckten file input
+        const fileSelectButton = fileDropArea.querySelector('.file-select-button');
+        if (fileSelectButton) {
+            fileSelectButton.addEventListener('click', function () {
+                fileInput.click();
+            });
+        }
+
+        // Drag-Events für Styling
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileDropArea.addEventListener(eventName, function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }, false);
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileDropArea.addEventListener(eventName, function () {
+                fileDropArea.classList.add('highlight');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileDropArea.addEventListener(eventName, function () {
+                fileDropArea.classList.remove('highlight');
+            }, false);
+        });
+
+        // Drop-Event
+        fileDropArea.addEventListener('drop', function (e) {
+            const file = e.dataTransfer.files[0];
+            handleImportFile(file);
+        }, false);
+    }
+
+    // Initialize database
+    initDatabase();
+
+    // Check for saved game state, then initialize
+    checkForSavedGameState();
 });

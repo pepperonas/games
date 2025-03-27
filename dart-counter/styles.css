@@ -517,3 +517,291 @@ input:checked + .slider {
 input:checked + .slider:before {
     transform: translateX(26px);
 }
+
+
+.export-btn {
+    background-color: #27ae60;
+    display: block;
+    margin: 10px auto;
+}
+
+.export-btn:hover {
+    background-color: #2ecc71;
+}
+
+.database-status {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 5px 10px;
+    border-radius: var(--border-radius);
+    font-size: 0.8rem;
+    opacity: 0.8;
+    z-index: 1000;
+}
+
+.database-status.connected {
+    background-color: #27ae60;
+}
+
+.database-status.error {
+    background-color: var(--accent-color);
+}
+
+/* Add a data section to the game container */
+.data-section {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.data-section h3 {
+    margin-bottom: 15px;
+}
+
+.data-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .data-controls {
+        flex-direction: column;
+    }
+}
+
+
+.import-container {
+    margin-top: 10px;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: var(--card-background);
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    width: 80%;
+    max-width: 500px;
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* File Drop Area */
+.file-drop-area {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.file-drop-area:hover {
+    background-color: var(--hover-color);
+}
+
+.file-drop-area.highlight {
+    border-color: var(--secondary-color);
+    background-color: rgba(41, 128, 185, 0.1);
+}
+
+.file-message {
+    display: block;
+    margin-bottom: 10px;
+    color: #666;
+}
+
+.file-input {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.file-select-button {
+    display: inline-block;
+    padding: 8px 15px;
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+}
+
+.import-status {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    min-height: 20px;
+}
+
+.data-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+@media (min-width: 768px) {
+    .data-controls {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+}
+
+
+.data-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.data-controls button {
+    flex: 1;
+    min-width: 200px;
+    max-width: 300px;
+}
+
+@media (max-width: 768px) {
+    .data-controls {
+        flex-direction: column;
+    }
+
+    .data-controls button {
+        max-width: none;
+    }
+}
+
+/* Rest der Styles unverändert */
+.btn-danger {
+    background-color: #e74c3c;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: var(--card-background);
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    width: 80%;
+    max-width: 500px;
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* File Drop Area */
+.file-drop-area {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.file-drop-area:hover {
+    background-color: var(--hover-color);
+}
+
+.file-drop-area.highlight {
+    border-color: var(--secondary-color);
+    background-color: rgba(41, 128, 185, 0.1);
+}
+
+.file-message {
+    display: block;
+    margin-bottom: 10px;
+    color: #666;
+}
+
+.file-select-button {
+    display: inline-block;
+    padding: 8px 15px;
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+}
+
+.import-status {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    min-height: 20px;
+}
