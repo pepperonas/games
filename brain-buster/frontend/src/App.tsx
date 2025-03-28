@@ -24,7 +24,7 @@ function App() {
     }, [initGameState])
 
     return (
-        <BrowserRouter>
+        <BrowserRouter basename="/games/brain-buster">
             <AnimatePresence mode="wait">
                 <Routes>
                     <Route path="/" element={<Layout/>}>
