@@ -7,46 +7,59 @@ export default {
     theme: {
         extend: {
             colors: {
-                violet: {
-                    300: 'rgb(196 181 253)',
-                    400: 'rgb(167 139 250)',
-                    500: 'rgb(139 92 246)',
-                    600: 'rgb(124 58 237)',
-                    700: 'rgb(109 40 217)',
-                    800: 'rgb(91 33 182)',
-                    900: 'rgb(76 29 149)',
-                    950: 'rgb(46 16 101)',
+                // Dunkles Blau-Grau Farbschema (basierend auf dem Screenshot)
+                primary: {
+                    50: '#f5f7fa',
+                    100: '#e4e7eb',
+                    200: '#cbd2d9',
+                    300: '#9aa5b1',
+                    400: '#7b8794',
+                    500: '#616e7c',
+                    600: '#52606d',
+                    700: '#3e4c59',
+                    800: '#323f4b',
+                    900: '#1f2933',
+                    950: '#1a202c',
                 },
-                blue: {
-                    300: 'rgb(147 197 253)',
-                    400: 'rgb(96 165 250)',
-                    500: 'rgb(59 130 246)',
-                    600: 'rgb(37 99 235)',
-                    700: 'rgb(29 78 216)',
-                    800: 'rgb(30 64 175)',
-                    900: 'rgb(30 58 138)',
+                secondary: {
+                    300: '#8ca0b3',  // Hellblau (für Texte und Überschriften)
+                    400: '#6b8096',
+                    500: '#4a5568',
+                    600: '#2d3748',
+                    700: '#252d3d',
+                    800: '#1e212d',
+                    900: '#171923',
+                    950: '#0f111a',
                 },
+                accent: {
+                    blue: '#688db1',    // Helles Blau für Buttons
+                    green: '#9cb68f',   // Helles Grün für Buttons
+                    red: '#e16162',     // Für rote Elemente
+                },
+                background: {
+                    dark: '#2B2E3B',    // Haupthintergrund
+                    darker: '#252830',  // Seitenleiste
+                    card: '#343845',    // Kartenelemente
+                },
+                // Status-Farben
                 green: {
-                    400: 'rgb(74 222 128)',
-                    500: 'rgb(34 197 94)',
+                    400: '#74dd80',
+                    500: '#22c55e',
                 },
                 red: {
-                    400: 'rgb(248 113 113)',
-                    500: 'rgb(239 68 68)',
+                    400: '#f87171',
+                    500: '#ef4444',
                 },
                 amber: {
-                    500: 'rgb(245 158 11)',
+                    500: '#f59e0b',
                 },
                 orange: {
-                    400: 'rgb(251 146 60)',
-                },
-                teal: {
-                    500: 'rgb(20 184 166)',
+                    400: '#fb923c',
                 },
                 gray: {
-                    300: 'rgb(209 213 219)',
-                    400: 'rgb(156 163 175)',
-                    700: 'rgb(55 65 81)',
+                    300: '#d1d5db',
+                    400: '#9ca3af',
+                    700: '#374151',
                 },
             }
         },

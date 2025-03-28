@@ -5,7 +5,7 @@
 :root {
   font-family: 'Poppins', system-ui, sans-serif;
   line-height: 1.5;
-  color-scheme: light dark;
+  color-scheme: dark;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -14,11 +14,12 @@
 }
 
 body {
-  @apply bg-gradient-to-br from-violet-900 to-blue-900 min-h-screen text-white;
+  /* Fester Hintergrund statt Gradient, passend zum Screenshot */
+  @apply bg-background-dark min-h-screen text-gray-300;
 }
 
 .card-hover {
-  @apply hover:shadow-lg hover:shadow-violet-500/20 transform transition-all duration-300 hover:-translate-y-1;
+  @apply hover:shadow-lg hover:shadow-secondary-700/20 transform transition-all duration-300 hover:-translate-y-1;
 }
 
 @keyframes bounce-once {

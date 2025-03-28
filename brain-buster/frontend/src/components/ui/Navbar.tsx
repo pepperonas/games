@@ -17,7 +17,7 @@ const Navbar = () => {
     ]
 
     return (
-        <nav className="bg-violet-950 shadow-lg py-4">
+        <nav className="bg-background-darker shadow-lg py-4">
             <div className="container mx-auto px-4 flex justify-between items-center">
                 <Link to="/" className="flex items-center space-x-2">
                     <motion.div
@@ -26,9 +26,9 @@ const Navbar = () => {
                     >
                         🧠
                     </motion.div>
-                    <span className="text-xl font-bold bg-gradient-to-r from-violet-400 to-blue-400 text-transparent bg-clip-text">
-            BrainBuster
-          </span>
+                    <span className="text-xl font-bold text-secondary-300">
+                        BrainBuster
+                    </span>
                 </Link>
 
                 {/* Desktop Navigation */}
@@ -39,14 +39,14 @@ const Navbar = () => {
                             to={item.path}
                             className={`relative px-2 py-1 ${
                                 location.pathname === item.path
-                                    ? 'text-violet-300'
+                                    ? 'text-accent-blue'
                                     : 'text-gray-300 hover:text-white'
                             }`}
                         >
                             {location.pathname === item.path && (
                                 <motion.div
                                     layoutId="navbar-indicator"
-                                    className="absolute inset-0 bg-violet-700/20 rounded-md -z-10"
+                                    className="absolute inset-0 bg-secondary-700/30 rounded-md -z-10"
                                     initial={false}
                                     transition={{ type: 'spring', duration: 0.5 }}
                                 />
@@ -95,7 +95,7 @@ const Navbar = () => {
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="md:hidden bg-violet-900"
+                    className="md:hidden bg-background-darker"
                 >
                     <div className="container mx-auto px-4 py-2 flex flex-col space-y-2">
                         {navItems.map((item) => (
@@ -104,8 +104,8 @@ const Navbar = () => {
                                 to={item.path}
                                 className={`px-4 py-2 rounded-md ${
                                     location.pathname === item.path
-                                        ? 'bg-violet-800 text-white'
-                                        : 'text-gray-300 hover:bg-violet-800/50'
+                                        ? 'bg-secondary-700 text-white'
+                                        : 'text-gray-300 hover:bg-secondary-700/30'
                                 }`}
                                 onClick={() => setIsMenuOpen(false)}
                             >

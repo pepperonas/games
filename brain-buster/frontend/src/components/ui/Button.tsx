@@ -24,12 +24,13 @@ const Button = ({
                 }: ButtonProps) => {
     const baseClasses = 'rounded-lg font-medium transition-all focus:outline-none focus:ring-2 focus:ring-offset-2'
 
+    // Angepasst an das Screenshot-Farbschema
     const variantClasses = {
-        primary: 'bg-violet-600 hover:bg-violet-700 focus:ring-violet-500 text-white',
-        secondary: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 text-white',
-        success: 'bg-green-600 hover:bg-green-700 focus:ring-green-500 text-white',
-        danger: 'bg-red-600 hover:bg-red-700 focus:ring-red-500 text-white',
-        outline: 'bg-transparent border border-violet-500 text-violet-500 hover:bg-violet-500/10 focus:ring-violet-500',
+        primary: 'bg-accent-blue hover:bg-accent-blue/80 focus:ring-accent-blue/40 text-white',
+        secondary: 'bg-accent-green hover:bg-accent-green/80 focus:ring-accent-green/40 text-white',
+        success: 'bg-green-500 hover:bg-green-600 focus:ring-green-400 text-white',
+        danger: 'bg-accent-red hover:bg-accent-red/80 focus:ring-accent-red/40 text-white',
+        outline: 'bg-transparent border border-accent-blue text-accent-blue hover:bg-accent-blue/10 focus:ring-accent-blue/30',
     }
 
     const sizeClasses = {
