@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seite nicht gefunden - BrainBuster</title>
+    <style>
+        body {
+            font-family: 'Poppins', system-ui, sans-serif;
+            background-color: #2B2E3B;
+            color: #d1d5db;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 500px;
+            padding: 2rem;
+            background-color: #343845;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #8ca0b3;
+        }
+
+        p {
+            margin-bottom: 1.5rem;
+        }
+
+        .emoji {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #688db1;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .button:hover {
+            background-color: #556e8c;
+        }
+
+        .redirect-text {
+            font-size: 0.9rem;
+            margin-top: 2rem;
+            color: #8ca0b3;
+        }
+    </style>
+    <script>
+        // Count down from 5 seconds
+        let secondsLeft = 5;
+
+        window.onload = function () {
+            const counterElement = document.getElementById('countdown');
+            const countInterval = setInterval(function () {
+                secondsLeft--;
+                if (counterElement) {
+                    counterElement.textContent = secondsLeft;
+                }
+
+                if (secondsLeft <= 0) {
+                    clearInterval(countInterval);
+                    // Redirect to the homepage
+                    window.location.href = '/games/brain-buster/';
+                }
+            }, 1000);
+        };
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="emoji">🤔</div>
+    <h1>Seite nicht gefunden</h1>
+    <p>Die gesuchte Seite existiert nicht oder wurde verschoben.</p>
+    <a href="/games/brain-buster/" class="button">Zurück zur Startseite</a>
+    <p class="redirect-text">
+        Sie werden in <span id="countdown">5</span> Sekunden automatisch zur Startseite
+        weitergeleitet.
+    </p>
+</div>
+</body>
+</html>

@@ -1,8 +1,8 @@
-import { createContext, ReactNode, useCallback, useContext, useReducer, useEffect } from 'react'
-import { v4 as uuidv4 } from 'uuid'
+import {createContext, ReactNode, useCallback, useContext, useEffect, useReducer} from 'react'
+import {v4 as uuidv4} from 'uuid'
 import localforage from 'localforage'
-import { GameSession, GameState, GameStats, Question } from '../types'
-import { sampleQuestions } from '../utils/sampleData'
+import {GameSession, GameState, GameStats, Question} from '../types'
+import {sampleQuestions} from '../utils/sampleData'
 
 // Initialer GameStats-Zustand
 const initialStats: GameStats = {
@@ -14,9 +14,9 @@ const initialStats: GameStats = {
     incorrectAnswers: 0,
     categories: {},
     difficulty: {
-        easy: { total: 0, correct: 0 },
-        medium: { total: 0, correct: 0 },
-        hard: { total: 0, correct: 0 },
+        easy: {total: 0, correct: 0},
+        medium: {total: 0, correct: 0},
+        hard: {total: 0, correct: 0},
     },
     history: [],
 }
@@ -88,7 +88,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
             }
 
         case 'ANSWER_QUESTION': {
-            const { answer } = action.payload
+            const {answer} = action.payload
 
             // Prüfe, ob es gültige Fragen gibt
             if (state.questions.length === 0 || state.currentQuestionIndex >= state.questions.length) {
@@ -114,14 +114,14 @@ function gameReducer(state: GameState, action: GameAction): GameState {
             const category = currentQuestion.category
             const difficulty = currentQuestion.difficulty
 
-            const updatedCategories = { ...state.stats.categories }
+            const updatedCategories = {...state.stats.categories}
             if (!updatedCategories[category]) {
-                updatedCategories[category] = { total: 0, correct: 0 }
+                updatedCategories[category] = {total: 0, correct: 0}
             }
             updatedCategories[category].total += 1
             if (isCorrect) updatedCategories[category].correct += 1
 
-            const updatedDifficulty = { ...state.stats.difficulty }
+            const updatedDifficulty = {...state.stats.difficulty}
             updatedDifficulty[difficulty].total += 1
             if (isCorrect) updatedDifficulty[difficulty].correct += 1
 
@@ -146,7 +146,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
             }
 
         case 'END_GAME': {
-            const { result } = action.payload
+            const {result} = action.payload
 
             // Session finalisieren
             const finalSession = state.currentSession
@@ -185,8 +185,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
                     ...state.multiplayer,
                     opponentScore: 0,
                 },
-                // Keep the questions array intact
-                questions: state.questions.length > 0 ? state.questions : sampleQuestions,
+                // Immer alle Fragen zurücksetzen, um sicherzustellen, dass alle Kategorien angezeigt werden
+                questions: sampleQuestions,
             }
 
         case 'SET_MULTIPLAYER_STATUS':
@@ -242,7 +242,7 @@ interface GameContextType {
 const GameContext = createContext<GameContextType | undefined>(undefined)
 
 // Provider-Komponente
-export const GameProvider = ({ children }: { children: ReactNode }) => {
+export const GameProvider = ({children}: { children: ReactNode }) => {
     const [state, dispatch] = useReducer(gameReducer, initialState)
 
     // Ensure sample questions are available on initial load
@@ -250,7 +250,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         if (state.questions.length === 0) {
             dispatch({
                 type: 'INIT_GAME_STATE',
-                payload: { questions: sampleQuestions }
+                payload: {questions: sampleQuestions}
             });
         }
     }, []);
@@ -273,7 +273,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
             // Still ensure questions are loaded even if there's an error
             dispatch({
                 type: 'INIT_GAME_STATE',
-                payload: { questions: sampleQuestions }
+                payload: {questions: sampleQuestions}
             });
         }
     }, [])
@@ -287,7 +287,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
 
         dispatch({
             type: 'START_GAME',
-            payload: { mode, questions: gameQuestions },
+            payload: {mode, questions: gameQuestions},
         })
     }, [])
 
@@ -295,7 +295,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     const answerQuestion = useCallback((answer: number) => {
         dispatch({
             type: 'ANSWER_QUESTION',
-            payload: { answer },
+            payload: {answer},
         })
 
         // Statistiken speichern
@@ -306,14 +306,14 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
 
     // Zur nächsten Frage wechseln
     const nextQuestion = useCallback(() => {
-        dispatch({ type: 'NEXT_QUESTION' })
+        dispatch({type: 'NEXT_QUESTION'})
     }, [])
 
     // Spiel beenden
     const endGame = useCallback((result: 'win' | 'loss' | 'draw') => {
         dispatch({
             type: 'END_GAME',
-            payload: { result },
+            payload: {result},
         })
 
         // Aktualisierte Statistiken speichern
@@ -324,7 +324,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
                 wins: state.stats.wins + (result === 'win' ? 1 : 0),
                 losses: state.stats.losses + (result === 'loss' ? 1 : 0),
                 history: state.currentSession
-                    ? [...state.stats.history, { ...state.currentSession, result }]
+                    ? [...state.stats.history, {...state.currentSession, result}]
                     : state.stats.history,
             }).catch((error) => {
                 console.error('Fehler beim Speichern der Spielstatistiken:', error)
@@ -334,7 +334,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
 
     // Spiel zurücksetzen
     const resetGame = useCallback(() => {
-        dispatch({ type: 'RESET_GAME' })
+        dispatch({type: 'RESET_GAME'})
     }, [])
 
     // Multiplayer-Status setzen

@@ -70,11 +70,20 @@ const GamePage = () => {
         resetGame()
     }
 
-    // Zur Startseite zurückkehren
+    useEffect(() => {
+        // Filter zurücksetzen, wenn man auf die Seite zurückkehrt oder wenn der Spielstatus idle ist
+        if (state.gameStatus === 'idle') {
+            setCategoryFilter(null);
+            setDifficultyFilter(null);
+        }
+    }, [state.gameStatus]);
+
     const handleBackToHome = () => {
-        resetGame()
-        navigate('/')
-    }
+        resetGame();
+        setCategoryFilter(null);
+        setDifficultyFilter(null);
+        navigate('/');
+    };
 
     // Verfügbare Kategorien aus den Beispielfragen ermitteln
     const availableCategories = Array.from(
