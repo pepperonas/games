@@ -25,21 +25,16 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
 
-        # Increased timeouts for multiplayer stability
-        proxy_connect_timeout 7d;
-        proxy_send_timeout 7d;
-        proxy_read_timeout 7d;
-
-        # Increased buffer sizes for larger data exchanges
-        proxy_buffers 16 32k;
-        proxy_buffer_size 64k;
+        # More reasonable timeouts for multiplayer
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
 
         # Disable buffering for better real-time communication
         proxy_buffering off;
     }
 
-    # This specific path is needed for Socket.io
-    # Important: Don't use regex here, use exact paths
+    # Socket.io specific path with cleaner configuration
     location /games/brain-buster/api/socket.io/ {
         proxy_pass http://localhost:5000/socket.io/;
         proxy_http_version 1.1;
@@ -49,47 +44,14 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
 
-        # Increased timeouts for multiplayer stability
-        proxy_connect_timeout 7d;
-        proxy_send_timeout 7d;
-        proxy_read_timeout 7d;
+        # More reasonable timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
 
-        # Increased buffer sizes for Socket.io
-        proxy_buffers 16 32k;
-        proxy_buffer_size 64k;
-
-        # Disable buffering for better real-time communication
+        # Disable buffering for real-time communication
         proxy_buffering off;
-    }
-
-    # Additional dedicated Socket.io configuration with regex matching
-    location ~* \/socket\.io\/.*$ {
-        proxy_pass http://localhost:5000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-
-        # Disable caching
-        proxy_buffering off;
-        proxy_cache off;
-
-        # Extended timeouts
-        proxy_connect_timeout 7d;
-        proxy_send_timeout 7d;
-        proxy_read_timeout 7d;
-
-        # Increased buffer sizes
-        proxy_buffers 16 32k;
-        proxy_buffer_size 64k;
-
-        # Important for WebSocket stability
-        tcp_nodelay on;
     }
 
     # Spezifische Konfiguration für brain-buster SPA
@@ -183,9 +145,9 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
-        proxy_connect_timeout 7d;
-        proxy_send_timeout 7d;
-        proxy_read_timeout 7d;
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
     }
 
     # SSL-Konfiguration

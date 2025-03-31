@@ -15,7 +15,7 @@ type MultiplayerStatus = 'setup' | 'lobby' | 'playing' | 'result'
 const MultiplayerPage = () => {
     // Sichere Verwendung des useGame hooks mit Fehlerbehandlung
     const gameContext = useGame()
-    const {socket, isConnected} = useSocket()  // IMPORTANT: Do NOT include connect here
+    const {socket, isConnected} = useSocket()  // Do NOT include connect here
 
     // Debug mode state
     const [showDebug, setShowDebug] = useState(false)
@@ -44,13 +44,32 @@ const MultiplayerPage = () => {
     const [isHost, setIsHost] = useState(false)
     const [connectionError, setConnectionError] = useState<string | null>(null)
 
-    // DO NOT attempt connection here - let MultiplayerSetup handle it
+    // Listen for game events from the server
     useEffect(() => {
-        console.log("MultiplayerPage mounted - connection status:", isConnected);
+        if (!socket) return;
 
-        // Important: We're removing the automatic connect here!
-        // The connection will be managed by MultiplayerSetup
-    }, [isConnected]);
+        // Listen for game started event - THIS IS CRITICAL FOR CLIENTS
+        const handleGameStarted = () => {
+            console.log("Game started event received - transitioning to game screen");
+            setStatus('playing');
+        };
+
+        // Listen for game ended event
+        const handleGameEnded = () => {
+            console.log("Game ended event received");
+            setStatus('result');
+        };
+
+        // Register event listeners
+        socket.on('game_started', handleGameStarted);
+        socket.on('game_ended', handleGameEnded);
+
+        // Cleanup when component unmounts
+        return () => {
+            socket.off('game_started', handleGameStarted);
+            socket.off('game_ended', handleGameEnded);
+        };
+    }, [socket]);
 
     // Status auf Setup zurücksetzen, wenn das Component unmounted wird
     useEffect(() => {
@@ -93,6 +112,7 @@ const MultiplayerPage = () => {
 
     // Spiel starten (nur für Host)
     const startGame = () => {
+        console.log("Host initiated game start");
         setStatus('playing');
     };
 

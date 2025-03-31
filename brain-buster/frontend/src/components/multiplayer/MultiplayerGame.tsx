@@ -41,10 +41,16 @@ const MultiplayerGame = ({
 
     // Initialize game with socket events
     useEffect(() => {
-        if (!socket) return;
+        if (!socket) {
+            console.error("No socket connection in MultiplayerGame");
+            return;
+        }
+
+        console.log("Setting up game event listeners");
 
         // Handle game started event
         const handleGameStarted = (data: { questions: Question[] }) => {
+            console.log("Game started with questions:", data.questions.length);
             setQuestions(data.questions);
             startGame('multiplayer', data.questions);
         };
@@ -57,6 +63,7 @@ const MultiplayerGame = ({
             isCorrect: boolean,
             newScore: number
         }) => {
+            console.log("Player answered:", data);
             // Update player scores
             setPlayerScores(prev => {
                 const updated = [...prev];
@@ -81,6 +88,7 @@ const MultiplayerGame = ({
             questionIndex: number,
             playerScores: PlayerScore[]
         }) => {
+            console.log("All players answered question", data.questionIndex);
             setPlayerScores(data.playerScores);
             setWaitingForOthers(false);
 
@@ -94,6 +102,7 @@ const MultiplayerGame = ({
 
         // Handle move to next question event
         const handleMoveToNextQuestion = (data: { nextQuestionIndex: number }) => {
+            console.log("Moving to next question:", data.nextQuestionIndex);
             setCurrentQuestionIndex(data.nextQuestionIndex);
             setWaitingForOthers(false);
         };
@@ -106,6 +115,7 @@ const MultiplayerGame = ({
                 isDraw: boolean
             }
         }) => {
+            console.log("Game ended with results:", data);
             setGameEnded(true);
             setPlayerScores(data.results.playerScores);
             setGameResult({
@@ -138,6 +148,7 @@ const MultiplayerGame = ({
 
         // Cleanup
         return () => {
+            console.log("Cleaning up game event listeners");
             socket.off('game_started', handleGameStarted);
             socket.off('player_answered', handlePlayerAnswered);
             socket.off('all_players_answered', handleAllPlayersAnswered);
@@ -150,6 +161,7 @@ const MultiplayerGame = ({
     const handleAnswerQuestion = (questionIndex: number, answer: number) => {
         if (!socket) return;
 
+        console.log("Sending answer to server:", { roomId, playerId, questionIndex, answer });
         socket.emit('answer_question', {
             roomId,
             playerId,
@@ -164,6 +176,7 @@ const MultiplayerGame = ({
     const handleNextQuestion = () => {
         if (!socket || !isHost) return;
 
+        console.log("Host moving to next question");
         socket.emit('next_question', {
             roomId,
             questionIndex: currentQuestionIndex
@@ -174,12 +187,14 @@ const MultiplayerGame = ({
     const handleEndGame = () => {
         if (!socket || !isHost) return;
 
+        console.log("Host ending the game");
         socket.emit('end_game', { roomId });
     };
 
     // Function to leave the game
     const handleLeaveGame = () => {
         if (socket) {
+            console.log("Leaving game/room");
             socket.emit('leave_room', { roomId, playerId });
         }
         onLeave();

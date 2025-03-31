@@ -69,9 +69,10 @@ const MultiplayerLobby = ({
         onLeave();
     };
 
-    // Toggle ready status
+    // Toggle ready status - Both host and non-host players should be able to use this
     const toggleReady = () => {
         if (socket) {
+            console.log("Toggling ready state:", !isReady);
             const newReadyStatus = !isReady;
             socket.emit('player_ready', { roomId, playerId, isReady: newReadyStatus });
             setIsReady(newReadyStatus);
@@ -151,17 +152,19 @@ const MultiplayerLobby = ({
             )}
 
             <div className="flex justify-between">
-                {isHost ? (
+                {/* Both host and non-host should have a ready button */}
+                <Button variant={isReady ? 'danger' : 'success'} onClick={toggleReady}>
+                    {isReady ? 'Nicht bereit' : 'Bereit'}
+                </Button>
+
+                {/* Only the host can see the start game button */}
+                {isHost && (
                     <Button
                         variant="primary"
                         disabled={players.length < 2 || !allPlayersReady}
                         onClick={handleStartGame}
                     >
                         Spiel starten
-                    </Button>
-                ) : (
-                    <Button variant={isReady ? 'danger' : 'success'} onClick={toggleReady}>
-                        {isReady ? 'Nicht bereit' : 'Bereit'}
                     </Button>
                 )}
             </div>
