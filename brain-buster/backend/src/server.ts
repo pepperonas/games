@@ -1,11 +1,11 @@
 import express from 'express';
 import http from 'http';
-import { Server } from 'socket.io';
+import {Server} from 'socket.io';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { v4 as uuidv4 } from 'uuid';
-import { RoomManager } from './models/RoomManager';
-import { Player } from './models/Player';
+import {v4 as uuidv4} from 'uuid';
+import {RoomManager} from './models/RoomManager';
+import {Player} from './models/Player';
 
 // Load environment variables
 dotenv.config();
@@ -91,7 +91,7 @@ io.on('connection', (socket) => {
     const playerId = uuidv4();
 
     // Join room handler
-    socket.on('join_room', ({ roomId, playerName, isHost }) => {
+    socket.on('join_room', ({roomId, playerName, isHost}) => {
         try {
             console.log(`Player ${playerName} joining room ${roomId}`);
 
@@ -102,7 +102,7 @@ io.on('connection', (socket) => {
             if (!roomManager.roomExists(roomId)) {
                 if (!isHost) {
                     // If player is not host but room doesn't exist, error
-                    socket.emit('error', { message: 'Room does not exist' });
+                    socket.emit('error', {message: 'Room does not exist'});
                     return;
                 }
                 roomManager.createRoom(roomId);
@@ -111,7 +111,7 @@ io.on('connection', (socket) => {
             // Add player to room
             const room = roomManager.getRoom(roomId);
             if (!room) {
-                socket.emit('error', { message: 'Error joining room' });
+                socket.emit('error', {message: 'Error joining room'});
                 return;
             }
 
@@ -133,16 +133,16 @@ io.on('connection', (socket) => {
             });
         } catch (error) {
             console.error(`Error in join_room handler: ${error}`);
-            socket.emit('error', { message: 'Internal server error' });
+            socket.emit('error', {message: 'Internal server error'});
         }
     });
 
     // Player ready state change handler
-    socket.on('player_ready', ({ roomId, playerId, isReady }) => {
+    socket.on('player_ready', ({roomId, playerId, isReady}) => {
         try {
             const room = roomManager.getRoom(roomId);
             if (!room) {
-                socket.emit('error', { message: 'Room not found' });
+                socket.emit('error', {message: 'Room not found'});
                 return;
             }
 
@@ -154,22 +154,22 @@ io.on('connection', (socket) => {
             });
         } catch (error) {
             console.error(`Error in player_ready handler: ${error}`);
-            socket.emit('error', { message: 'Internal server error' });
+            socket.emit('error', {message: 'Internal server error'});
         }
     });
 
     // Start game handler (host only)
-    socket.on('start_game', ({ roomId, questions }) => {
+    socket.on('start_game', ({roomId, questions}) => {
         try {
             const room = roomManager.getRoom(roomId);
             if (!room) {
-                socket.emit('error', { message: 'Room not found' });
+                socket.emit('error', {message: 'Room not found'});
                 return;
             }
 
             // Check if all players are ready
             if (!room.allPlayersReady()) {
-                socket.emit('error', { message: 'Not all players are ready' });
+                socket.emit('error', {message: 'Not all players are ready'});
                 return;
             }
 
@@ -182,16 +182,16 @@ io.on('connection', (socket) => {
             });
         } catch (error) {
             console.error(`Error in start_game handler: ${error}`);
-            socket.emit('error', { message: 'Internal server error' });
+            socket.emit('error', {message: 'Internal server error'});
         }
     });
 
     // Answer question handler
-    socket.on('answer_question', ({ roomId, playerId, questionIndex, answer }) => {
+    socket.on('answer_question', ({roomId, playerId, questionIndex, answer}) => {
         try {
             const room = roomManager.getRoom(roomId);
             if (!room) {
-                socket.emit('error', { message: 'Room not found' });
+                socket.emit('error', {message: 'Room not found'});
                 return;
             }
 
@@ -200,7 +200,7 @@ io.on('connection', (socket) => {
             const player = room.getPlayer(playerId);
 
             if (!player) {
-                socket.emit('error', { message: 'Player not found' });
+                socket.emit('error', {message: 'Player not found'});
                 return;
             }
 
@@ -225,16 +225,16 @@ io.on('connection', (socket) => {
             }
         } catch (error) {
             console.error(`Error in answer_question handler: ${error}`);
-            socket.emit('error', { message: 'Internal server error' });
+            socket.emit('error', {message: 'Internal server error'});
         }
     });
 
     // Next question handler
-    socket.on('next_question', ({ roomId, questionIndex }) => {
+    socket.on('next_question', ({roomId, questionIndex}) => {
         try {
             const room = roomManager.getRoom(roomId);
             if (!room) {
-                socket.emit('error', { message: 'Room not found' });
+                socket.emit('error', {message: 'Room not found'});
                 return;
             }
 
@@ -247,16 +247,16 @@ io.on('connection', (socket) => {
             });
         } catch (error) {
             console.error(`Error in next_question handler: ${error}`);
-            socket.emit('error', { message: 'Internal server error' });
+            socket.emit('error', {message: 'Internal server error'});
         }
     });
 
     // End game handler
-    socket.on('end_game', ({ roomId }) => {
+    socket.on('end_game', ({roomId}) => {
         try {
             const room = roomManager.getRoom(roomId);
             if (!room) {
-                socket.emit('error', { message: 'Room not found' });
+                socket.emit('error', {message: 'Room not found'});
                 return;
             }
 
@@ -272,12 +272,12 @@ io.on('connection', (socket) => {
             room.endGame();
         } catch (error) {
             console.error(`Error in end_game handler: ${error}`);
-            socket.emit('error', { message: 'Internal server error' });
+            socket.emit('error', {message: 'Internal server error'});
         }
     });
 
     // Leave room handler
-    socket.on('leave_room', ({ roomId, playerId }) => {
+    socket.on('leave_room', ({roomId, playerId}) => {
         try {
             const room = roomManager.getRoom(roomId);
             if (!room) return;
@@ -313,7 +313,7 @@ io.on('connection', (socket) => {
             console.log(`Connection disconnected: ${socket.id}, reason: ${reason}`);
 
             // Find player by socket ID
-            const { room, player } = roomManager.findPlayerBySocketId(socket.id);
+            const {room, player} = roomManager.findPlayerBySocketId(socket.id);
 
             if (room && player) {
                 // Remove player from room
