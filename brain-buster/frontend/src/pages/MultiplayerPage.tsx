@@ -15,7 +15,7 @@ type MultiplayerStatus = 'setup' | 'lobby' | 'playing' | 'result'
 const MultiplayerPage = () => {
     // Sichere Verwendung des useGame hooks mit Fehlerbehandlung
     const gameContext = useGame()
-    const {socket, isConnected, connect} = useSocket()
+    const {socket, isConnected} = useSocket()  // IMPORTANT: Do NOT include connect here
 
     // Debug mode state
     const [showDebug, setShowDebug] = useState(false)
@@ -44,42 +44,13 @@ const MultiplayerPage = () => {
     const [isHost, setIsHost] = useState(false)
     const [connectionError, setConnectionError] = useState<string | null>(null)
 
-    // Connect to the socket server when the component mounts
+    // DO NOT attempt connection here - let MultiplayerSetup handle it
     useEffect(() => {
-        if (!isConnected) {
-            connect();
-            console.log("Attempting to connect to socket server...");
-        }
-    }, [connect, isConnected]);
+        console.log("MultiplayerPage mounted - connection status:", isConnected);
 
-    // Listen for connection errors
-    useEffect(() => {
-        if (socket) {
-            socket.on('connect_error', (error) => {
-                console.error("Socket connection error:", error);
-                setConnectionError("Failed to connect to game server. Please try again later.");
-            });
-
-            return () => {
-                socket.off('connect_error');
-            };
-        }
-    }, [socket]);
-
-    // Listen for game start event
-    useEffect(() => {
-        if (!socket) return;
-
-        const handleGameStarted = () => {
-            setStatus('playing');
-        };
-
-        socket.on('game_started', handleGameStarted);
-
-        return () => {
-            socket.off('game_started', handleGameStarted);
-        };
-    }, [socket]);
+        // Important: We're removing the automatic connect here!
+        // The connection will be managed by MultiplayerSetup
+    }, [isConnected]);
 
     // Status auf Setup zurücksetzen, wenn das Component unmounted wird
     useEffect(() => {

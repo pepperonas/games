@@ -32,6 +32,7 @@ const io = new Server(server, {
         methods: ['GET', 'POST'],
         credentials: true
     },
+    // Use the same path that is configured in Nginx
     path: '/socket.io'
 });
 
@@ -49,7 +50,26 @@ app.get('/', (req, res) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-    res.status(200).json({status: 'ok', message: 'Server is running'});
+    res.status(200).json({
+        status: 'ok',
+        message: 'Server is running',
+        time: new Date().toISOString(),
+        env: {
+            node_env: process.env.NODE_ENV,
+            cors_origin: process.env.CORS_ORIGIN
+        }
+    });
+});
+
+// Socket.io info endpoint for debugging
+app.get('/socket-info', (req, res) => {
+    res.status(200).json({
+        activeConnections: io.engine.clientsCount,
+        serverTime: new Date().toISOString(),
+        socketEnabled: true,
+        socketPath: io.path(),
+        rooms: roomManager.getRoomCount()
+    });
 });
 
 // Socket.io connection handler
@@ -58,6 +78,17 @@ io.on('connection', (socket) => {
 
     // Generate a unique player ID
     const playerId = uuidv4();
+
+    // Socket.io test ping/pong for connection checking
+    socket.on('ping_test', (data) => {
+        console.log(`Received ping from client ${socket.id} with timestamp ${data?.time || 'unknown'}`);
+        // Send pong response with original timestamp
+        socket.emit('pong_test', {
+            originalTime: data?.time || Date.now(),
+            serverTime: Date.now(),
+            message: 'Connection successful'
+        });
+    });
 
     // Join room handler
     socket.on('join_room', ({roomId, playerName, isHost}) => {

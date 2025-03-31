@@ -13,23 +13,30 @@ const MultiplayerSetup = ({onConnect}: MultiplayerSetupProps) => {
     const [setupMode, setSetupMode] = useState<'create' | 'join' | null>(null)
     const [isConnecting, setIsConnecting] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const {socket, isConnected, connect, disconnect} = useSocket()
+    const {socket, isConnected, connect} = useSocket()
+    const [connectionAttempted, setConnectionAttempted] = useState(false)
 
     // Improved connection management
     const handleSocketConnection = useCallback(() => {
-        // If not connected, attempt to connect
-        if (!isConnected) {
-            // First, ensure any existing connection is closed
-            disconnect();
-            // Then attempt to connect
+        // Only connect if not already connecting and not already connected
+        if (!isConnected && !connectionAttempted) {
+            console.log("Initial socket connection attempt from MultiplayerSetup");
+            setConnectionAttempted(true);
             connect();
         }
-    }, [isConnected, connect, disconnect]);
+    }, [isConnected, connectionAttempted, connect]);
 
-    // Manage connection on component mount and mode change
+    // Manage connection only on component mount
     useEffect(() => {
+        console.log("MultiplayerSetup mounted, connection status:", isConnected);
         handleSocketConnection();
-    }, [handleSocketConnection]);
+
+        // Cleanup function when component unmounts
+        return () => {
+            console.log("MultiplayerSetup unmounted");
+            setConnectionAttempted(false);
+        };
+    }, [handleSocketConnection, isConnected]);
 
     // Improve connection error handling
     useEffect(() => {
@@ -62,6 +69,12 @@ const MultiplayerSetup = ({onConnect}: MultiplayerSetupProps) => {
 
     // Verbindung herstellen - mit verbesserte Fehlerbehandlung
     const handleConnect = useCallback(() => {
+        // Prevent multiple connection attempts
+        if (isConnecting) {
+            console.log("Already attempting to connect, ignoring duplicate request");
+            return;
+        }
+
         // Validierungen
         if (!isConnected) {
             setError('Nicht mit dem Server verbunden. Bitte versuchen Sie es später erneut.');
@@ -88,20 +101,23 @@ const MultiplayerSetup = ({onConnect}: MultiplayerSetupProps) => {
 
         // Neue Event-Listener
         const handleRoomJoined = (data: { roomId: string; playerId: string; isHost: boolean }) => {
+            console.log("Room joined successfully:", data);
             setIsConnecting(false);
             onConnect(playerName, data.roomId, data.isHost);
         };
 
         const handleError = (errorData: { message: string }) => {
+            console.error("Room join error:", errorData);
             setIsConnecting(false);
             setError(errorData.message || 'Ein unerwarteter Fehler ist aufgetreten');
         };
 
-        // Event-Listener hinzufügen
+        // Event-Listener ONCE (not on, to prevent duplicates)
         socket?.once('room_joined', handleRoomJoined);
         socket?.once('error', handleError);
 
         // Raum beitreten
+        console.log(`Emitting join_room: ${roomId}, ${playerName}, isHost: ${setupMode === 'create'}`);
         socket?.emit('join_room', {
             roomId,
             playerName,
@@ -113,7 +129,9 @@ const MultiplayerSetup = ({onConnect}: MultiplayerSetupProps) => {
             if (isConnecting) {
                 setIsConnecting(false);
                 setError('Verbindungsaufbau dauert zu lange. Bitte versuchen Sie es erneut.');
-                socket?.disconnect();
+                // Remove the event listeners
+                socket?.off('room_joined', handleRoomJoined);
+                socket?.off('error', handleError);
             }
         }, 10000); // 10 Sekunden Timeout
 
@@ -123,7 +141,7 @@ const MultiplayerSetup = ({onConnect}: MultiplayerSetupProps) => {
             socket?.off('room_joined', handleRoomJoined);
             socket?.off('error', handleError);
         };
-    }, [isConnected, playerName, roomId, setupMode, socket, onConnect]);
+    }, [isConnected, playerName, roomId, setupMode, socket, onConnect, isConnecting]);
 
     return (
         <Card>
