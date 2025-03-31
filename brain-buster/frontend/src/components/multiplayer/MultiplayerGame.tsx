@@ -13,6 +13,28 @@ interface PlayerScore {
     score: number;
 }
 
+interface GameStartedData {
+    questions: Question[];
+    players: any[];
+    startTime: number;
+    isReconnect?: boolean;
+}
+
+interface AllPlayersAnsweredData {
+    questionIndex: number;
+    playerScores: PlayerScore[];
+    allPlayers: any[];
+}
+
+interface GameEndedData {
+    results: {
+        playerScores: PlayerScore[];
+        winners: PlayerScore[];
+        isDraw: boolean;
+        allPlayers: any[];
+    }
+}
+
 interface MultiplayerGameProps {
     playerName: string
     roomId: string
@@ -38,128 +60,212 @@ const MultiplayerGame = ({
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
     const [waitingForOthers, setWaitingForOthers] = useState(false)
     const [gameResult, setGameResult] = useState<{ winners: PlayerScore[], isDraw: boolean } | null>(null)
+    const [initComplete, setInitComplete] = useState(false)
+    const [errorMsg, setErrorMsg] = useState<string | null>(null)
+    const [debugMode, setDebugMode] = useState(false)
 
-    // Initialize game with socket events
+    useEffect(() => {
+        // Wenn wir keine Fragen haben, aber initComplete ist noch false
+        if (questions.length === 0 && !initComplete) {
+            // Prüfen, ob die Fragen im lokalen Speicher sind
+            const savedQuestions = localStorage.getItem('lastGameQuestions');
+            if (savedQuestions) {
+                try {
+                    const parsedQuestions = JSON.parse(savedQuestions);
+
+                    if (Array.isArray(parsedQuestions) && parsedQuestions.length > 0) {
+                        console.log("🛟 Loaded questions from local storage:", parsedQuestions.length);
+                        setQuestions(parsedQuestions);
+                        setCurrentQuestionIndex(0);
+                        setInitComplete(true);
+                        startGame('multiplayer', parsedQuestions);
+                    }
+                } catch (error) {
+                    console.error("Failed to parse saved questions:", error);
+                }
+            }
+        }
+    }, [questions.length, initComplete, startGame]);
+
+    // Primary game initialization effect
     useEffect(() => {
         if (!socket) {
-            console.error("No socket connection in MultiplayerGame");
+            console.error("No socket connection available");
+            setErrorMsg("Keine Verbindung zum Server verfügbar.");
             return;
         }
 
-        console.log("Setting up game event listeners");
+        console.log("Setting up game event listeners in MultiplayerGame");
 
-        // Handle game started event
-        const handleGameStarted = (data: { questions: Question[] }) => {
-            console.log("Game started with questions:", data.questions.length);
+        // CRITICALLY IMPORTANT: Handle game_started event
+        const handleGameStarted = (data: GameStartedData) => {
+            console.log("🎮 Game started event received:", data);
+
+            // Defensive validation
+            if (!data || !data.questions || !Array.isArray(data.questions) || data.questions.length === 0) {
+                console.error("❌ Invalid data in game_started event:", data);
+
+                // Versuche aus dem lokalen Speicher zu laden
+                const savedQuestions = localStorage.getItem('lastGameQuestions');
+                if (savedQuestions) {
+                    try {
+                        const parsedQuestions = JSON.parse(savedQuestions);
+                        if (Array.isArray(parsedQuestions) && parsedQuestions.length > 0) {
+                            console.log("🆘 Using saved questions as fallback:", parsedQuestions.length);
+                            setQuestions(parsedQuestions);
+                            setCurrentQuestionIndex(0);
+                            setInitComplete(true);
+                            setErrorMsg(null);
+                            startGame('multiplayer', parsedQuestions);
+                            return;
+                        }
+                    } catch (error) {
+                        console.error("Failed to parse saved questions:", error);
+                    }
+                }
+
+                setErrorMsg("Ungültige Spielstart-Daten empfangen. Bitte Spiel neu starten.");
+                return;
+            }
+
+            console.log(`✅ Successfully received ${data.questions.length} questions`);
+
+            // Speichere die Fragen im lokalen Speicher für Notfälle
+            localStorage.setItem('lastGameQuestions', JSON.stringify(data.questions));
+
+            // Ensure we set these in the correct order
             setQuestions(data.questions);
+            setCurrentQuestionIndex(0);
+            setInitComplete(true);
+            setErrorMsg(null);
+
+            // Start the game in context
             startGame('multiplayer', data.questions);
         };
 
-        // Handle player answered event
-        const handlePlayerAnswered = (data: {
-            playerId: string,
-            playerName: string,
-            questionIndex: number,
-            isCorrect: boolean,
-            newScore: number
-        }) => {
-            console.log("Player answered:", data);
-            // Update player scores
-            setPlayerScores(prev => {
-                const updated = [...prev];
-                const playerIndex = updated.findIndex(p => p.id === data.playerId);
+        // Function for other events
+        const setupOtherEventListeners = () => {
+            // Handle player answered event
+            socket.on('player_answered', (data: any) => {
+                console.log("Player answered:", data);
+                setPlayerScores(prev => {
+                    const updated = [...prev];
+                    const playerIndex = updated.findIndex(p => p.id === data.playerId);
 
-                if (playerIndex >= 0) {
-                    updated[playerIndex].score = data.newScore;
-                } else {
-                    updated.push({
-                        id: data.playerId,
-                        name: data.playerName,
-                        score: data.newScore
-                    });
+                    if (playerIndex >= 0) {
+                        updated[playerIndex].score = data.newScore;
+                    } else {
+                        updated.push({
+                            id: data.playerId,
+                            name: data.playerName,
+                            score: data.newScore
+                        });
+                    }
+
+                    return updated;
+                });
+            });
+
+            // Handle all players answered event
+            socket.on('all_players_answered', (data: AllPlayersAnsweredData) => {
+                console.log("All players answered question", data.questionIndex);
+                setPlayerScores(data.playerScores);
+                setWaitingForOthers(false);
+
+                // If this was the last question, end the game
+                if (data.questionIndex >= questions.length - 1) {
+                    console.log("Last question answered, preparing to end game");
+                    if (isHost) {
+                        setTimeout(() => {
+                            console.log("Host ending the game after final question");
+                            socket.emit('end_game', { roomId });
+                        }, 2000);
+                    }
                 }
+            });
 
-                return updated;
+            // Handle move to next question event
+            socket.on('move_to_next_question', (data: { nextQuestionIndex: number }) => {
+                console.log("Moving to next question:", data.nextQuestionIndex);
+                setCurrentQuestionIndex(data.nextQuestionIndex);
+                setWaitingForOthers(false);
+            });
+
+            // Handle game ended event
+            socket.on('game_ended', (data: GameEndedData) => {
+                console.log("Game ended with results:", data);
+                setGameEnded(true);
+
+                if (data && data.results) {
+                    setPlayerScores(data.results.playerScores || []);
+                    setGameResult({
+                        winners: data.results.winners || [],
+                        isDraw: data.results.isDraw || false
+                    });
+
+                    // Determine the result for the local player
+                    const isWinner = data.results.winners?.some((w: PlayerScore) => w.id === playerId);
+                    let result: 'win' | 'loss' | 'draw' = 'draw';
+
+                    if (data.results.isDraw) {
+                        result = 'draw';
+                    } else if (isWinner) {
+                        result = 'win';
+                    } else {
+                        result = 'loss';
+                    }
+
+                    // Update local game state
+                    endGame(result);
+                }
+            });
+
+            // Handle socket errors
+            socket.on('error', (data: { message: string }) => {
+                console.error("Socket error:", data);
+                setErrorMsg(data.message || "Ein Fehler ist aufgetreten");
             });
         };
 
-        // Handle all players answered event
-        const handleAllPlayersAnswered = (data: {
-            questionIndex: number,
-            playerScores: PlayerScore[]
-        }) => {
-            console.log("All players answered question", data.questionIndex);
-            setPlayerScores(data.playerScores);
-            setWaitingForOthers(false);
+        // Register all event listeners
+        socket.on('game_started', handleGameStarted);
+        setupOtherEventListeners();
 
-            // If this is the last question, automatically end the game
-            if (currentQuestionIndex >= questions.length - 1) {
-                if (isHost) {
+        // Try to reconnect to an existing game if we're returning to this component
+        if (!initComplete && questions.length === 0) {
+            console.log("Checking for existing game in room:", roomId);
+            socket.emit('check_game_status', { roomId });
+        }
+
+        // Cleanup function
+        return () => {
+            console.log("Cleaning up all game event listeners");
+            socket.off('game_started', handleGameStarted);
+            socket.off('player_answered');
+            socket.off('all_players_answered');
+            socket.off('move_to_next_question');
+            socket.off('game_ended');
+            socket.off('error');
+        };
+    }, [socket, startGame, endGame, playerId, roomId, isHost, questions.length, initComplete]);
+
+    // Effect to handle auto-timeout for ending the game
+    useEffect(() => {
+        if (initComplete && questions.length > 0 && currentQuestionIndex >= questions.length - 1 && !gameEnded) {
+            const timer = setTimeout(() => {
+                if (isHost && socket) {
+                    console.log("Auto-ending game after timeout");
                     socket.emit('end_game', { roomId });
                 }
-            }
-        };
+            }, 10000);
 
-        // Handle move to next question event
-        const handleMoveToNextQuestion = (data: { nextQuestionIndex: number }) => {
-            console.log("Moving to next question:", data.nextQuestionIndex);
-            setCurrentQuestionIndex(data.nextQuestionIndex);
-            setWaitingForOthers(false);
-        };
+            return () => clearTimeout(timer);
+        }
+    }, [questions.length, currentQuestionIndex, gameEnded, isHost, socket, roomId, initComplete]);
 
-        // Handle game ended event
-        const handleGameEnded = (data: {
-            results: {
-                playerScores: PlayerScore[],
-                winners: PlayerScore[],
-                isDraw: boolean
-            }
-        }) => {
-            console.log("Game ended with results:", data);
-            setGameEnded(true);
-            setPlayerScores(data.results.playerScores);
-            setGameResult({
-                winners: data.results.winners,
-                isDraw: data.results.isDraw
-            });
-
-            // Determine the result for the local player
-            const isWinner = data.results.winners.some(w => w.id === playerId);
-
-            let result: 'win' | 'loss' | 'draw' = 'draw';
-            if (data.results.isDraw) {
-                result = 'draw';
-            } else if (isWinner) {
-                result = 'win';
-            } else {
-                result = 'loss';
-            }
-
-            // Update local game state
-            endGame(result);
-        };
-
-        // Listen for events
-        socket.on('game_started', handleGameStarted);
-        socket.on('player_answered', handlePlayerAnswered);
-        socket.on('all_players_answered', handleAllPlayersAnswered);
-        socket.on('move_to_next_question', handleMoveToNextQuestion);
-        socket.on('game_ended', handleGameEnded);
-
-        // Cleanup
-        return () => {
-            console.log("Cleaning up game event listeners");
-            socket.off('game_started', handleGameStarted);
-            socket.off('player_answered', handlePlayerAnswered);
-            socket.off('all_players_answered', handleAllPlayersAnswered);
-            socket.off('move_to_next_question', handleMoveToNextQuestion);
-            socket.off('game_ended', handleGameEnded);
-        };
-    }, [socket, startGame, endGame, playerId, isHost, roomId, questions.length, currentQuestionIndex]);
-
-    // Function to handle answering a question
+    // Handle answering a question
     const handleAnswerQuestion = (questionIndex: number, answer: number) => {
-        if (!socket) return;
+        if (!socket || !initComplete) return;
 
         console.log("Sending answer to server:", { roomId, playerId, questionIndex, answer });
         socket.emit('answer_question', {
@@ -172,26 +278,26 @@ const MultiplayerGame = ({
         setWaitingForOthers(true);
     };
 
-    // Function to handle moving to the next question
+    // Handle moving to the next question (host only)
     const handleNextQuestion = () => {
-        if (!socket || !isHost) return;
+        if (!socket || !isHost || !initComplete) return;
 
-        console.log("Host moving to next question");
+        console.log("Host moving to next question from index", currentQuestionIndex);
         socket.emit('next_question', {
             roomId,
             questionIndex: currentQuestionIndex
         });
     };
 
-    // Function to handle ending the game
+    // Handle ending the game
     const handleEndGame = () => {
-        if (!socket || !isHost) return;
+        if (!socket) return;
 
-        console.log("Host ending the game");
+        console.log("User requested to end the game");
         socket.emit('end_game', { roomId });
     };
 
-    // Function to leave the game
+    // Handle leaving the game
     const handleLeaveGame = () => {
         if (socket) {
             console.log("Leaving game/room");
@@ -200,11 +306,43 @@ const MultiplayerGame = ({
         onLeave();
     };
 
+    // Handle force refreshing game state
+    const handleForceRefresh = () => {
+        if (!socket) return;
+
+        console.log("Force refreshing game state");
+        socket.emit('check_game_status', { roomId, playerId });
+
+        // Let server know we're having problems
+        socket.emit('debug_request', {
+            roomId,
+            playerId,
+            status: {
+                initComplete,
+                questionsCount: questions.length,
+                currentIndex: currentQuestionIndex
+            }
+        });
+    };
+
     // Calculate the current player's score
     const currentPlayerScore = playerScores.find(p => p.id === playerId)?.score || 0;
 
     // Calculate opponent scores
     const opponentScores = playerScores.filter(p => p.id !== playerId);
+
+    // Compute current game state for logging
+    const gameStatus = {
+        initComplete,
+        questionsLength: questions.length,
+        currentQuestionIndex,
+        waitingForOthers,
+        gameEnded
+    };
+
+    if (debugMode) {
+        console.log("Game state:", gameStatus);
+    }
 
     return (
         <div>
@@ -218,7 +356,14 @@ const MultiplayerGame = ({
                                     <h3 className="font-medium">{roomId}</h3>
                                 </div>
 
-                                <div className="text-right">
+                                <div className="flex items-center space-x-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setDebugMode(!debugMode)}
+                                    >
+                                        {debugMode ? "Debug aus" : "Debug an"}
+                                    </Button>
                                     <Button variant="outline" size="sm" onClick={handleLeaveGame}>
                                         Spiel verlassen
                                     </Button>
@@ -265,7 +410,44 @@ const MultiplayerGame = ({
                         ))}
                     </div>
 
-                    {questions.length > 0 && currentQuestionIndex < questions.length ? (
+                    {/* Debug Information */}
+                    {debugMode && (
+                        <Card className="bg-gray-800 p-4 text-xs font-mono">
+                            <div className="overflow-auto max-h-40">
+                                <pre>{JSON.stringify({
+                                    initComplete,
+                                    questionsLength: questions.length,
+                                    currentIndex: currentQuestionIndex,
+                                    waitingForOthers,
+                                    isHost,
+                                    firstQuestion: questions[0] ?
+                                        { id: questions[0].id, question: questions[0].question } :
+                                        null
+                                }, null, 2)}</pre>
+                            </div>
+                        </Card>
+                    )}
+
+                    {/* Error Message */}
+                    {errorMsg && (
+                        <Card className="p-4 bg-red-600/20 border border-red-600/40">
+                            <div className="flex items-center mb-2">
+                                <div className="text-lg mr-2">⚠️</div>
+                                <p className="font-medium text-red-300">{errorMsg}</p>
+                            </div>
+                            <div className="flex space-x-2">
+                                <Button variant="primary" size="sm" onClick={handleForceRefresh}>
+                                    Spielstatus aktualisieren
+                                </Button>
+                                <Button variant="secondary" size="sm" onClick={() => setErrorMsg(null)}>
+                                    Schließen
+                                </Button>
+                            </div>
+                        </Card>
+                    )}
+
+                    {/* Main Game Content */}
+                    {initComplete && questions.length > 0 && currentQuestionIndex < questions.length ? (
                         <div>
                             <div className="mb-4 flex justify-between items-center">
                                 <div>
@@ -287,12 +469,26 @@ const MultiplayerGame = ({
                         </div>
                     ) : (
                         <Card className="text-center p-6">
-                            <h3 className="text-xl font-bold mb-4">Alle Fragen beantwortet!</h3>
-                            <p className="mb-6">Warte auf die anderen Spieler...</p>
-                            {isHost && (
-                                <Button variant="primary" onClick={handleEndGame}>
-                                    Spiel beenden
-                                </Button>
+                            {!initComplete ? (
+                                <>
+                                    <h3 className="text-xl font-bold mb-4">Spiel wird initialisiert...</h3>
+                                    <p className="mb-6">
+                                        Warte auf Daten vom Server... {questions.length > 0 ?
+                                        `(${questions.length} Fragen empfangen)` : ''}
+                                    </p>
+
+                                    <Button variant="secondary" onClick={handleForceRefresh}>
+                                        Status aktualisieren
+                                    </Button>
+                                </>
+                            ) : (
+                                <>
+                                    <h3 className="text-xl font-bold mb-4">Alle Fragen beantwortet!</h3>
+                                    <p className="mb-6">Warte auf die anderen Spieler...</p>
+                                    <Button variant="primary" onClick={handleEndGame}>
+                                        Spiel beenden
+                                    </Button>
+                                </>
                             )}
                         </Card>
                     )}

@@ -8,9 +8,18 @@ import MultiplayerLobby from '../components/multiplayer/MultiplayerLobby'
 import MultiplayerGame from '../components/multiplayer/MultiplayerGame'
 import SocketDebug from '../components/multiplayer/SocketDebug'
 import Button from '../components/ui/Button'
+import {Question} from '../types'
 
 // Multiplayer-Status-Typen
 type MultiplayerStatus = 'setup' | 'lobby' | 'playing' | 'result'
+
+// Interface für Game Started Event
+interface GameStartedData {
+    questions: Question[];
+    players: any[];
+    startTime: number;
+    isReconnect?: boolean;
+}
 
 const MultiplayerPage = () => {
     // Sichere Verwendung des useGame hooks mit Fehlerbehandlung
@@ -49,8 +58,18 @@ const MultiplayerPage = () => {
         if (!socket) return;
 
         // Listen for game started event - THIS IS CRITICAL FOR CLIENTS
-        const handleGameStarted = () => {
-            console.log("Game started event received - transitioning to game screen");
+        const handleGameStarted = (data: GameStartedData) => {
+            console.log("Game started event received - transitioning to game screen", data);
+            // Important logging to debug client problems
+            console.log("Questions received:", data.questions?.length || 0);
+
+            // Double check data received
+            if (!data || !data.questions || data.questions.length === 0) {
+                console.error("Invalid game_started data received");
+                socket.emit('error', {message: 'Received no questions from server'});
+                return;
+            }
+
             setStatus('playing');
         };
 

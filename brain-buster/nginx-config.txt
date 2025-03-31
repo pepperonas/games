@@ -109,6 +109,11 @@ server {
         try_files $uri $uri.html $uri/ =404;
     }
 
+    location /stuff/weather/ {
+        alias /var/www/html/stuff/weather/build/;
+        try_files $uri $uri/ /stuff/weather/index.html;
+    }
+
     # Generischer /stuff/ Block für future SPA-Projekte
     location /stuff/ {
         alias /var/www/html/stuff/;
@@ -117,20 +122,24 @@ server {
         try_files $uri $uri/ @stuff_spa_fallback;
     }
 
-    # SPA-Fallback für alle /stuff/-Unterordner
+    # SPA-Fallback für alle /stuff/-Unterordner (angepasst für Option 1)
     location @stuff_spa_fallback {
-        # Extrahiere den ersten Unterordner aus dem Pfad
         set $subdirectory "";
         if ($request_uri ~ "^/stuff/([^/]+)") {
             set $subdirectory $1;
         }
 
-        # Wenn die Datei index.html im Unterordner existiert, nutze sie als Fallback
+        # Prüfe zuerst auf build/index.html (für SPAs mit Build-Struktur)
         if (-f $document_root/stuff/$subdirectory/build/index.html) {
             rewrite ^/stuff/([^/]+)(.*)$ /stuff/$1/build/index.html break;
         }
 
-        # Fallback für statische Seiten
+        # Fallback auf direkte index.html im Unterordner (für flache Strukturen wie weather)
+        if (-f $document_root/stuff/$subdirectory/index.html) {
+            rewrite ^/stuff/([^/]+)(.*)$ /stuff/$1/index.html break;
+        }
+
+        # Wenn keine der beiden Dateien existiert, 404 zurückgeben
         return 404;
     }
 

@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import {v4 as uuidv4} from 'uuid';
 import {RoomManager} from './models/RoomManager';
 import {Player} from './models/Player';
+import {Question} from './types';
 
 // Load environment variables
 dotenv.config();
@@ -146,8 +147,10 @@ io.on('connection', (socket) => {
         });
     });
 
-    // Start game handler (host only)
-    socket.on('start_game', ({roomId, questions}) => {
+    // Prepare game handler - simplified initialization
+    socket.on('prepare_game', ({roomId, questionCount}) => {
+        console.log(`Preparing game in room ${roomId} for ${questionCount} questions`);
+
         const room = roomManager.getRoom(roomId);
         if (!room) {
             socket.emit('error', {message: 'Room not found'});
@@ -160,23 +163,142 @@ io.on('connection', (socket) => {
             return;
         }
 
-        // Ensure players are aware they're in the game
-        room.getPlayerList().forEach(player => {
-            const playerObj = room.getPlayer(player.id);
-            if (playerObj) {
-                playerObj.setReady(false); // Reset ready state for game
+        // Just send a preparation signal to all clients
+        io.to(roomId).emit('game_preparing', {
+            roomId,
+            questionCount,
+            timestamp: Date.now()
+        });
+    });
+
+    // Start game handler (host only)
+    socket.on('start_game', ({roomId, questions}) => {
+        console.log(`Attempting to start game in room ${roomId} with ${questions?.length || 0} questions`);
+
+        const room = roomManager.getRoom(roomId);
+        if (!room) {
+            console.error(`Room ${roomId} not found when starting game`);
+            socket.emit('error', {message: 'Room not found'});
+            return;
+        }
+
+        // Check if all players are ready
+        if (!room.allPlayersReady()) {
+            console.error(`Not all players are ready in room ${roomId}`);
+            socket.emit('error', {message: 'Not all players are ready'});
+            return;
+        }
+
+        // Verify we have questions
+        if (!questions || questions.length === 0) {
+            console.error(`No questions provided for room ${roomId}`);
+            socket.emit('error', {message: 'No questions provided'});
+            return;
+        }
+
+        // WICHTIG: Stark vereinfachte Serialisierung
+        try {
+            // Extrahiere nur die wichtigsten Daten, um Größe zu reduzieren
+            const simplifiedQuestions = questions.map((q: Question, i: number) => ({
+                id: `q-${i}`,
+                question: q.question,
+                options: q.options,
+                correctAnswer: q.correctAnswer,
+                category: q.category,
+                difficulty: q.difficulty
+            }));
+
+            // Start the game
+            room.startGame(simplifiedQuestions);
+            console.log(`Game started in room ${roomId} with ${simplifiedQuestions.length} simplified questions`);
+
+            // Sende die Fragen in kleineren Batches, um Übertragungsprobleme zu vermeiden
+            // Zuerst an alle
+            io.to(roomId).emit('game_started', {
+                questions: simplifiedQuestions,
+                players: room.getPlayerList(),
+                startTime: Date.now()
+            });
+
+            // Dann an jeden einzeln
+            const socketsInRoom = io.sockets.adapter.rooms.get(roomId) || new Set();
+            for (const socketId of socketsInRoom) {
+                try {
+                    const clientSocket = io.sockets.sockets.get(socketId);
+                    if (clientSocket) {
+                        // Kurze Verzögerung zwischen Sendevorgängen
+                        setTimeout(() => {
+                            console.log(`Sending individual game_started to ${socketId.substring(0, 6)}...`);
+                            clientSocket.emit('game_started', {
+                                questions: simplifiedQuestions,
+                                players: room.getPlayerList(),
+                                startTime: Date.now() + 500 // Leicht verzögerter Start
+                            });
+                        }, 200); // 200ms Verzögerung
+                    }
+                } catch (error) {
+                    console.error(`Error sending to client ${socketId}:`, error);
+                }
             }
-        });
+        } catch (error) {
+            console.error(`Error starting game in room ${roomId}:`, error);
+            socket.emit('error', {message: 'Failed to process questions'});
+        }
+    });
 
-        // Start the game
-        room.startGame(questions);
+    // Check game status handler - helps clients reconnect to game state
+    socket.on('check_game_status', ({roomId, playerId}) => {
+        console.log(`Checking game status for room ${roomId}, player ${playerId}`);
 
-        // Broadcast game start with full player information
-        io.to(roomId).emit('game_started', {
-            questions: questions,
-            players: room.getPlayerList(), // Full player list
-            startTime: Date.now()
-        });
+        const room = roomManager.getRoom(roomId);
+        if (!room) {
+            console.error(`Room ${roomId} not found for status check`);
+            socket.emit('error', {message: 'Room not found'});
+            return;
+        }
+
+        // Get questions from the room
+        const questions = room.getQuestions();
+
+        // Check if a game is in progress
+        if (questions && questions.length > 0) {
+            console.log(`Found active game in room ${roomId} with ${questions.length} questions`);
+
+            // Send the game_started event directly to this client
+            socket.emit('game_started', {
+                questions: questions,
+                players: room.getPlayerList(),
+                startTime: Date.now(),
+                isReconnect: true
+            });
+        } else {
+            socket.emit('error', {message: 'No active game found'});
+        }
+    });
+
+    // Add debug request handler
+    socket.on('debug_request', (data) => {
+        console.log('Debug request received:', data);
+
+        // Respond with server state
+        const room = roomManager.getRoom(data.roomId);
+
+        if (room) {
+            const debugResponse = {
+                roomExists: true,
+                playerCount: room.getPlayerList().length,
+                gameStarted: room.getQuestions().length > 0,
+                questionCount: room.getQuestions().length,
+                serverTime: new Date().toISOString()
+            };
+
+            socket.emit('debug_response', debugResponse);
+        } else {
+            socket.emit('debug_response', {
+                roomExists: false,
+                serverTime: new Date().toISOString()
+            });
+        }
     });
 
     // Answer question handler
@@ -213,6 +335,18 @@ io.on('connection', (socket) => {
                 playerScores: room.getPlayerScores(),
                 allPlayers: room.getPlayerList() // Send full player list
             });
+
+            // WICHTIGE ÄNDERUNG: Wenn das die letzte Frage war, automatisch das Spiel beenden
+            if (questionIndex >= room.getQuestions().length - 1) {
+                console.log(`Last question answered in room ${roomId}, ending game automatically`);
+                // End the game automatically after a short delay
+                setTimeout(() => {
+                    io.to(roomId).emit('game_ended', {
+                        results: room.calculateResults()
+                    });
+                    room.endGame();
+                }, 2000);
+            }
         }
     });
 
@@ -320,6 +454,20 @@ io.on('connection', (socket) => {
                 io.to(room.getId()).emit('player_list_updated', {
                     players: room.getPlayerList()
                 });
+
+                // WICHTIGE ERGÄNZUNG: Prüfe, ob alle verbliebenen Spieler die aktuelle Frage beantwortet haben
+                const questions = room.getQuestions();
+                const currentQuestionIndex = Math.min(questions.length - 1, 0); // Standardmäßig erste oder letzte Frage
+
+                if (room.allPlayersAnswered(currentQuestionIndex)) {
+                    // Wenn alle verbliebenen Spieler die aktuelle Frage beantwortet haben,
+                    // sende entsprechendes Event, damit das Spiel nicht hängen bleibt
+                    io.to(room.getId()).emit('all_players_answered', {
+                        questionIndex: currentQuestionIndex,
+                        playerScores: room.getPlayerScores(),
+                        allPlayers: room.getPlayerList()
+                    });
+                }
             }
         }
     });

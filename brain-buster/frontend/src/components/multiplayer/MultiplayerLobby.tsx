@@ -82,13 +82,43 @@ const MultiplayerLobby = ({
     // Start game handler
     const handleStartGame = () => {
         if (socket && isHost) {
-            // Filter questions based on current state if needed
-            const questions = [...state.questions]
-                .sort(() => Math.random() - 0.5)
-                .slice(0, 10);
+            console.log("Host starting game with simplified questions");
 
-            socket.emit('start_game', { roomId, questions });
-            onStart();
+            // Erstelle eine stark vereinfachte Version der Fragen
+            const simplifiedQuestions = [...state.questions]
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 5) // Nur 5 Fragen für bessere Übertragung
+                .map((q, index) => ({
+                    id: `simple-question-${index}`,
+                    question: q.question,
+                    options: q.options,
+                    correctAnswer: q.correctAnswer,
+                    category: q.category,
+                    difficulty: q.difficulty
+                }));
+
+            // Speichere diese Fragen lokal, um sie später direkt zu verwenden
+            localStorage.setItem('lastGameQuestions', JSON.stringify(simplifiedQuestions));
+
+            // Sende die Fragen mit einem verzögerten Mechanismus
+            // Zuerst senden wir nur die Anzahl und IDs
+            socket.emit('prepare_game', {
+                roomId,
+                questionCount: simplifiedQuestions.length
+            });
+
+            // Nach kurzer Verzögerung senden wir die vollständigen Fragen
+            setTimeout(() => {
+                socket.emit('start_game', {
+                    roomId,
+                    questions: simplifiedQuestions
+                });
+
+                // Nach noch einer kurzen Verzögerung rufen wir den Callback auf
+                setTimeout(() => {
+                    onStart();
+                }, 300);
+            }, 300);
         }
     };
 
