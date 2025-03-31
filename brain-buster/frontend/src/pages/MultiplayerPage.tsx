@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
-import Card from '../components/ui/Card' // Card-Komponente importieren für Fallback
-import { useGame } from '../store/GameContext'
+import {useEffect, useState} from 'react'
+import {motion} from 'framer-motion'
+import Card from '../components/ui/Card'
+import {useGame} from '../store/GameContext'
+import {useSocket} from '../store/SocketContext'
 import MultiplayerSetup from '../components/multiplayer/MultiplayerSetup'
 import MultiplayerLobby from '../components/multiplayer/MultiplayerLobby'
 import MultiplayerGame from '../components/multiplayer/MultiplayerGame'
+import SocketDebug from '../components/multiplayer/SocketDebug'
+import Button from '../components/ui/Button'
 
 // Multiplayer-Status-Typen
 type MultiplayerStatus = 'setup' | 'lobby' | 'playing' | 'result'
@@ -12,95 +15,194 @@ type MultiplayerStatus = 'setup' | 'lobby' | 'playing' | 'result'
 const MultiplayerPage = () => {
     // Sichere Verwendung des useGame hooks mit Fehlerbehandlung
     const gameContext = useGame()
+    const {socket, isConnected, connect} = useSocket()
+
+    // Debug mode state
+    const [showDebug, setShowDebug] = useState(false)
 
     // Überprüfung, ob der gameContext korrekt initialisiert wurde
     if (!gameContext) {
         return (
             <Card>
                 <div className="text-center py-8">
-                    <h2 className="text-xl font-bold text-red-400 mb-2">Fehler beim Laden des Spielkontexts</h2>
-                    <p>Bitte starten Sie die Anwendung neu oder kehren Sie zur Startseite zurück.</p>
+                    <h2 className="text-xl font-bold text-red-400 mb-2">Fehler beim Laden des
+                        Spielkontexts</h2>
+                    <p>Bitte starten Sie die Anwendung neu oder kehren Sie zur Startseite
+                        zurück.</p>
                 </div>
             </Card>
         )
     }
 
     // Destrukturiere erst nach der Überprüfung
-    const { resetGame } = gameContext
+    const {resetGame} = gameContext
 
     const [status, setStatus] = useState<MultiplayerStatus>('setup')
     const [playerName, setPlayerName] = useState('')
     const [roomId, setRoomId] = useState('')
+    const [playerId, setPlayerId] = useState('')
     const [isHost, setIsHost] = useState(false)
+    const [connectionError, setConnectionError] = useState<string | null>(null)
+
+    // Connect to the socket server when the component mounts
+    useEffect(() => {
+        if (!isConnected) {
+            connect();
+            console.log("Attempting to connect to socket server...");
+        }
+    }, [connect, isConnected]);
+
+    // Listen for connection errors
+    useEffect(() => {
+        if (socket) {
+            socket.on('connect_error', (error) => {
+                console.error("Socket connection error:", error);
+                setConnectionError("Failed to connect to game server. Please try again later.");
+            });
+
+            return () => {
+                socket.off('connect_error');
+            };
+        }
+    }, [socket]);
+
+    // Listen for game start event
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleGameStarted = () => {
+            setStatus('playing');
+        };
+
+        socket.on('game_started', handleGameStarted);
+
+        return () => {
+            socket.off('game_started', handleGameStarted);
+        };
+    }, [socket]);
 
     // Status auf Setup zurücksetzen, wenn das Component unmounted wird
     useEffect(() => {
         return () => {
-            resetGame()
-        }
-    }, [resetGame])
+            resetGame();
+        };
+    }, [resetGame]);
 
     // Verbindung zum Multiplayer-Server herstellen
-    const connectToServer = (name: string, room: string, host: boolean) => {
-        setPlayerName(name)
-        setRoomId(room)
-        setIsHost(host)
-        setStatus('lobby')
+    const connectToServer = (name: string, room: string, isHostRoom: boolean) => {
+        if (!socket || !isConnected) {
+            setConnectionError("Not connected to the server. Please try again later.");
+            return;
+        }
 
-        // Hier würde die Verbindung zum WebRTC-Server aufgebaut werden
-        // Für diese Demo simulieren wir die Verbindung
-        console.log(`Verbinde als ${host ? 'Host' : 'Gast'} mit Namen ${name} zum Raum ${room}`)
-    }
+        setConnectionError(null);
+        console.log(`Attempting to join room: ${room} as ${isHostRoom ? 'host' : 'guest'}`);
+
+        socket.once('room_joined', (data) => {
+            console.log("Room joined successfully:", data);
+            setPlayerName(name);
+            setRoomId(room);
+            setPlayerId(data.playerId);
+            setIsHost(data.isHost);
+            setStatus('lobby');
+        });
+
+        socket.once('error', (data) => {
+            console.error("Error joining room:", data);
+            setConnectionError(data.message || "Failed to join room");
+        });
+
+        // Join the room
+        socket.emit('join_room', {
+            roomId: room,
+            playerName: name,
+            isHost: isHostRoom
+        });
+    };
 
     // Spiel starten (nur für Host)
     const startGame = () => {
-        setStatus('playing')
-
-        // Hier würde das Signal zum Spielstart an alle Spieler gesendet werden
-        console.log('Starte Multiplayer-Spiel')
-    }
+        setStatus('playing');
+    };
 
     // Zurück zur Lobby
     const backToLobby = () => {
-        setStatus('lobby')
-        resetGame()
-    }
+        setStatus('lobby');
+        resetGame();
+    };
 
     // Spiel verlassen
     const leaveGame = () => {
-        setStatus('setup')
-        setPlayerName('')
-        setRoomId('')
-        setIsHost(false)
-        resetGame()
-
-        // Hier würde die Verbindung zum WebRTC-Server getrennt werden
-        console.log('Verlasse Multiplayer-Spiel')
-    }
+        setStatus('setup');
+        setPlayerName('');
+        setRoomId('');
+        setPlayerId('');
+        setIsHost(false);
+        resetGame();
+    };
 
     return (
         <div className="max-w-3xl mx-auto">
             <h1 className="text-3xl font-bold text-center mb-8">Multiplayer-Modus</h1>
 
+            {/* Debug toggle button */}
+            <div className="text-right mb-4">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowDebug(!showDebug)}
+                >
+                    {showDebug ? "Debug ausblenden" : "Debug anzeigen"}
+                </Button>
+            </div>
+
+            {/* Connection status */}
+            {!isConnected && (
+                <Card className="mb-4 p-4 bg-yellow-600/20 border border-yellow-600/40">
+                    <div className="flex items-center">
+                        <div className="text-lg mr-2">⚠️</div>
+                        <div>
+                            <p className="font-medium">Verbindung zum Server wird hergestellt...</p>
+                            <p className="text-sm text-gray-300">Falls die Verbindung nicht
+                                hergestellt werden kann, überprüfen Sie bitte Ihre
+                                Internetverbindung.</p>
+                        </div>
+                    </div>
+                </Card>
+            )}
+
+            {/* Connection error */}
+            {connectionError && (
+                <Card className="mb-4 p-4 bg-red-600/20 border border-red-600/40">
+                    <div className="flex items-center">
+                        <div className="text-lg mr-2">❌</div>
+                        <div>
+                            <p className="font-medium">Verbindungsfehler</p>
+                            <p className="text-sm">{connectionError}</p>
+                        </div>
+                    </div>
+                </Card>
+            )}
+
             {status === 'setup' && (
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
+                    initial={{opacity: 0, y: 20}}
+                    animate={{opacity: 1, y: 0}}
+                    transition={{duration: 0.3}}
                 >
-                    <MultiplayerSetup onConnect={connectToServer} />
+                    <MultiplayerSetup onConnect={connectToServer}/>
                 </motion.div>
             )}
 
             {status === 'lobby' && (
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
+                    initial={{opacity: 0, y: 20}}
+                    animate={{opacity: 1, y: 0}}
+                    transition={{duration: 0.3}}
                 >
                     <MultiplayerLobby
-                        playerName={playerName}
                         roomId={roomId}
+                        playerId={playerId}
                         isHost={isHost}
                         onStart={startGame}
                         onLeave={leaveGame}
@@ -110,19 +212,23 @@ const MultiplayerPage = () => {
 
             {status === 'playing' && (
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3 }}
+                    initial={{opacity: 0, scale: 0.95}}
+                    animate={{opacity: 1, scale: 1}}
+                    transition={{duration: 0.3}}
                 >
                     <MultiplayerGame
                         playerName={playerName}
                         roomId={roomId}
+                        playerId={playerId}
                         isHost={isHost}
                         onBackToLobby={backToLobby}
                         onLeave={leaveGame}
                     />
                 </motion.div>
             )}
+
+            {/* Debug component */}
+            {showDebug && <SocketDebug/>}
         </div>
     )
 }

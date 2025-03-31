@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-  <!-- Quadratischer Hintergrund mit abgerundeten Ecken -->
-  <rect width="200" height="200" rx="20" ry="20" fill="#262830"/>
-  
-  <!-- Text "BB" in der Mitte -->
-  <text x="100" y="115" font-family="Oswald, sans-serif" font-size="140" font-weight="bold" fill="#efefef" text-anchor="middle" dominant-baseline="middle">BB</text>
-</svg>

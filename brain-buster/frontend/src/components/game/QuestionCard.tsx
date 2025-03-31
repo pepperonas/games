@@ -7,10 +7,21 @@ import { useGame } from '../../store/GameContext'
 
 interface QuestionCardProps {
     question: Question
-    onNext: () => void
+    onNext?: () => void
+    onAnswer?: (answer: number) => void
+    isMultiplayer?: boolean
+    isHost?: boolean
+    waitingForOthers?: boolean
 }
 
-const QuestionCard = ({ question, onNext }: QuestionCardProps) => {
+const QuestionCard = ({
+                          question,
+                          onNext,
+                          onAnswer,
+                          isMultiplayer = false,
+                          isHost = false,
+                          waitingForOthers = false
+                      }: QuestionCardProps) => {
     const { state, answerQuestion, nextQuestion, endGame } = useGame()
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
     const [showResult, setShowResult] = useState(false)
@@ -18,7 +29,7 @@ const QuestionCard = ({ question, onNext }: QuestionCardProps) => {
 
     // Timer für die Frage
     useEffect(() => {
-        if (showResult) return
+        if (showResult || waitingForOthers) return
 
         const timer = setInterval(() => {
             setTimeLeft((prev) => {
@@ -33,23 +44,30 @@ const QuestionCard = ({ question, onNext }: QuestionCardProps) => {
         }, 1000)
 
         return () => clearInterval(timer)
-    }, [showResult])
+    }, [showResult, waitingForOthers])
 
     // Antwort auswählen
     const handleSelectAnswer = (index: number) => {
-        if (showResult) return
+        if (showResult || waitingForOthers) return
         setSelectedAnswer(index)
     }
 
     // Antwort überprüfen
     const handleCheckAnswer = (answer: number) => {
-        if (showResult) return
+        if (showResult || waitingForOthers) return
 
         // Antwort setzen (falls Timeout)
         if (answer >= 0) {
             setSelectedAnswer(answer)
         }
 
+        // For multiplayer mode, emit the answer to the server
+        if (isMultiplayer && onAnswer) {
+            onAnswer(selectedAnswer !== null ? selectedAnswer : -1);
+            return;
+        }
+
+        // Solo mode logic
         // Antwort an den GameContext senden
         answerQuestion(selectedAnswer !== null ? selectedAnswer : -1)
 
@@ -118,12 +136,12 @@ const QuestionCard = ({ question, onNext }: QuestionCardProps) => {
         <Card>
             <div className="mb-4">
                 <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium text-violet-300">
-            {question.category} • {question.difficulty === 'easy' ? 'Leicht' : question.difficulty === 'medium' ? 'Mittel' : 'Schwer'}
-          </span>
                     <span className="text-sm font-medium text-violet-300">
-            Zeit: {timeLeft}s
-          </span>
+                        {question.category} • {question.difficulty === 'easy' ? 'Leicht' : question.difficulty === 'medium' ? 'Mittel' : 'Schwer'}
+                    </span>
+                    <span className="text-sm font-medium text-violet-300">
+                        Zeit: {timeLeft}s
+                    </span>
                 </div>
 
                 {/* Timer-Balken */}
@@ -161,7 +179,7 @@ const QuestionCard = ({ question, onNext }: QuestionCardProps) => {
                                 initial={optionVariants.initial}
                                 animate={{ ...optionVariants.animate(index), ...optionState }}
                                 variants={optionVariants}
-                                whileHover={!showResult ? { scale: 1.01 } : {}}
+                                whileHover={!showResult && !waitingForOthers ? { scale: 1.01 } : {}}
                                 onClick={() => handleSelectAnswer(index)}
                             >
                                 <div className="flex items-center space-x-3">
@@ -176,13 +194,28 @@ const QuestionCard = ({ question, onNext }: QuestionCardProps) => {
                 </AnimatePresence>
             </div>
 
-            <div className="flex justify-end">
-                <Button
-                    onClick={() => handleCheckAnswer(selectedAnswer || 0)}
-                    disabled={selectedAnswer === null || showResult}
-                >
-                    Antwort überprüfen
-                </Button>
+            <div className="flex justify-between">
+                {waitingForOthers ? (
+                    <div className="w-full text-center text-violet-300">
+                        Warte auf andere Spieler...
+                    </div>
+                ) : isMultiplayer && isHost && showResult ? (
+                    <Button
+                        className="ml-auto"
+                        onClick={onNext}
+                        disabled={!showResult}
+                    >
+                        Nächste Frage
+                    </Button>
+                ) : (
+                    <Button
+                        className="ml-auto"
+                        onClick={() => handleCheckAnswer(selectedAnswer || 0)}
+                        disabled={selectedAnswer === null || showResult || waitingForOthers}
+                    >
+                        Antwort überprüfen
+                    </Button>
+                )}
             </div>
         </Card>
     )

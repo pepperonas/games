@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import Card from '../ui/Card'
 import Button from '../ui/Button'
+import { useSocket } from '../../store/SocketContext'
 
 interface MultiplayerSetupProps {
     onConnect: (playerName: string, roomId: string, isHost: boolean) => void
@@ -11,6 +12,16 @@ const MultiplayerSetup = ({ onConnect }: MultiplayerSetupProps) => {
     const [playerName, setPlayerName] = useState('')
     const [roomId, setRoomId] = useState('')
     const [setupMode, setSetupMode] = useState<'create' | 'join' | null>(null)
+    const [isConnecting, setIsConnecting] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+    const { socket, isConnected, connect } = useSocket()
+
+    // Connect to the socket server when the component mounts
+    useEffect(() => {
+        if (!isConnected) {
+            connect();
+        }
+    }, [connect, isConnected]);
 
     // Spielraum erstellen
     const handleCreateRoom = () => {
@@ -26,17 +37,42 @@ const MultiplayerSetup = ({ onConnect }: MultiplayerSetupProps) => {
 
     // Verbindung herstellen
     const handleConnect = () => {
+        if (!isConnected) {
+            setError('Nicht mit dem Server verbunden. Bitte versuchen Sie es später erneut.');
+            return;
+        }
+
         if (!playerName.trim()) {
-            alert('Bitte gib deinen Namen ein')
-            return
+            setError('Bitte gib deinen Namen ein');
+            return;
         }
 
         if (setupMode === 'join' && !roomId.trim()) {
-            alert('Bitte gib eine Raum-ID ein')
-            return
+            setError('Bitte gib eine Raum-ID ein');
+            return;
         }
 
-        onConnect(playerName, roomId, setupMode === 'create')
+        setIsConnecting(true);
+        setError(null);
+
+        // Listen for the room_joined event
+        socket?.once('room_joined', (data) => {
+            setIsConnecting(false);
+            onConnect(playerName, data.roomId, data.isHost);
+        });
+
+        // Listen for errors
+        socket?.once('error', (data) => {
+            setIsConnecting(false);
+            setError(data.message);
+        });
+
+        // Join the room
+        socket?.emit('join_room', {
+            roomId,
+            playerName,
+            isHost: setupMode === 'create'
+        });
     }
 
     return (
@@ -71,6 +107,7 @@ const MultiplayerSetup = ({ onConnect }: MultiplayerSetupProps) => {
                             onChange={(e) => setPlayerName(e.target.value)}
                             className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
                             placeholder="Gib deinen Namen ein"
+                            disabled={isConnecting}
                         />
                     </div>
 
@@ -86,6 +123,7 @@ const MultiplayerSetup = ({ onConnect }: MultiplayerSetupProps) => {
                                 onChange={(e) => setRoomId(e.target.value)}
                                 className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
                                 placeholder="Gib die Raum-ID ein"
+                                disabled={isConnecting}
                             />
                         </div>
                     ) : (
@@ -100,6 +138,7 @@ const MultiplayerSetup = ({ onConnect }: MultiplayerSetupProps) => {
                                     value={roomId}
                                     readOnly
                                     className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-l-lg focus:outline-none"
+                                    disabled={isConnecting}
                                 />
                                 <button
                                     onClick={() => {
@@ -108,6 +147,7 @@ const MultiplayerSetup = ({ onConnect }: MultiplayerSetupProps) => {
                                     }}
                                     className="bg-violet-600 px-4 rounded-r-lg hover:bg-violet-700"
                                     aria-label="Raum-ID kopieren"
+                                    disabled={isConnecting}
                                 >
                                     📋
                                 </button>
@@ -115,12 +155,26 @@ const MultiplayerSetup = ({ onConnect }: MultiplayerSetupProps) => {
                         </div>
                     )}
 
+                    {error && (
+                        <div className="p-3 bg-red-500/20 border border-red-500/40 rounded-lg text-red-300 text-sm">
+                            {error}
+                        </div>
+                    )}
+
                     <div className="flex justify-between mt-6">
-                        <Button variant="outline" onClick={() => setSetupMode(null)}>
+                        <Button 
+                            variant="outline" 
+                            onClick={() => setSetupMode(null)}
+                            disabled={isConnecting}
+                        >
                             Zurück
                         </Button>
-                        <Button variant="primary" onClick={handleConnect}>
-                            Verbinden
+                        <Button 
+                            variant="primary" 
+                            onClick={handleConnect}
+                            disabled={isConnecting}
+                        >
+                            {isConnecting ? 'Verbinde...' : 'Verbinden'}
                         </Button>
                     </div>
                 </div>
