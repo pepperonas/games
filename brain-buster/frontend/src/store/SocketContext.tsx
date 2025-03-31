@@ -59,16 +59,17 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({children}) =>
 
         try {
             const newSocket = io(socketUrl, {
-                path: '/games/brain-buster/api/socket.io/', // Make sure this matches Nginx proxy_pass path
-                transports: ['websocket', 'polling'], // Enable both for better compatibility
+                path: '/games/brain-buster/api/socket.io/',
+                transports: ['websocket', 'polling'], // Stelle sicher, dass beide verfügbar sind
                 reconnection: true,
                 reconnectionAttempts: 5,
                 reconnectionDelay: 2000,
                 timeout: 10000,
+                forceNew: true, // Erzwinge eine neue Verbindung
                 query: {
-                    t: Date.now().toString() // Prevent caching
-                },
-                forceNew: true
+                    clientId: Math.random().toString(36).substring(2, 15), // Eindeutige Client-ID
+                    t: Date.now().toString() // Verhindere Caching
+                }
             });
 
             // Enhanced connection event handlers

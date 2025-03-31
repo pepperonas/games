@@ -172,7 +172,7 @@ io.on('connection', (socket) => {
     });
 
     // Start game handler (host only)
-    socket.on('start_game', ({roomId, questions}) => {
+    socket.on('start_game', ({roomId, questions}: {roomId: string, questions: Question[]}) => {
         console.log(`Attempting to start game in room ${roomId} with ${questions?.length || 0} questions`);
 
         const room = roomManager.getRoom(roomId);
@@ -196,50 +196,67 @@ io.on('connection', (socket) => {
             return;
         }
 
-        // WICHTIG: Stark vereinfachte Serialisierung
         try {
-            // Extrahiere nur die wichtigsten Daten, um Größe zu reduzieren
+            // Simplify questions to reduce payload size
             const simplifiedQuestions = questions.map((q: Question, i: number) => ({
                 id: `q-${i}`,
                 question: q.question,
                 options: q.options,
                 correctAnswer: q.correctAnswer,
-                category: q.category,
-                difficulty: q.difficulty
+                category: q.category || 'General',
+                difficulty: q.difficulty || 'medium'
             }));
 
-            // Start the game
-            room.startGame(simplifiedQuestions);
-            console.log(`Game started in room ${roomId} with ${simplifiedQuestions.length} simplified questions`);
+            // Log question content for debugging
+            console.log(`Prepared ${simplifiedQuestions.length} questions for game in room ${roomId}`);
 
-            // Sende die Fragen in kleineren Batches, um Übertragungsprobleme zu vermeiden
-            // Zuerst an alle
-            io.to(roomId).emit('game_started', {
-                questions: simplifiedQuestions,
-                players: room.getPlayerList(),
-                startTime: Date.now()
+            // First notify all players with a preparation message
+            io.to(roomId).emit('game_preparing', {
+                roomId,
+                questionCount: simplifiedQuestions.length,
+                timestamp: Date.now()
             });
 
-            // Dann an jeden einzeln
-            const socketsInRoom = io.sockets.adapter.rooms.get(roomId) || new Set();
-            for (const socketId of socketsInRoom) {
-                try {
-                    const clientSocket = io.sockets.sockets.get(socketId);
-                    if (clientSocket) {
-                        // Kurze Verzögerung zwischen Sendevorgängen
-                        setTimeout(() => {
-                            console.log(`Sending individual game_started to ${socketId.substring(0, 6)}...`);
-                            clientSocket.emit('game_started', {
-                                questions: simplifiedQuestions,
-                                players: room.getPlayerList(),
-                                startTime: Date.now() + 500 // Leicht verzögerter Start
-                            });
-                        }, 200); // 200ms Verzögerung
-                    }
-                } catch (error) {
-                    console.error(`Error sending to client ${socketId}:`, error);
+            // Short delay before starting the game to ensure clients are ready
+            setTimeout(() => {
+                // Start the game
+                room.startGame(simplifiedQuestions);
+                console.log(`Game started in room ${roomId} with ${simplifiedQuestions.length} questions`);
+
+                // Send game_started to all players at once
+                io.to(roomId).emit('game_started', {
+                    questions: simplifiedQuestions,
+                    players: room.getPlayerList(),
+                    startTime: Date.now() + 1000 // slight delay to ensure clients are ready
+                });
+
+                // Then individually to ensure reliable delivery
+                const socketsInRoom = io.sockets.adapter.rooms.get(roomId) || new Set();
+                let clientIndex = 0;
+
+                // Process each client with a small delay between them
+                for (const socketId of socketsInRoom) {
+                    clientIndex++;
+                    // Use setTimeout with increasing delays for each client to prevent network congestion
+                    setTimeout(() => {
+                        try {
+                            const clientSocket = io.sockets.sockets.get(socketId);
+                            if (clientSocket) {
+                                console.log(`Sending individual game_started to client ${clientIndex} (${socketId.substring(0, 6)}...)`);
+                                clientSocket.emit('game_started', {
+                                    questions: simplifiedQuestions,
+                                    players: room.getPlayerList(),
+                                    startTime: Date.now() + 1500, // Additional delay for client processing
+                                    reliable: true // Flag to indicate this is the reliable individual transmission
+                                });
+                            }
+                        } catch (error) {
+                            console.error(`Error sending to client ${socketId}:`, error);
+                        }
+                    }, 300 * clientIndex); // Stagger the sends by 300ms per client
                 }
-            }
+            }, 1000); // Wait 1 second before starting game
+
         } catch (error) {
             console.error(`Error starting game in room ${roomId}:`, error);
             socket.emit('error', {message: 'Failed to process questions'});

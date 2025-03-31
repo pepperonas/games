@@ -18,6 +18,7 @@ interface GameStartedData {
     players: any[];
     startTime: number;
     isReconnect?: boolean;
+    reliable?: boolean;
 }
 
 interface AllPlayersAnsweredData {
@@ -97,51 +98,59 @@ const MultiplayerGame = ({
 
         console.log("Setting up game event listeners in MultiplayerGame");
 
-        // CRITICALLY IMPORTANT: Handle game_started event
+        // CRITICALLY IMPORTANT: Handle game_started event with improved reliability
         const handleGameStarted = (data: GameStartedData) => {
-            console.log("🎮 Game started event received:", data);
+            console.log("🎮 Game started event received:",
+                data?.reliable ? "RELIABLE TRANSMISSION" : "BROADCAST TRANSMISSION");
 
-            // Defensive validation
+            // More detailed logging
+            console.log(`Questions received: ${data?.questions?.length || 0}`);
+            console.log(`Start time: ${new Date(data?.startTime || Date.now()).toISOString()}`);
+
+            // Defensive validation with better feedback
             if (!data || !data.questions || !Array.isArray(data.questions) || data.questions.length === 0) {
                 console.error("❌ Invalid data in game_started event:", data);
+                setErrorMsg("Ungültige Spielstart-Daten empfangen. Versuche Neustart...");
 
-                // Versuche aus dem lokalen Speicher zu laden
-                const savedQuestions = localStorage.getItem('lastGameQuestions');
-                if (savedQuestions) {
-                    try {
-                        const parsedQuestions = JSON.parse(savedQuestions);
-                        if (Array.isArray(parsedQuestions) && parsedQuestions.length > 0) {
-                            console.log("🆘 Using saved questions as fallback:", parsedQuestions.length);
-                            setQuestions(parsedQuestions);
-                            setCurrentQuestionIndex(0);
-                            setInitComplete(true);
-                            setErrorMsg(null);
-                            startGame('multiplayer', parsedQuestions);
-                            return;
-                        }
-                    } catch (error) {
-                        console.error("Failed to parse saved questions:", error);
+                // Try to recover by requesting game status again
+                setTimeout(() => {
+                    if (socket && roomId) {
+                        console.log("Attempting recovery by requesting game status");
+                        socket.emit('check_game_status', { roomId, playerId });
                     }
-                }
+                }, 2000);
 
-                setErrorMsg("Ungültige Spielstart-Daten empfangen. Bitte Spiel neu starten.");
+                return;
+            }
+
+            // Prevent duplicate initializations
+            if (initComplete && questions.length > 0) {
+                console.log("⚠️ Game already initialized, ignoring duplicate game_started event");
                 return;
             }
 
             console.log(`✅ Successfully received ${data.questions.length} questions`);
 
-            // Speichere die Fragen im lokalen Speicher für Notfälle
+            // Backup questions for potential recovery
             localStorage.setItem('lastGameQuestions', JSON.stringify(data.questions));
+            localStorage.setItem('lastGameTimestamp', Date.now().toString());
 
-            // Ensure we set these in the correct order
+            // Set game state - order matters!
             setQuestions(data.questions);
             setCurrentQuestionIndex(0);
             setInitComplete(true);
             setErrorMsg(null);
 
-            // Start the game in context
+            // Initialize game in context
             startGame('multiplayer', data.questions);
         };
+
+        // Also handle game_preparing event to set up expectations
+        socket.on('game_preparing', (data) => {
+            console.log("Game is being prepared", data);
+            // Show preparation state to user
+            setErrorMsg("Spiel wird vorbereitet...");
+        });
 
         // Function for other events
         const setupOtherEventListeners = () => {
@@ -234,13 +243,14 @@ const MultiplayerGame = ({
         // Try to reconnect to an existing game if we're returning to this component
         if (!initComplete && questions.length === 0) {
             console.log("Checking for existing game in room:", roomId);
-            socket.emit('check_game_status', { roomId });
+            socket.emit('check_game_status', { roomId, playerId });
         }
 
         // Cleanup function
         return () => {
             console.log("Cleaning up all game event listeners");
             socket.off('game_started', handleGameStarted);
+            socket.off('game_preparing');
             socket.off('player_answered');
             socket.off('all_players_answered');
             socket.off('move_to_next_question');
@@ -248,6 +258,59 @@ const MultiplayerGame = ({
             socket.off('error');
         };
     }, [socket, startGame, endGame, playerId, roomId, isHost, questions.length, initComplete]);
+
+    // Add this additional effect to handle recovery after a short timeout
+    useEffect(() => {
+        if (!socket || initComplete || questions.length > 0) {
+            return; // Don't need recovery
+        }
+
+        // Set a timeout to check if game initialization failed
+        const recoveryTimeout = setTimeout(() => {
+            if (!initComplete && questions.length === 0) {
+                console.log("Game not initialized after timeout, attempting recovery");
+
+                // Try to recover by requesting game status
+                if (socket && roomId) {
+                    socket.emit('check_game_status', { roomId, playerId });
+
+                    // Also try debug request for more info
+                    socket.emit('debug_request', {
+                        roomId,
+                        playerId,
+                        clientState: {
+                            initComplete,
+                            questionsLoaded: questions.length > 0
+                        }
+                    });
+                }
+
+                // Check if we have backup questions
+                const savedQuestions = localStorage.getItem('lastGameQuestions');
+                const timestamp = localStorage.getItem('lastGameTimestamp');
+
+                // Only use saved questions if they're recent (within last 5 minutes)
+                const isRecent = timestamp && (Date.now() - parseInt(timestamp)) < 5 * 60 * 1000;
+
+                if (savedQuestions && isRecent) {
+                    try {
+                        const parsedQuestions = JSON.parse(savedQuestions);
+                        if (Array.isArray(parsedQuestions) && parsedQuestions.length > 0) {
+                            console.log("🚨 Using backup questions as emergency recovery", parsedQuestions.length);
+                            setQuestions(parsedQuestions);
+                            setCurrentQuestionIndex(0);
+                            setInitComplete(true);
+                            startGame('multiplayer', parsedQuestions);
+                        }
+                    } catch (error) {
+                        console.error("Failed to parse backup questions", error);
+                    }
+                }
+            }
+        }, 8000); // Wait 8 seconds for game to initialize
+
+        return () => clearTimeout(recoveryTimeout);
+    }, [socket, roomId, playerId, initComplete, questions.length, startGame]);
 
     // Effect to handle auto-timeout for ending the game
     useEffect(() => {
@@ -306,7 +369,7 @@ const MultiplayerGame = ({
         onLeave();
     };
 
-    // Handle force refreshing game state
+// Handle force refreshing game state
     const handleForceRefresh = () => {
         if (!socket) return;
 

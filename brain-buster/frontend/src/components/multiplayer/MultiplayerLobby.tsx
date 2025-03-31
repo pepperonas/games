@@ -84,12 +84,15 @@ const MultiplayerLobby = ({
         if (socket && isHost) {
             console.log("Host starting game with simplified questions");
 
-            // Erstelle eine stark vereinfachte Version der Fragen
+            // Display loading state to the user
+            setError("Spiel wird gestartet... Bitte warten.");
+
+            // Create a simplified version of the questions
             const simplifiedQuestions = [...state.questions]
                 .sort(() => Math.random() - 0.5)
-                .slice(0, 5) // Nur 5 Fragen für bessere Übertragung
+                .slice(0, 5) // Only 5 questions for better transmission
                 .map((q, index) => ({
-                    id: `simple-question-${index}`,
+                    id: `question-${index}`,
                     question: q.question,
                     options: q.options,
                     correctAnswer: q.correctAnswer,
@@ -97,28 +100,51 @@ const MultiplayerLobby = ({
                     difficulty: q.difficulty
                 }));
 
-            // Speichere diese Fragen lokal, um sie später direkt zu verwenden
-            localStorage.setItem('lastGameQuestions', JSON.stringify(simplifiedQuestions));
+            // Save questions locally for backup/recovery
+            try {
+                localStorage.setItem('lastGameQuestions', JSON.stringify(simplifiedQuestions));
+                localStorage.setItem('lastGameTimestamp', Date.now().toString());
+            } catch (e) {
+                console.error("Failed to save questions to localStorage", e);
+            }
 
-            // Sende die Fragen mit einem verzögerten Mechanismus
-            // Zuerst senden wir nur die Anzahl und IDs
+            // First signal preparation
             socket.emit('prepare_game', {
                 roomId,
                 questionCount: simplifiedQuestions.length
             });
 
-            // Nach kurzer Verzögerung senden wir die vollständigen Fragen
+            // Then wait a moment before sending the full questions
             setTimeout(() => {
+                // Send the game start command with questions
                 socket.emit('start_game', {
                     roomId,
                     questions: simplifiedQuestions
                 });
 
-                // Nach noch einer kurzen Verzögerung rufen wir den Callback auf
-                setTimeout(() => {
+                // Set a timeout for the callback
+                const startGameTimeout = setTimeout(() => {
+                    // Call the callback after a brief delay
                     onStart();
-                }, 300);
-            }, 300);
+                }, 1500);
+
+                // Also set a safety net: if game doesn't start properly,
+                // we'll retry sending the start command
+                const backupTimeout = setTimeout(() => {
+                    console.log("Safety check: Re-sending start_game command");
+                    socket.emit('start_game', {
+                        roomId,
+                        questions: simplifiedQuestions,
+                        isRetry: true
+                    });
+                }, 5000);
+
+                // Clean up timeouts if component unmounts
+                return () => {
+                    clearTimeout(startGameTimeout);
+                    clearTimeout(backupTimeout);
+                };
+            }, 1000);
         }
     };
 
