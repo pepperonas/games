@@ -1,345 +1,275 @@
-// server.js - Hauptdatei des BrainBuster-Backends
+import express from 'express';
+import http from 'http';
+import {Server} from 'socket.io';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import {v4 as uuidv4} from 'uuid';
+import {RoomManager} from './models/RoomManager';
+import {Player} from './models/Player';
 
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
-const cors = require('cors');
-const { v4: uuidv4 } = require('uuid');
+// Load environment variables
+dotenv.config();
 
-// Logger-Funktion für bessere Fehlersuche
-const logger = (level, message) => {
-    const timestamp = new Date().toISOString();
-    console.log(`[${level}] ${timestamp}: ${message}`);
-};
-
-// Environment-Variablen
-const PORT = process.env.PORT || 5000;
-const NODE_ENV = process.env.NODE_ENV || 'development';
-
-// Express-App initialisieren
+// Initialize Express app
 const app = express();
-app.use(cors());
+const PORT = process.env.PORT || 5000;
+
+// Configure middleware
+app.use(cors({
+    origin: process.env.CORS_ORIGIN || '*',
+    methods: ['GET', 'POST'],
+    credentials: true
+}));
 app.use(express.json());
 
-// Server erstellen
+// Create HTTP server
 const server = http.createServer(app);
 
-// Socket.io mit CORS-Einstellungen initialisieren
-const io = socketIo(server, {
+// Initialize Socket.io server with CORS configuration
+const io = new Server(server, {
     cors: {
-        origin: "*",
-        methods: ["GET", "POST"],
+        origin: process.env.CORS_ORIGIN || '*',
+        methods: ['GET', 'POST'],
         credentials: true
     },
-    transports: ['websocket', 'polling'],
-    pingTimeout: 60000,
-    pingInterval: 25000,
-    connectTimeout: 30000
+    path: '/socket.io'
 });
 
-// Status-Endpunkt für Healthchecks
+// Initialize room manager
+const roomManager = new RoomManager();
+
+// Root endpoint - for testing connection
 app.get('/', (req, res) => {
-    res.json({ status: 'ok', environment: NODE_ENV });
+    res.status(200).json({
+        message: 'BrainBuster Multiplayer API is running',
+        socketPath: '/socket.io',
+        version: '1.0.0'
+    });
 });
 
-// Spieldaten-Speicher
-const rooms = {};
-const userSocketMap = {}; // Zuordnung von Benutzernamen zu Socket-IDs
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.status(200).json({status: 'ok', message: 'Server is running'});
+});
 
-// Hilfsfunktionen
-const generateRoomCode = () => {
-    // 6-stelliger alphanumerischer Code
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < 6; i++) {
-        result += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    return result;
-};
-
-const cleanupPlayer = (socketId) => {
-    // Finde alle Räume, in denen der Spieler ist
-    Object.keys(rooms).forEach(roomCode => {
-        const room = rooms[roomCode];
-        const playerIndex = room.players.findIndex(p => p.id === socketId);
-
-        if (playerIndex !== -1) {
-            const player = room.players[playerIndex];
-            logger('INFO', `Player ${player.name} left room ${roomCode}`);
-
-            // Spieler aus Raum entfernen
-            room.players.splice(playerIndex, 1);
-
-            // Wenn keine Spieler übrig sind, Raum löschen
-            if (room.players.length === 0) {
-                logger('INFO', `Room ${roomCode} is empty, deleting`);
-                delete rooms[roomCode];
-            }
-            // Sonst Host-Status aktualisieren, falls nötig
-            else if (player.isHost && room.players.length > 0) {
-                logger('INFO', `Host left room ${roomCode}, assigning new host`);
-                room.players[0].isHost = true;
-                io.to(roomCode).emit('roomUpdated', room);
-                io.to(room.players[0].id).emit('hostStatus', true);
-            }
-
-            // Anderen Spielern im Raum Bescheid geben
-            io.to(roomCode).emit('playerLeft', socketId, room);
-        }
-    });
-};
-
-// Socket.io Event-Handler
+// Socket.io connection handler
 io.on('connection', (socket) => {
-    logger('INFO', `New connection: ${socket.id}`);
+    console.log(`New connection: ${socket.id}`);
 
-    // Verbindungsabbruch behandeln
-    socket.on('disconnect', (reason) => {
-        logger('INFO', `Disconnected: ${socket.id}, reason: ${reason}`);
-        cleanupPlayer(socket.id);
+    // Generate a unique player ID
+    const playerId = uuidv4();
 
-        // Aus userSocketMap entfernen
-        Object.keys(userSocketMap).forEach(username => {
-            if (userSocketMap[username] === socket.id) {
-                delete userSocketMap[username];
+    // Join room handler
+    socket.on('join_room', ({roomId, playerName, isHost}) => {
+        console.log(`Player ${playerName} joining room ${roomId}`);
+
+        // Create player object
+        const player = new Player(playerId, socket.id, playerName, isHost);
+
+        // Check if room exists, create if not
+        if (!roomManager.roomExists(roomId)) {
+            if (!isHost) {
+                // If player is not host but room doesn't exist, error
+                socket.emit('error', {message: 'Room does not exist'});
+                return;
             }
+            roomManager.createRoom(roomId);
+        }
+
+        // Add player to room
+        const room = roomManager.getRoom(roomId);
+        if (!room) {
+            socket.emit('error', {message: 'Error joining room'});
+            return;
+        }
+
+        room.addPlayer(player);
+
+        // Join socket room
+        socket.join(roomId);
+
+        // Notify player joined successfully
+        socket.emit('room_joined', {
+            roomId,
+            playerId,
+            isHost
+        });
+
+        // Notify all players in room about the updated player list
+        io.to(roomId).emit('player_list_updated', {
+            players: room.getPlayerList()
         });
     });
 
-    // Raum erstellen
-    socket.on('createRoom', (playerName) => {
-        logger('INFO', `Creating room for player: ${playerName}`);
-
-        // Prüfen ob der Spielername bereits in einem Raum ist
-        if (userSocketMap[playerName]) {
-            const existingSocketId = userSocketMap[playerName];
-            // Wenn derselbe Spieler eine neue Verbindung herstellt
-            if (existingSocketId !== socket.id) {
-                logger('INFO', `Player ${playerName} already exists with socket ${existingSocketId}, updating to ${socket.id}`);
-                // Alte Socket-Verbindung aufräumen
-                const oldSocket = io.sockets.sockets.get(existingSocketId);
-                if (oldSocket) {
-                    oldSocket.disconnect();
-                }
-            }
-        }
-
-        // Spieler zur Mapping hinzufügen
-        userSocketMap[playerName] = socket.id;
-
-        const roomCode = generateRoomCode();
-        rooms[roomCode] = {
-            players: [{
-                id: socket.id,
-                name: playerName,
-                isHost: true,
-                isReady: false
-            }],
-            status: 'waiting',
-            gameData: null,
-            createdAt: new Date().toISOString()
-        };
-
-        socket.join(roomCode);
-        socket.roomCode = roomCode;
-        logger('INFO', `Room ${roomCode} created by ${playerName}`);
-
-        // Raum-Informationen an den Client senden
-        socket.emit('roomCreated', roomCode, rooms[roomCode]);
-        socket.emit('hostStatus', true);
-    });
-
-    // Raum beitreten
-    socket.on('joinRoom', (roomCode, playerName) => {
-        logger('INFO', `Player ${playerName} trying to join room ${roomCode}`);
-
-        // Prüfen, ob der Raum existiert
-        if (!rooms[roomCode]) {
-            logger('ERROR', `Room ${roomCode} does not exist`);
-            socket.emit('error', 'Raum existiert nicht');
+    // Player ready state change handler
+    socket.on('player_ready', ({roomId, playerId, isReady}) => {
+        const room = roomManager.getRoom(roomId);
+        if (!room) {
+            socket.emit('error', {message: 'Room not found'});
             return;
         }
 
-        // Prüfen, ob der Spielername bereits in der Mapping existiert
-        if (userSocketMap[playerName]) {
-            const existingSocketId = userSocketMap[playerName];
-            // Wenn derselbe Spieler eine neue Verbindung herstellt
-            if (existingSocketId !== socket.id) {
-                logger('INFO', `Player ${playerName} already exists with socket ${existingSocketId}, updating to ${socket.id}`);
+        room.setPlayerReady(playerId, isReady);
 
-                // Überprüfen, ob der Spieler bereits in diesem Raum ist
-                const existingPlayerInRoom = rooms[roomCode].players.find(p => p.id === existingSocketId);
-                if (existingPlayerInRoom) {
-                    // Socket-ID aktualisieren
-                    existingPlayerInRoom.id = socket.id;
-
-                    // Alte Socket-Verbindung aufräumen
-                    const oldSocket = io.sockets.sockets.get(existingSocketId);
-                    if (oldSocket) {
-                        oldSocket.disconnect();
-                    }
-
-                    // Socket-Map aktualisieren
-                    userSocketMap[playerName] = socket.id;
-
-                    // Socket dem Raum beitreten lassen
-                    socket.join(roomCode);
-                    socket.roomCode = roomCode;
-
-                    // Raum-Update an alle senden
-                    io.to(roomCode).emit('roomUpdated', rooms[roomCode]);
-
-                    // Host-Status setzen, falls nötig
-                    if (existingPlayerInRoom.isHost) {
-                        socket.emit('hostStatus', true);
-                    }
-
-                    logger('INFO', `Updated player ${playerName} socket in room ${roomCode}`);
-                    return;
-                }
-            }
-        }
-
-        // Spieler zur Mapping hinzufügen
-        userSocketMap[playerName] = socket.id;
-
-        // Prüfen, ob der Spielername bereits im Raum ist
-        const playerExists = rooms[roomCode].players.some(p => p.name === playerName);
-        if (playerExists) {
-            logger('ERROR', `Player name ${playerName} already exists in room ${roomCode}`);
-            socket.emit('error', 'Spielername bereits im Raum vergeben');
-            return;
-        }
-
-        // Prüfen, ob das Spiel bereits läuft
-        if (rooms[roomCode].status === 'playing') {
-            logger('ERROR', `Game in room ${roomCode} already in progress`);
-            socket.emit('error', 'Spiel bereits im Gange');
-            return;
-        }
-
-        // Spieler zum Raum hinzufügen
-        rooms[roomCode].players.push({
-            id: socket.id,
-            name: playerName,
-            isHost: false,
-            isReady: false
+        // Notify all players in room about the updated player list
+        io.to(roomId).emit('player_list_updated', {
+            players: room.getPlayerList()
         });
-
-        socket.join(roomCode);
-        socket.roomCode = roomCode;
-        logger('INFO', `Player ${playerName} joined room ${roomCode}`);
-
-        // Raum-Informationen an alle Spieler senden
-        io.to(roomCode).emit('roomUpdated', rooms[roomCode]);
-        socket.emit('roomJoined', roomCode, rooms[roomCode]);
     });
 
-    // Spieler-Status ändern (bereit/nicht bereit)
-    socket.on('toggleReady', (roomCode) => {
-        logger('INFO', `Toggle ready status in room ${roomCode}`);
-
-        // Prüfen, ob der Raum existiert
-        if (!rooms[roomCode]) {
-            logger('ERROR', `Room ${roomCode} does not exist`);
-            socket.emit('error', 'Raum existiert nicht');
+    // Start game handler (host only)
+    socket.on('start_game', ({roomId, questions}) => {
+        const room = roomManager.getRoom(roomId);
+        if (!room) {
+            socket.emit('error', {message: 'Room not found'});
             return;
         }
 
-        // Spieler im Raum finden
-        const player = rooms[roomCode].players.find(p => p.id === socket.id);
+        // Check if all players are ready
+        if (!room.allPlayersReady()) {
+            socket.emit('error', {message: 'Not all players are ready'});
+            return;
+        }
+
+        // Start the game
+        room.startGame(questions);
+
+        // Notify all players that the game has started
+        io.to(roomId).emit('game_started', {
+            questions: room.getQuestions()
+        });
+    });
+
+    // Answer question handler
+    socket.on('answer_question', ({roomId, playerId, questionIndex, answer}) => {
+        const room = roomManager.getRoom(roomId);
+        if (!room) {
+            socket.emit('error', {message: 'Room not found'});
+            return;
+        }
+
+        // Record player's answer
+        const isCorrect = room.recordAnswer(playerId, questionIndex, answer);
+        const player = room.getPlayer(playerId);
         if (!player) {
-            logger('ERROR', `Player with socket ${socket.id} not found in room ${roomCode}`);
-            socket.emit('error', 'Spieler nicht im Raum');
+            socket.emit('error', {message: 'Player not found'});
             return;
         }
 
-        // Bereit-Status umschalten
-        player.isReady = !player.isReady;
-        logger('INFO', `Player ${player.name} is now ${player.isReady ? 'ready' : 'not ready'}`);
+        // Update player's score
+        const newScore = player.getScore();
 
-        // Status an alle Spieler senden
-        io.to(roomCode).emit('roomUpdated', rooms[roomCode]);
+        // Notify all players about the answer
+        io.to(roomId).emit('player_answered', {
+            playerId,
+            playerName: player.getName(),
+            questionIndex,
+            isCorrect,
+            newScore
+        });
+
+        // Check if all players have answered
+        if (room.allPlayersAnswered(questionIndex)) {
+            io.to(roomId).emit('all_players_answered', {
+                questionIndex,
+                playerScores: room.getPlayerScores()
+            });
+        }
     });
 
-    // Spiel starten
-    socket.on('startGame', (roomCode) => {
-        logger('INFO', `Attempt to start game in room ${roomCode}`);
-
-        // Prüfen, ob der Raum existiert
-        if (!rooms[roomCode]) {
-            logger('ERROR', `Room ${roomCode} does not exist`);
-            socket.emit('error', 'Raum existiert nicht');
+    // Next question handler
+    socket.on('next_question', ({roomId, questionIndex}) => {
+        const room = roomManager.getRoom(roomId);
+        if (!room) {
+            socket.emit('error', {message: 'Room not found'});
             return;
         }
 
-        // Prüfen, ob der Spieler der Host ist
-        const player = rooms[roomCode].players.find(p => p.id === socket.id);
-        if (!player || !player.isHost) {
-            logger('ERROR', `Player with socket ${socket.id} is not the host of room ${roomCode}`);
-            socket.emit('error', 'Nur der Host kann das Spiel starten');
-            return;
-        }
+        // Reset answers for the next question
+        room.resetAnswersForQuestion(questionIndex + 1);
 
-        // Prüfen, ob alle Spieler bereit sind (außer dem Host)
-        const allReady = rooms[roomCode].players.every(p => p.isHost || p.isReady);
-        if (!allReady) {
-            logger('ERROR', `Not all players are ready in room ${roomCode}`);
-            socket.emit('error', 'Nicht alle Spieler sind bereit');
-            return;
-        }
-
-        // Mindestanzahl an Spielern prüfen
-        if (rooms[roomCode].players.length < 2) {
-            logger('ERROR', `Not enough players in room ${roomCode}`);
-            socket.emit('error', 'Mindestens 2 Spieler benötigt');
-            return;
-        }
-
-        // Spiel initialisieren
-        rooms[roomCode].status = 'playing';
-        rooms[roomCode].gameData = {
-            currentRound: 1,
-            maxRounds: 10,
-            startTime: new Date().toISOString(),
-            questions: [], // Hier würden die Fragen generiert
-            scores: rooms[roomCode].players.map(p => ({
-                playerId: p.id,
-                playerName: p.name,
-                score: 0
-            }))
-        };
-
-        logger('INFO', `Game started in room ${roomCode}`);
-
-        // Spielstart an alle Spieler senden
-        io.to(roomCode).emit('gameStarted', rooms[roomCode]);
+        // Notify all players to move to the next question
+        io.to(roomId).emit('move_to_next_question', {
+            nextQuestionIndex: questionIndex + 1
+        });
     });
 
-    // Spiel verlassen
-    socket.on('leaveRoom', () => {
-        logger('INFO', `Player with socket ${socket.id} leaving room`);
-        cleanupPlayer(socket.id);
+    // End game handler
+    socket.on('end_game', ({roomId}) => {
+        const room = roomManager.getRoom(roomId);
+        if (!room) {
+            socket.emit('error', {message: 'Room not found'});
+            return;
+        }
+
+        // Calculate results
+        const results = room.calculateResults();
+
+        // Notify all players about the final results
+        io.to(roomId).emit('game_ended', {
+            results
+        });
+
+        // Mark the game as ended
+        room.endGame();
     });
 
-    // Spiel-spezifische Events würden hier folgen
-    // ...
+    // Leave room handler
+    socket.on('leave_room', ({roomId, playerId}) => {
+        const room = roomManager.getRoom(roomId);
+        if (!room) return;
+
+        // Remove player from room
+        room.removePlayer(playerId);
+
+        // Leave socket room
+        socket.leave(roomId);
+
+        // If room is empty, remove it
+        if (room.isEmpty()) {
+            roomManager.removeRoom(roomId);
+        } else {
+            // If the host left, assign a new host
+            if (room.needsNewHost()) {
+                room.assignNewHost();
+            }
+
+            // Notify remaining players about the updated player list
+            io.to(roomId).emit('player_list_updated', {
+                players: room.getPlayerList()
+            });
+        }
+    });
+
+    // Disconnect handler
+    socket.on('disconnect', () => {
+        console.log(`Connection disconnected: ${socket.id}`);
+
+        // Find player by socket ID
+        const {room, player} = roomManager.findPlayerBySocketId(socket.id);
+        if (room && player) {
+            // Remove player from room
+            room.removePlayer(player.getId());
+
+            // If room is empty, remove it
+            if (room.isEmpty()) {
+                roomManager.removeRoom(room.getId());
+            } else {
+                // If the host left, assign a new host
+                if (room.needsNewHost()) {
+                    room.assignNewHost();
+                }
+
+                // Notify remaining players about the updated player list
+                io.to(room.getId()).emit('player_list_updated', {
+                    players: room.getPlayerList()
+                });
+            }
+        }
+    });
 });
 
-// Server starten
+// Start the server
 server.listen(PORT, () => {
-    logger('INFO', `Server running on port ${PORT}`);
-    logger('INFO', `Process ID: ${process.pid}`);
-    logger('INFO', `Environment: ${NODE_ENV}`);
+    console.log(`Server running on port ${PORT}`);
 });
-
-// Graceful Shutdown
-process.on('SIGTERM', () => {
-    logger('INFO', 'SIGTERM received, shutting down gracefully');
-    server.close(() => {
-        logger('INFO', 'Server closed');
-        process.exit(0);
-    });
-});
-
-module.exports = { app, server, io };
