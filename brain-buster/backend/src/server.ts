@@ -82,7 +82,6 @@ io.on('connection', (socket) => {
     // Socket.io test ping/pong for connection checking
     socket.on('ping_test', (data) => {
         console.log(`Received ping from client ${socket.id} with timestamp ${data?.time || 'unknown'}`);
-        // Send pong response with original timestamp
         socket.emit('pong_test', {
             originalTime: data?.time || Date.now(),
             serverTime: Date.now(),
@@ -100,7 +99,6 @@ io.on('connection', (socket) => {
         // Check if room exists, create if not
         if (!roomManager.roomExists(roomId)) {
             if (!isHost) {
-                // If player is not host but room doesn't exist, error
                 socket.emit('error', {message: 'Room does not exist'});
                 return;
             }
@@ -162,12 +160,22 @@ io.on('connection', (socket) => {
             return;
         }
 
+        // Ensure players are aware they're in the game
+        room.getPlayerList().forEach(player => {
+            const playerObj = room.getPlayer(player.id);
+            if (playerObj) {
+                playerObj.setReady(false); // Reset ready state for game
+            }
+        });
+
         // Start the game
         room.startGame(questions);
 
-        // Notify all players that the game has started
+        // Broadcast game start with full player information
         io.to(roomId).emit('game_started', {
-            questions: room.getQuestions()
+            questions: questions,
+            players: room.getPlayerList(), // Full player list
+            startTime: Date.now()
         });
     });
 
@@ -179,31 +187,31 @@ io.on('connection', (socket) => {
             return;
         }
 
-        // Record player's answer
-        const isCorrect = room.recordAnswer(playerId, questionIndex, answer);
         const player = room.getPlayer(playerId);
         if (!player) {
             socket.emit('error', {message: 'Player not found'});
             return;
         }
 
-        // Update player's score
-        const newScore = player.getScore();
+        // Record player's answer
+        const isCorrect = room.recordAnswer(playerId, questionIndex, answer);
 
-        // Notify all players about the answer
+        // Broadcast to all players in the room
         io.to(roomId).emit('player_answered', {
             playerId,
             playerName: player.getName(),
             questionIndex,
             isCorrect,
-            newScore
+            newScore: player.getScore(),
+            allPlayers: room.getPlayerList() // Send full player list
         });
 
         // Check if all players have answered
         if (room.allPlayersAnswered(questionIndex)) {
             io.to(roomId).emit('all_players_answered', {
                 questionIndex,
-                playerScores: room.getPlayerScores()
+                playerScores: room.getPlayerScores(),
+                allPlayers: room.getPlayerList() // Send full player list
             });
         }
     });
@@ -216,12 +224,26 @@ io.on('connection', (socket) => {
             return;
         }
 
+        console.log(`Attempting to move to next question in room ${roomId}, current index: ${questionIndex}`);
+
+        // Ensure questions exist and index is valid
+        if (!room.getQuestions() || questionIndex + 1 >= room.getQuestions().length) {
+            console.log(`Invalid question index or no more questions`);
+
+            // If no more questions, end the game
+            io.to(roomId).emit('game_ended', {
+                results: room.calculateResults()
+            });
+            return;
+        }
+
         // Reset answers for the next question
         room.resetAnswersForQuestion(questionIndex + 1);
 
-        // Notify all players to move to the next question
+        // Broadcast to all players in the room
         io.to(roomId).emit('move_to_next_question', {
-            nextQuestionIndex: questionIndex + 1
+            nextQuestionIndex: questionIndex + 1,
+            allPlayers: room.getPlayerList()
         });
     });
 
@@ -238,7 +260,10 @@ io.on('connection', (socket) => {
 
         // Notify all players about the final results
         io.to(roomId).emit('game_ended', {
-            results
+            results: {
+                ...results,
+                allPlayers: room.getPlayerList() // Send full player list
+            }
         });
 
         // Mark the game as ended
