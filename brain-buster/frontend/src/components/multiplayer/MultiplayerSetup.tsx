@@ -1,33 +1,58 @@
-import { useState, useEffect } from 'react'
-import { v4 as uuidv4 } from 'uuid'
+import {useCallback, useEffect, useState} from 'react'
 import Card from '../ui/Card'
 import Button from '../ui/Button'
-import { useSocket } from '../../store/SocketContext'
+import {useSocket} from '../../store/SocketContext'
 
 interface MultiplayerSetupProps {
     onConnect: (playerName: string, roomId: string, isHost: boolean) => void
 }
 
-const MultiplayerSetup = ({ onConnect }: MultiplayerSetupProps) => {
+const MultiplayerSetup = ({onConnect}: MultiplayerSetupProps) => {
     const [playerName, setPlayerName] = useState('')
     const [roomId, setRoomId] = useState('')
     const [setupMode, setSetupMode] = useState<'create' | 'join' | null>(null)
     const [isConnecting, setIsConnecting] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const { socket, isConnected, connect } = useSocket()
+    const {socket, isConnected, connect, disconnect} = useSocket()
 
-    // Connect to the socket server when the component mounts
-    useEffect(() => {
+    // Improved connection management
+    const handleSocketConnection = useCallback(() => {
+        // If not connected, attempt to connect
         if (!isConnected) {
+            // First, ensure any existing connection is closed
+            disconnect();
+            // Then attempt to connect
             connect();
         }
-    }, [connect, isConnected]);
+    }, [isConnected, connect, disconnect]);
+
+    // Manage connection on component mount and mode change
+    useEffect(() => {
+        handleSocketConnection();
+    }, [handleSocketConnection]);
+
+    // Improve connection error handling
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleConnectionError = () => {
+            setIsConnecting(false);
+            setError('Verbindungsfehler. Bitte versuchen Sie es später erneut.');
+        };
+
+        socket.on('connect_error', handleConnectionError);
+
+        return () => {
+            socket.off('connect_error', handleConnectionError);
+        };
+    }, [socket]);
 
     // Spielraum erstellen
     const handleCreateRoom = () => {
         setSetupMode('create')
-        // Generiere eine zufällige Raum-ID
-        setRoomId(uuidv4().slice(0, 8))
+        // Generiere eine zufällige Raum-ID mit weniger Komplexität
+        const newRoomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+        setRoomId(newRoomId)
     }
 
     // Spielraum beitreten
@@ -35,8 +60,9 @@ const MultiplayerSetup = ({ onConnect }: MultiplayerSetupProps) => {
         setSetupMode('join')
     }
 
-    // Verbindung herstellen
-    const handleConnect = () => {
+    // Verbindung herstellen - mit verbesserte Fehlerbehandlung
+    const handleConnect = useCallback(() => {
+        // Validierungen
         if (!isConnected) {
             setError('Nicht mit dem Server verbunden. Bitte versuchen Sie es später erneut.');
             return;
@@ -52,28 +78,52 @@ const MultiplayerSetup = ({ onConnect }: MultiplayerSetupProps) => {
             return;
         }
 
-        setIsConnecting(true);
+        // Zurücksetzen vorheriger Fehler
         setError(null);
+        setIsConnecting(true);
 
-        // Listen for the room_joined event
-        socket?.once('room_joined', (data) => {
+        // Cleanup existing listeners to prevent multiple handlers
+        socket?.off('room_joined');
+        socket?.off('error');
+
+        // Neue Event-Listener
+        const handleRoomJoined = (data: { roomId: string; playerId: string; isHost: boolean }) => {
             setIsConnecting(false);
             onConnect(playerName, data.roomId, data.isHost);
-        });
+        };
 
-        // Listen for errors
-        socket?.once('error', (data) => {
+        const handleError = (errorData: { message: string }) => {
             setIsConnecting(false);
-            setError(data.message);
-        });
+            setError(errorData.message || 'Ein unerwarteter Fehler ist aufgetreten');
+        };
 
-        // Join the room
+        // Event-Listener hinzufügen
+        socket?.once('room_joined', handleRoomJoined);
+        socket?.once('error', handleError);
+
+        // Raum beitreten
         socket?.emit('join_room', {
             roomId,
             playerName,
             isHost: setupMode === 'create'
         });
-    }
+
+        // Timeout für Verbindungsversuch
+        const connectTimeout = setTimeout(() => {
+            if (isConnecting) {
+                setIsConnecting(false);
+                setError('Verbindungsaufbau dauert zu lange. Bitte versuchen Sie es erneut.');
+                socket?.disconnect();
+            }
+        }, 10000); // 10 Sekunden Timeout
+
+        // Cleanup-Funktion
+        return () => {
+            clearTimeout(connectTimeout);
+            socket?.off('room_joined', handleRoomJoined);
+            socket?.off('error', handleError);
+        };
+    }, [isConnected, playerName, roomId, setupMode, socket, onConnect]);
 
     return (
         <Card>
@@ -108,6 +158,7 @@ const MultiplayerSetup = ({ onConnect }: MultiplayerSetupProps) => {
                             className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
                             placeholder="Gib deinen Namen ein"
                             disabled={isConnecting}
+                            maxLength={20}
                         />
                     </div>
 
@@ -120,10 +171,11 @@ const MultiplayerSetup = ({ onConnect }: MultiplayerSetupProps) => {
                                 id="roomId"
                                 type="text"
                                 value={roomId}
-                                onChange={(e) => setRoomId(e.target.value)}
+                                onChange={(e) => setRoomId(e.target.value.toUpperCase())}
                                 className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
                                 placeholder="Gib die Raum-ID ein"
                                 disabled={isConnecting}
+                                maxLength={6}
                             />
                         </div>
                     ) : (
@@ -143,7 +195,8 @@ const MultiplayerSetup = ({ onConnect }: MultiplayerSetupProps) => {
                                 <button
                                     onClick={() => {
                                         navigator.clipboard.writeText(roomId)
-                                        alert('Raum-ID kopiert!')
+                                            .then(() => alert('Raum-ID kopiert!'))
+                                            .catch(err => console.error('Fehler beim Kopieren', err));
                                     }}
                                     className="bg-violet-600 px-4 rounded-r-lg hover:bg-violet-700"
                                     aria-label="Raum-ID kopieren"
@@ -156,21 +209,25 @@ const MultiplayerSetup = ({ onConnect }: MultiplayerSetupProps) => {
                     )}
 
                     {error && (
-                        <div className="p-3 bg-red-500/20 border border-red-500/40 rounded-lg text-red-300 text-sm">
+                        <div
+                            className="p-3 bg-red-500/20 border border-red-500/40 rounded-lg text-red-300 text-sm">
                             {error}
                         </div>
                     )}
 
                     <div className="flex justify-between mt-6">
-                        <Button 
-                            variant="outline" 
-                            onClick={() => setSetupMode(null)}
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setSetupMode(null);
+                                setError(null);
+                            }}
                             disabled={isConnecting}
                         >
                             Zurück
                         </Button>
-                        <Button 
-                            variant="primary" 
+                        <Button
+                            variant="primary"
                             onClick={handleConnect}
                             disabled={isConnecting}
                         >
@@ -183,4 +240,4 @@ const MultiplayerSetup = ({ onConnect }: MultiplayerSetupProps) => {
     )
 }
 
-export default MultiplayerSetup
+export default MultiplayerSetup;
