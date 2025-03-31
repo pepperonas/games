@@ -1,0 +1,44 @@
+root@mrx3k1:/var/www/html/games/brain-buster# tree -I "node_modules|backend/node_modules"
+.
+├── 404.html
+├── apple-touch-icon.png
+├── assets
+│   ├── index-BS-H6TjY.js
+│   ├── index-BWYc3ENy.css
+│   ├── index-BWzo_pPf.js
+│   ├── index-CDKtaJNU.js
+│   ├── index-CGbSQ_Q8.css
+│   ├── index-CmYgREeQ.css
+│   ├── index-Cuat7_GV.js
+│   ├── index-CuieMNKF.js
+│   ├── index-Cyl6oWuI.js
+│   ├── index-DtsKXz48.js
+│   ├── index-DvN4E3Fb.js
+│   ├── index-TNql3go6.js
+│   └── index-pexNexSb.css
+├── backend
+│   ├── deployment-instructions.sh
+│   ├── dist
+│   │   ├── models
+│   │   │   ├── Player.js
+│   │   │   ├── Room.js
+│   │   │   └── RoomManager.js
+│   │   ├── server.js
+│   │   └── types.js
+│   ├── nodemon.json
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── src
+│   │   ├── models
+│   │   │   ├── Player.ts
+│   │   │   ├── Room.ts
+│   │   │   └── RoomManager.ts
+│   │   ├── server.ts
+│   │   └── types.ts
+│   └── tsconfig.json
+├── brain-buster.jpg
+├── brainbuster.png
+├── favicon-16x16.png
+├── favicon-32x32.png
+├── favicon.ico
+└── index.html

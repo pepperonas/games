@@ -1,0 +1,214 @@
+server {
+    root /var/www/html;
+
+    # Add index.php to the list if you are using PHP
+    index index.html index.htm index.nginx-debian.html;
+
+    server_name mrx3k1.de www.mrx3k1.de 69.62.121.168;
+
+    location / {
+        # First attempt to serve request as file, then
+        # as directory, then fall back to displaying a 404.
+        try_files $uri $uri/ =404;
+    }
+
+    # BrainBuster API and WebSocket backend
+    # This handles regular HTTP requests to the API
+    location /games/brain-buster/api/ {
+        proxy_pass http://localhost:5000/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+
+        # Increased timeouts for multiplayer stability
+        proxy_connect_timeout 7d;
+        proxy_send_timeout 7d;
+        proxy_read_timeout 7d;
+
+        # Increased buffer sizes for larger data exchanges
+        proxy_buffers 16 32k;
+        proxy_buffer_size 64k;
+
+        # Disable buffering for better real-time communication
+        proxy_buffering off;
+    }
+
+    # This specific path is needed for Socket.io
+    # Important: Don't use regex here, use exact paths
+    location /games/brain-buster/api/socket.io/ {
+        proxy_pass http://localhost:5000/socket.io/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+
+        # Increased timeouts for multiplayer stability
+        proxy_connect_timeout 7d;
+        proxy_send_timeout 7d;
+        proxy_read_timeout 7d;
+
+        # Increased buffer sizes for Socket.io
+        proxy_buffers 16 32k;
+        proxy_buffer_size 64k;
+
+        # Disable buffering for better real-time communication
+        proxy_buffering off;
+    }
+
+    # Additional dedicated Socket.io configuration with regex matching
+    location ~* \/socket\.io\/.*$ {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Disable caching
+        proxy_buffering off;
+        proxy_cache off;
+
+        # Extended timeouts
+        proxy_connect_timeout 7d;
+        proxy_send_timeout 7d;
+        proxy_read_timeout 7d;
+
+        # Increased buffer sizes
+        proxy_buffers 16 32k;
+        proxy_buffer_size 64k;
+
+        # Important for WebSocket stability
+        tcp_nodelay on;
+    }
+
+    # Spezifische Konfiguration für brain-buster SPA
+    location /games/brain-buster/ {
+        alias /var/www/html/games/brain-buster/;
+        try_files $uri $uri/ /games/brain-buster/index.html;
+
+        # Add cache control headers for SPA assets
+        add_header Cache-Control "no-cache, must-revalidate";
+        expires 0;
+    }
+
+    # Rest of your locations...
+    location /gta/ {
+        proxy_pass http://localhost:8001/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Spezifische Konfiguration für linux-terminal-simulator (behalten wir)
+    location /stuff/linux-terminal-simulator/ {
+        alias /var/www/html/stuff/linux-terminal-simulator/build/;
+        try_files $uri $uri/ /stuff/linux-terminal-simulator/index.html;
+    }
+
+    location /stuff/sm-downloader/ {
+        proxy_pass http://localhost:3002/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 120s;
+    }
+
+    location /greystone/ {
+        alias /var/www/html/greystone/;
+        try_files $uri $uri.html $uri/ =404;
+    }
+
+    # Generischer /games/ Block für andere Spiele
+    location /games/ {
+        alias /var/www/html/games/;
+
+        # Versuche direkte Dateiübereinstimmungen vor dem Fallback
+        try_files $uri $uri.html $uri/ =404;
+    }
+
+    # Generischer /stuff/ Block für future SPA-Projekte
+    location /stuff/ {
+        alias /var/www/html/stuff/;
+
+        # Versuche direkte Dateiübereinstimmungen vor dem Fallback
+        try_files $uri $uri/ @stuff_spa_fallback;
+    }
+
+    # SPA-Fallback für alle /stuff/-Unterordner
+    location @stuff_spa_fallback {
+        # Extrahiere den ersten Unterordner aus dem Pfad
+        set $subdirectory "";
+        if ($request_uri ~ "^/stuff/([^/]+)") {
+            set $subdirectory $1;
+        }
+
+        # Wenn die Datei index.html im Unterordner existiert, nutze sie als Fallback
+        if (-f $document_root/stuff/$subdirectory/build/index.html) {
+            rewrite ^/stuff/([^/]+)(.*)$ /stuff/$1/build/index.html break;
+        }
+
+        # Fallback für statische Seiten
+        return 404;
+    }
+
+    # WebSocket-Proxy für den Pong-Signaling-Server
+    location /socket.io/ {
+        proxy_pass http://localhost:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        proxy_connect_timeout 7d;
+        proxy_send_timeout 7d;
+        proxy_read_timeout 7d;
+    }
+
+    # SSL-Konfiguration
+    listen [::]:443 ssl ipv6only=on; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/mrx3k1.de/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/mrx3k1.de/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
+
+server {
+    if ($host = www.mrx3k1.de) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+    if ($host = mrx3k1.de) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+    listen 80;
+    listen [::]:80 default_server;
+
+    server_name mrx3k1.de www.mrx3k1.de 69.62.121.168;
+    return 404; # managed by Certbot
+}
