@@ -1,12 +1,12 @@
 // src/components/multiplayer/WebRTCMultiplayerGame.tsx
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import {useEffect, useState} from 'react';
+import {motion} from 'framer-motion';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import QuestionCard from '../game/QuestionCard';
-import { useGame } from '../../store/GameContext';
-import { useWebRTC } from '../../store/WebRTCContext';
-import { Question } from '../../types';
+import {useGame} from '../../store/GameContext';
+import {useWebRTC} from '../../store/WebRTCContext';
+import {Question} from '../../types';
 
 interface PlayerScore {
     id: string;
@@ -24,29 +24,32 @@ interface WebRTCMultiplayerGameProps {
 }
 
 const WebRTCMultiplayerGame = ({
-    playerName,
-    roomId,
-    playerId,
-    isHost,
-    onBackToLobby,
-    onLeave
-}: WebRTCMultiplayerGameProps) => {
-    const { startGame: startGameContext, endGame } = useGame();
-    const { 
-        webRTC, 
-        players, 
-        isConnected, 
-        answerQuestion: answerQuestionWebRTC, 
+                                   playerName,
+                                   roomId,
+                                   playerId,
+                                   isHost,
+                                   onBackToLobby,
+                                   onLeave
+                               }: WebRTCMultiplayerGameProps) => {
+    const {startGame: startGameContext, endGame} = useGame();
+    const {
+        webRTC,
+        players,
+        isConnected,
+        answerQuestion: answerQuestionWebRTC,
         nextQuestion: nextQuestionWebRTC,
-        leaveRoom 
+        leaveRoom
     } = useWebRTC();
-    
+
     const [gameEnded, setGameEnded] = useState(false);
     const [playerScores, setPlayerScores] = useState<PlayerScore[]>([]);
     const [questions, setQuestions] = useState<Question[]>([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [waitingForOthers, setWaitingForOthers] = useState(false);
-    const [gameResult, setGameResult] = useState<{ winners: PlayerScore[], isDraw: boolean } | null>(null);
+    const [gameResult, setGameResult] = useState<{
+        winners: PlayerScore[],
+        isDraw: boolean
+    } | null>(null);
     const [initComplete, setInitComplete] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [debugMode, setDebugMode] = useState(false);
@@ -101,10 +104,10 @@ const WebRTCMultiplayerGame = ({
         webRTC.registerCallbacks({
             onGameStarted: (gameState) => {
                 console.log("Spiel gestartet Event empfangen:", gameState);
-                
+
                 // Detaillierteres Logging
                 console.log(`Empfangene Fragen: ${gameState.questions.length}`);
-                
+
                 // Defensives Validieren mit besserem Feedback
                 if (!gameState || !gameState.questions || !Array.isArray(gameState.questions) || gameState.questions.length === 0) {
                     console.error("❌ Ungültige Daten im game-started Event:", gameState);
@@ -133,13 +136,13 @@ const WebRTCMultiplayerGame = ({
                 // Initialisiere Spiel im Kontext
                 startGameContext('multiplayer', gameState.questions);
             },
-            
+
             onPlayerAnswer: (data) => {
                 console.log("Spieler hat geantwortet:", data);
                 updatePlayerScores();
             },
-            
-            onAllPlayersAnswered: (questionIndex, playerScores) => {
+
+            onAllPlayersAnswered: (questionIndex, _playerScores) => {
                 console.log("Alle Spieler haben Frage beantwortet", questionIndex);
                 updatePlayerScores();
                 setWaitingForOthers(false);
@@ -152,13 +155,13 @@ const WebRTCMultiplayerGame = ({
                     }
                 }
             },
-            
+
             onNextQuestion: (nextIndex) => {
                 console.log("Wechsel zur nächsten Frage:", nextIndex);
                 setCurrentQuestionIndex(nextIndex);
                 setWaitingForOthers(false);
             },
-            
+
             onQuestionTimerEnded: (questionIndex) => {
                 console.log("Timer für Frage abgelaufen:", questionIndex);
                 // Zeit ist abgelaufen, aber noch nicht geantwortet
@@ -167,7 +170,7 @@ const WebRTCMultiplayerGame = ({
                     handleAnswerQuestion(-1);
                 }
             },
-            
+
             onGameEnded: (results) => {
                 console.log("Spiel beendet mit Ergebnissen:", results);
                 setGameEnded(true);
@@ -195,7 +198,7 @@ const WebRTCMultiplayerGame = ({
                     endGame(result);
                 }
             },
-            
+
             onError: (message) => {
                 console.error("WebRTC Fehler:", message);
                 setErrorMsg(message || "Ein Fehler ist aufgetreten");
@@ -212,7 +215,12 @@ const WebRTCMultiplayerGame = ({
     const handleAnswerQuestion = (answer: number) => {
         if (!webRTC || !initComplete) return;
 
-        console.log("Sende Antwort:", { roomId, playerId, questionIndex: currentQuestionIndex, answer });
+        console.log("Sende Antwort:", {
+            roomId,
+            playerId,
+            questionIndex: currentQuestionIndex,
+            answer
+        });
         answerQuestionWebRTC(currentQuestionIndex, answer);
 
         setWaitingForOthers(true);
@@ -237,7 +245,7 @@ const WebRTCMultiplayerGame = ({
         if (!webRTC) return;
 
         setErrorMsg("Verbindung wird neu aufgebaut...");
-        
+
         // Kurze Pause, dann die Seite neu laden
         setTimeout(() => {
             window.location.reload();
@@ -341,7 +349,7 @@ const WebRTCMultiplayerGame = ({
                                     isHost,
                                     webRTCConnected: isConnected,
                                     firstQuestion: questions[0] ?
-                                        { id: questions[0].id, question: questions[0].question } :
+                                        {id: questions[0].id, question: questions[0].question} :
                                         null
                                 }, null, 2)}</pre>
                             </div>
@@ -359,7 +367,8 @@ const WebRTCMultiplayerGame = ({
                                 <Button variant="primary" size="sm" onClick={handleForceRefresh}>
                                     Spielstatus aktualisieren
                                 </Button>
-                                <Button variant="secondary" size="sm" onClick={() => setErrorMsg(null)}>
+                                <Button variant="secondary" size="sm"
+                                        onClick={() => setErrorMsg(null)}>
                                     Schließen
                                 </Button>
                             </div>
@@ -371,7 +380,8 @@ const WebRTCMultiplayerGame = ({
                         <div>
                             <div className="mb-4 flex justify-between items-center">
                                 <div>
-                                    <span className="text-sm font-medium text-violet-300">Frage</span>
+                                    <span
+                                        className="text-sm font-medium text-violet-300">Frage</span>
                                     <h2 className="text-xl font-bold">
                                         {currentQuestionIndex + 1} / {questions.length}
                                     </h2>
@@ -391,7 +401,8 @@ const WebRTCMultiplayerGame = ({
                         <Card className="text-center p-6">
                             {!initComplete ? (
                                 <>
-                                    <h3 className="text-xl font-bold mb-4">Spiel wird initialisiert...</h3>
+                                    <h3 className="text-xl font-bold mb-4">Spiel wird
+                                        initialisiert...</h3>
                                     <p className="mb-6">
                                         Warte auf Daten vom Peer... {questions.length > 0 ?
                                         `(${questions.length} Fragen empfangen)` : ''}
@@ -403,7 +414,8 @@ const WebRTCMultiplayerGame = ({
                                 </>
                             ) : (
                                 <>
-                                    <h3 className="text-xl font-bold mb-4">Alle Fragen beantwortet!</h3>
+                                    <h3 className="text-xl font-bold mb-4">Alle Fragen
+                                        beantwortet!</h3>
                                     <p className="mb-6">Warte auf die anderen Spieler...</p>
                                 </>
                             )}
@@ -427,7 +439,8 @@ const WebRTCMultiplayerGame = ({
                                 <div className="text-lg mb-1">
                                     {player.name}
                                     {player.id === playerId && (
-                                        <span className="ml-2 text-xs bg-blue-600 px-2 py-0.5 rounded-full">
+                                        <span
+                                            className="ml-2 text-xs bg-blue-600 px-2 py-0.5 rounded-full">
                                             Du
                                         </span>
                                     )}
@@ -440,30 +453,32 @@ const WebRTCMultiplayerGame = ({
                     <div className="mb-8">
                         {gameResult?.isDraw ? (
                             <motion.div
-                                initial={{ scale: 0.8, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                transition={{ duration: 0.5 }}
+                                initial={{scale: 0.8, opacity: 0}}
+                                animate={{scale: 1, opacity: 1}}
+                                transition={{duration: 0.5}}
                             >
                                 <div className="text-4xl mb-2">🤝</div>
                                 <h3 className="text-xl font-bold text-blue-400">Unentschieden!</h3>
                             </motion.div>
                         ) : gameResult?.winners.some(w => w.id === playerId) ? (
                             <motion.div
-                                initial={{ scale: 0.8, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                transition={{ duration: 0.5 }}
+                                initial={{scale: 0.8, opacity: 0}}
+                                animate={{scale: 1, opacity: 1}}
+                                transition={{duration: 0.5}}
                             >
                                 <div className="text-4xl mb-2">🏆</div>
-                                <h3 className="text-xl font-bold text-green-400">Du hast gewonnen!</h3>
+                                <h3 className="text-xl font-bold text-green-400">Du hast
+                                    gewonnen!</h3>
                             </motion.div>
                         ) : (
                             <motion.div
-                                initial={{ scale: 0.8, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                transition={{ duration: 0.5 }}
+                                initial={{scale: 0.8, opacity: 0}}
+                                animate={{scale: 1, opacity: 1}}
+                                transition={{duration: 0.5}}
                             >
                                 <div className="text-4xl mb-2">😢</div>
-                                <h3 className="text-xl font-bold text-orange-400">Du hast verloren</h3>
+                                <h3 className="text-xl font-bold text-orange-400">Du hast
+                                    verloren</h3>
                             </motion.div>
                         )}
                     </div>

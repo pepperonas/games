@@ -1,7 +1,7 @@
 // backend/src/signaling-server.ts
 import express from 'express';
 import http from 'http';
-import { WebSocketServer } from 'ws';
+import { WebSocketServer, WebSocket as WSSocket } from 'ws';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 
@@ -9,7 +9,7 @@ import path from 'path';
 interface Player {
   id: string;
   name: string;
-  ws: WebSocket;
+  ws: WSSocket;
   isHost: boolean;
   isReady: boolean;
   score: number;
@@ -49,16 +49,17 @@ const wss = new WebSocketServer({ server, path: '/socket.io/' });
 const rooms: Map<string, Room> = new Map();
 
 // WebSocket-Verbindungs-Handler
-wss.on('connection', (ws: WebSocket) => {
+wss.on('connection', (ws: WSSocket) => {
   console.log('Neue WebSocket-Verbindung');
 
   let playerId = '';
   let currentRoomId = '';
 
   // Nachrichtenverarbeitung
-  ws.on('message', (message: string) => {
+  ws.on('message', (message: Buffer | string) => {
     try {
-      const data = JSON.parse(message);
+      const messageStr = message.toString();
+      const data = JSON.parse(messageStr);
       handleMessage(ws, data);
     } catch (error) {
       console.error('Fehler beim Verarbeiten der Nachricht:', error);
@@ -72,7 +73,7 @@ wss.on('connection', (ws: WebSocket) => {
   // Verbindungsabbruch
   ws.on('close', () => {
     console.log('WebSocket-Verbindung geschlossen');
-    
+
     // Spieler aus dem Raum entfernen, wenn vorhanden
     if (currentRoomId && playerId) {
       handlePlayerLeave(currentRoomId, playerId);
@@ -80,12 +81,12 @@ wss.on('connection', (ws: WebSocket) => {
   });
 
   // Fehlerbehandlung
-  ws.on('error', (error) => {
+  ws.on('error', (error: Error) => {
     console.error('WebSocket-Fehler:', error);
   });
 
   // Nachrichtenverarbeitung
-  function handleMessage(ws: WebSocket, data: any): void {
+  function handleMessage(ws: WSSocket, data: any): void {
     const { type, sender, roomId, content } = data;
 
     // Setze die Spieler-ID und den aktuellen Raum
@@ -129,7 +130,7 @@ wss.on('connection', (ws: WebSocket) => {
   }
 
   // Raum erstellen
-  function handleCreateRoom(roomId: string, playerId: string, playerName: string, ws: WebSocket): void {
+  function handleCreateRoom(roomId: string, playerId: string, playerName: string, ws: WSSocket): void {
     // Prüfe, ob der Raum bereits existiert
     if (rooms.has(roomId)) {
       sendTo(ws, {
@@ -172,7 +173,7 @@ wss.on('connection', (ws: WebSocket) => {
   }
 
   // Raum beitreten
-  function handleJoinRoom(roomId: string, playerId: string, playerName: string, ws: WebSocket): void {
+  function handleJoinRoom(roomId: string, playerId: string, playerName: string, ws: WSSocket): void {
     // Prüfe, ob der Raum existiert
     if (!rooms.has(roomId)) {
       sendTo(ws, {
@@ -332,7 +333,7 @@ wss.on('connection', (ws: WebSocket) => {
   }
 
   // Sende eine Nachricht an einen bestimmten WebSocket
-  function sendTo(ws: WebSocket, message: any): void {
+  function sendTo(ws: WSSocket, message: any): void {
     try {
       ws.send(JSON.stringify(message));
     } catch (error) {

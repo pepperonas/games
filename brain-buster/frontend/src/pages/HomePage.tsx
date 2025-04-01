@@ -2,7 +2,7 @@
 import {Link} from 'react-router-dom'
 import {motion} from 'framer-motion'
 import Card from '../components/ui/Card'
-import Button from '../ui/Button'
+import Button from '../components/ui/Button'
 
 const HomePage = () => {
     return (
@@ -22,7 +22,7 @@ const HomePage = () => {
                 </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl mx-auto">
                 <Card className="text-center flex flex-col items-center justify-between h-full">
                     <div>
                         <motion.div
@@ -51,36 +51,12 @@ const HomePage = () => {
                         <motion.div
                             initial={{y: -20, opacity: 0}}
                             animate={{y: 0, opacity: 1}}
-                            transition={{delay: 0.3, duration: 0.5}}
-                            className="text-4xl mb-2"
-                        >
-                            👥
-                        </motion.div>
-                        <h2 className="text-2xl font-bold mb-4 text-accent-green">Multiplayer</h2>
-                        <p className="mb-6 text-gray-300">
-                            Tritt gegen Freunde oder zufällige Gegner in Echtzeit an. Zeige dein
-                            Wissen und erklimme die Bestenliste!
-                        </p>
-                    </div>
-                    <Link to="/multiplayer">
-                        <Button size="lg" variant="secondary">
-                            Socket.io Mehrspieler
-                        </Button>
-                    </Link>
-                </Card>
-
-                <Card className="text-center flex flex-col items-center justify-between h-full">
-                    <div>
-                        <motion.div
-                            initial={{y: -20, opacity: 0}}
-                            animate={{y: 0, opacity: 1}}
                             transition={{delay: 0.4, duration: 0.5}}
                             className="text-4xl mb-2"
                         >
                             🚀
                         </motion.div>
-                        <h2 className="text-2xl font-bold mb-4 text-accent-blue">WebRTC
-                            Multiplayer</h2>
+                        <h2 className="text-2xl font-bold mb-4 text-accent-blue">Multiplayer</h2>
                         <p className="mb-6 text-gray-300">
                             Spiele direkt Peer-to-Peer mit deinen Freunden über WebRTC für bessere
                             Verbindungsqualität und weniger Verzögerung!
@@ -88,7 +64,7 @@ const HomePage = () => {
                     </div>
                     <Link to="/webrtc">
                         <Button size="lg" variant="primary">
-                            WebRTC Mehrspieler
+                            Jetzt spielen
                         </Button>
                     </Link>
                 </Card>
