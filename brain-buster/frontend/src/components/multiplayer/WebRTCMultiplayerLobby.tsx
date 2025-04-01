@@ -1,96 +1,65 @@
-import { useEffect, useState } from 'react'
-import Card from '../ui/Card'
-import Button from '../ui/Button'
-import { useSocket } from '../../store/SocketContext'
-import { useGame } from '../../store/GameContext'
+// src/components/multiplayer/WebRTCMultiplayerLobby.tsx
+import { useEffect, useState } from 'react';
+import Card from '../ui/Card';
+import Button from '../ui/Button';
+import { useWebRTC } from '../../store/WebRTCContext';
+import { useGame } from '../../store/GameContext';
 
-interface PlayerInfo {
-    id: string;
-    name: string;
+interface WebRTCMultiplayerLobbyProps {
+    roomId: string;
+    playerId: string;
     isHost: boolean;
-    isReady: boolean;
-    score: number;
+    onStart: () => void;
+    onLeave: () => void;
 }
 
-interface MultiplayerLobbyProps {
-    roomId: string
-    isHost: boolean
-    playerId: string
-    onStart: () => void
-    onLeave: () => void
-}
-
-const MultiplayerLobby = ({
-                              roomId,
-                              isHost,
-                              playerId,
-                              onStart,
-                              onLeave
-                          }: MultiplayerLobbyProps) => {
-    const [players, setPlayers] = useState<PlayerInfo[]>([]);
+const WebRTCMultiplayerLobby = ({
+    roomId,
+    playerId,
+    isHost,
+    onStart,
+    onLeave
+}: WebRTCMultiplayerLobbyProps) => {
     const [isReady, setIsReady] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const { socket } = useSocket();
+    const { players, setReady, startGame, leaveRoom } = useWebRTC();
     const { state } = useGame();
 
-    // Listen for player list updates
+    // Überwache den eigenen Ready-Status
     useEffect(() => {
-        if (!socket) return;
-
-        const handlePlayerListUpdate = (data: { players: PlayerInfo[] }) => {
-            setPlayers(data.players);
-
-            // Update the local ready state based on the server data
-            const currentPlayer = data.players.find(player => player.id === playerId);
-            if (currentPlayer) {
-                setIsReady(currentPlayer.isReady);
-            }
-        };
-
-        // Listen for error messages
-        const handleError = (data: { message: string }) => {
-            setError(data.message);
-        };
-
-        socket.on('player_list_updated', handlePlayerListUpdate);
-        socket.on('error', handleError);
-
-        return () => {
-            socket.off('player_list_updated', handlePlayerListUpdate);
-            socket.off('error', handleError);
-        };
-    }, [socket, playerId]);
-
-    // Leave room handler
-    const handleLeave = () => {
-        if (socket) {
-            socket.emit('leave_room', { roomId, playerId });
+        // Finde den eigenen Spieler in der Spielerliste
+        const currentPlayer = players.find(player => player.id === playerId);
+        if (currentPlayer) {
+            setIsReady(currentPlayer.isReady);
         }
+    }, [players, playerId]);
+
+    // Raum verlassen
+    const handleLeave = () => {
+        leaveRoom();
         onLeave();
     };
 
-    // Toggle ready status - Both host and non-host players should be able to use this
+    // Ready-Status umschalten
     const toggleReady = () => {
-        if (socket) {
-            console.log("Toggling ready state:", !isReady);
-            const newReadyStatus = !isReady;
-            socket.emit('player_ready', { roomId, playerId, isReady: newReadyStatus });
-            setIsReady(newReadyStatus);
-        }
+        console.log("Ready-Status umschalten:", !isReady);
+        const newReadyStatus = !isReady;
+        setReady(newReadyStatus);
+        setIsReady(newReadyStatus);
     };
 
-    // Start game handler
+    // Spiel starten (nur für Host)
     const handleStartGame = () => {
-        if (socket && isHost) {
-            console.log("Host starting game with simplified questions");
+        if (isHost) {
+            console.log("Host startet das Spiel mit vereinfachten Fragen");
 
-            // Display loading state to the user
+            // Anzeigestatus für den Benutzer
             setError("Spiel wird gestartet... Bitte warten.");
 
-            // Create a simplified version of the questions
+            // Erstelle eine vereinfachte Version der Fragen
             const simplifiedQuestions = [...state.questions]
                 .sort(() => Math.random() - 0.5)
-                .slice(0, 5) // Only 5 questions for better transmission
+                .slice(0, 10) // 10 Fragen für schnellere Übertragung
                 .map((q, index) => ({
                     id: `question-${index}`,
                     question: q.question,
@@ -100,55 +69,25 @@ const MultiplayerLobby = ({
                     difficulty: q.difficulty
                 }));
 
-            // Save questions locally for backup/recovery
+            // Speichere Fragen lokal für Backup/Wiederherstellung
             try {
                 localStorage.setItem('lastGameQuestions', JSON.stringify(simplifiedQuestions));
                 localStorage.setItem('lastGameTimestamp', Date.now().toString());
             } catch (e) {
-                console.error("Failed to save questions to localStorage", e);
+                console.error("Fehler beim Speichern der Fragen im localStorage", e);
             }
 
-            // First signal preparation
-            socket.emit('prepare_game', {
-                roomId,
-                questionCount: simplifiedQuestions.length
-            });
+            // Starte das Spiel mit den ausgewählten Fragen
+            startGame(simplifiedQuestions);
 
-            // Then wait a moment before sending the full questions
+            // Timeout für den Callback
             setTimeout(() => {
-                // Send the game start command with questions
-                socket.emit('start_game', {
-                    roomId,
-                    questions: simplifiedQuestions
-                });
-
-                // Set a timeout for the callback
-                const startGameTimeout = setTimeout(() => {
-                    // Call the callback after a brief delay
-                    onStart();
-                }, 1500);
-
-                // Also set a safety net: if game doesn't start properly,
-                // we'll retry sending the start command
-                const backupTimeout = setTimeout(() => {
-                    console.log("Safety check: Re-sending start_game command");
-                    socket.emit('start_game', {
-                        roomId,
-                        questions: simplifiedQuestions,
-                        isRetry: true
-                    });
-                }, 5000);
-
-                // Clean up timeouts if component unmounts
-                return () => {
-                    clearTimeout(startGameTimeout);
-                    clearTimeout(backupTimeout);
-                };
+                onStart();
             }, 1000);
         }
     };
 
-    // Check if all players are ready
+    // Prüfe, ob alle Spieler bereit sind
     const allPlayersReady = players.length > 0 && players.every(player => player.isReady);
 
     return (
@@ -208,12 +147,12 @@ const MultiplayerLobby = ({
             )}
 
             <div className="flex justify-between">
-                {/* Both host and non-host should have a ready button */}
+                {/* Sowohl Host als auch Mitspieler haben einen Ready-Button */}
                 <Button variant={isReady ? 'danger' : 'success'} onClick={toggleReady}>
                     {isReady ? 'Nicht bereit' : 'Bereit'}
                 </Button>
 
-                {/* Only the host can see the start game button */}
+                {/* Nur der Host kann das Spiel starten */}
                 {isHost && (
                     <Button
                         variant="primary"
@@ -225,7 +164,7 @@ const MultiplayerLobby = ({
                 )}
             </div>
         </Card>
-    )
-}
+    );
+};
 
-export default MultiplayerLobby
+export default WebRTCMultiplayerLobby;

@@ -1,4 +1,4 @@
-// ========== src/App.tsx ==========
+// src/App.tsx
 import {ReactNode, useEffect} from 'react'
 import {BrowserRouter, Route, Routes, useLocation, useNavigate} from 'react-router-dom'
 import {AnimatePresence} from 'framer-motion'
@@ -6,7 +6,7 @@ import {AnimatePresence} from 'framer-motion'
 // Pages
 import HomePage from './pages/HomePage'
 import GamePage from './pages/GamePage'
-import MultiplayerPage from './pages/MultiplayerPage'
+import WebRTCMultiplayerPage from './pages/WebRTCMultiplayerPage'
 import StatsPage from './pages/StatsPage'
 import SettingsPage from './pages/SettingsPage'
 import NotFoundPage from './pages/NotFoundPage'
@@ -75,7 +75,7 @@ function App() {
                         <Route path="/" element={<Layout/>}>
                             <Route index element={<HomePage/>}/>
                             <Route path="game" element={<GamePage/>}/>
-                            <Route path="multiplayer" element={<MultiplayerPage/>}/>
+                            <Route path="webrtc" element={<WebRTCMultiplayerPage/>}/>
                             <Route path="stats" element={<StatsPage/>}/>
                             <Route path="settings" element={<SettingsPage/>}/>
                             <Route path="*" element={<NotFoundHandler/>}/>

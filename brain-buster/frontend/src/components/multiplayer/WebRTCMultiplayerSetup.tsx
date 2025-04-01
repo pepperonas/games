@@ -1,84 +1,95 @@
-import {useCallback, useEffect, useState} from 'react'
-import Card from '../ui/Card'
-import Button from '../ui/Button'
-import {useSocket} from '../../store/SocketContext'
+// src/components/multiplayer/WebRTCMultiplayerSetup.tsx
+import { useCallback, useEffect, useState } from 'react';
+import Card from '../ui/Card';
+import Button from '../ui/Button';
+import { useWebRTC } from '../../store/WebRTCContext';
 
-interface MultiplayerSetupProps {
-    onConnect: (playerName: string, roomId: string, isHost: boolean) => void
+interface WebRTCMultiplayerSetupProps {
+    onConnect: (playerName: string, roomId: string, isHost: boolean) => void;
 }
 
-const MultiplayerSetup = ({onConnect}: MultiplayerSetupProps) => {
-    const [playerName, setPlayerName] = useState('')
-    const [roomId, setRoomId] = useState('')
-    const [setupMode, setSetupMode] = useState<'create' | 'join' | null>(null)
-    const [isConnecting, setIsConnecting] = useState(false)
-    const [error, setError] = useState<string | null>(null)
-    const {socket, isConnected, connect} = useSocket()
-    const [connectionAttempted, setConnectionAttempted] = useState(false)
+const WebRTCMultiplayerSetup = ({ onConnect }: WebRTCMultiplayerSetupProps) => {
+    const [playerName, setPlayerName] = useState('');
+    const [roomId, setRoomId] = useState('');
+    const [setupMode, setSetupMode] = useState<'create' | 'join' | null>(null);
+    const [isConnecting, setIsConnecting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    // Improved connection management
-    const handleSocketConnection = useCallback(() => {
-        // Only connect if not already connecting and not already connected
-        if (!isConnected && !connectionAttempted) {
-            console.log("Initial socket connection attempt from MultiplayerSetup");
+    const {
+        isSignalingConnected,
+        connectToSignalingServer,
+        createRoom,
+        joinRoom,
+        error: webRTCError
+    } = useWebRTC();
+
+    const [connectionAttempted, setConnectionAttempted] = useState(false);
+
+    // Verbesserte Verbindungsverwaltung
+    const handleSignalingConnection = useCallback(async () => {
+        // Nur verbinden, wenn nicht bereits verbunden und nicht bereits beim Verbinden
+        if (!isSignalingConnected && !connectionAttempted) {
+            console.log("Initialer Verbindungsversuch zum Signaling-Server");
             setConnectionAttempted(true);
-            connect();
+            try {
+                await connectToSignalingServer();
+                console.log("Verbindung zum Signaling-Server hergestellt");
+            } catch (error) {
+                console.error("Fehler bei der Verbindung zum Signaling-Server:", error);
+                setError(`Verbindungsfehler: ${error}`);
+            }
         }
-    }, [isConnected, connectionAttempted, connect]);
+    }, [isSignalingConnected, connectionAttempted, connectToSignalingServer]);
 
-    // Manage connection only on component mount
+    // Verwalte Verbindung nur beim Komponenten-Mount
     useEffect(() => {
-        console.log("MultiplayerSetup mounted, connection status:", isConnected);
-        handleSocketConnection();
+        console.log("WebRTCMultiplayerSetup mounted, Verbindungsstatus:", isSignalingConnected);
+        handleSignalingConnection();
 
-        // Cleanup function when component unmounts
+        // Bereinigungsfunktion beim Unmount der Komponente
         return () => {
-            console.log("MultiplayerSetup unmounted");
+            console.log("WebRTCMultiplayerSetup unmounted");
             setConnectionAttempted(false);
         };
-    }, [handleSocketConnection, isConnected]);
+    }, [handleSignalingConnection, isSignalingConnected]);
 
-    // Improve connection error handling
+    // Überwache WebRTC-Fehler
     useEffect(() => {
-        if (!socket) return;
-
-        const handleConnectionError = () => {
+        if (webRTCError) {
+            setError(webRTCError);
             setIsConnecting(false);
-            setError('Verbindungsfehler. Bitte versuchen Sie es später erneut.');
-        };
-
-        socket.on('connect_error', handleConnectionError);
-
-        return () => {
-            socket.off('connect_error', handleConnectionError);
-        };
-    }, [socket]);
+        }
+    }, [webRTCError]);
 
     // Spielraum erstellen
     const handleCreateRoom = () => {
-        setSetupMode('create')
+        setSetupMode('create');
         // Generiere eine zufällige Raum-ID mit weniger Komplexität
         const newRoomId = Math.random().toString(36).substring(2, 8).toUpperCase();
-        setRoomId(newRoomId)
-    }
+        setRoomId(newRoomId);
+    };
 
     // Spielraum beitreten
     const handleJoinRoom = () => {
-        setSetupMode('join')
-    }
+        setSetupMode('join');
+    };
 
-    // Verbindung herstellen - mit verbesserte Fehlerbehandlung
-    const handleConnect = useCallback(() => {
-        // Prevent multiple connection attempts
+    // Verbindung herstellen - mit verbesserter Fehlerbehandlung
+    const handleConnect = useCallback(async () => {
+        // Verhindere mehrfache Verbindungsversuche
         if (isConnecting) {
-            console.log("Already attempting to connect, ignoring duplicate request");
+            console.log("Bereits beim Verbinden, ignoriere doppelte Anfrage");
             return;
         }
 
         // Validierungen
-        if (!isConnected) {
-            setError('Nicht mit dem Server verbunden. Bitte versuchen Sie es später erneut.');
-            return;
+        if (!isSignalingConnected) {
+            try {
+                await connectToSignalingServer();
+            } catch (error) {
+                setError('Nicht mit dem Server verbunden. Bitte versuchen Sie es später erneut.');
+                return;
+            }
         }
 
         if (!playerName.trim()) {
@@ -95,53 +106,27 @@ const MultiplayerSetup = ({onConnect}: MultiplayerSetupProps) => {
         setError(null);
         setIsConnecting(true);
 
-        // Cleanup existing listeners to prevent multiple handlers
-        socket?.off('room_joined');
-        socket?.off('error');
-
-        // Neue Event-Listener
-        const handleRoomJoined = (data: { roomId: string; playerId: string; isHost: boolean }) => {
-            console.log("Room joined successfully:", data);
-            setIsConnecting(false);
-            onConnect(playerName, data.roomId, data.isHost);
-        };
-
-        const handleError = (errorData: { message: string }) => {
-            console.error("Room join error:", errorData);
-            setIsConnecting(false);
-            setError(errorData.message || 'Ein unerwarteter Fehler ist aufgetreten');
-        };
-
-        // Event-Listener ONCE (not on, to prevent duplicates)
-        socket?.once('room_joined', handleRoomJoined);
-        socket?.once('error', handleError);
-
-        // Raum beitreten
-        console.log(`Emitting join_room: ${roomId}, ${playerName}, isHost: ${setupMode === 'create'}`);
-        socket?.emit('join_room', {
-            roomId,
-            playerName,
-            isHost: setupMode === 'create'
-        });
-
-        // Timeout für Verbindungsversuch
-        const connectTimeout = setTimeout(() => {
-            if (isConnecting) {
-                setIsConnecting(false);
-                setError('Verbindungsaufbau dauert zu lange. Bitte versuchen Sie es erneut.');
-                // Remove the event listeners
-                socket?.off('room_joined', handleRoomJoined);
-                socket?.off('error', handleError);
+        try {
+            if (setupMode === 'create') {
+                // Raum erstellen
+                const createdRoomId = await createRoom(playerName, roomId);
+                console.log(`Raum erstellt: ${createdRoomId}`);
+                onConnect(playerName, createdRoomId, true);
+            } else {
+                // Raum beitreten
+                await joinRoom(playerName, roomId);
+                console.log(`Raum beigetreten: ${roomId}`);
+                onConnect(playerName, roomId, false);
             }
-        }, 10000); // 10 Sekunden Timeout
 
-        // Cleanup-Funktion
-        return () => {
-            clearTimeout(connectTimeout);
-            socket?.off('room_joined', handleRoomJoined);
-            socket?.off('error', handleError);
-        };
-    }, [isConnected, playerName, roomId, setupMode, socket, onConnect, isConnecting]);
+            // Erfolg!
+            setIsConnecting(false);
+        } catch (error) {
+            console.error("Fehler bei der Raumverbindung:", error);
+            setError(`Fehler: ${error}`);
+            setIsConnecting(false);
+        }
+    }, [isConnecting, isSignalingConnected, playerName, roomId, setupMode, connectToSignalingServer, createRoom, joinRoom, onConnect]);
 
     return (
         <Card>
@@ -255,7 +240,7 @@ const MultiplayerSetup = ({onConnect}: MultiplayerSetupProps) => {
                 </div>
             )}
         </Card>
-    )
-}
+    );
+};
 
-export default MultiplayerSetup;
+export default WebRTCMultiplayerSetup;
