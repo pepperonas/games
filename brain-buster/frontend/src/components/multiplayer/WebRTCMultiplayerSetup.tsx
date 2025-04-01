@@ -14,6 +14,7 @@ const WebRTCMultiplayerSetup = ({ onConnect }: WebRTCMultiplayerSetupProps) => {
     const [setupMode, setSetupMode] = useState<'create' | 'join' | null>(null);
     const [isConnecting, setIsConnecting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [connectionAttempts, setConnectionAttempts] = useState(0);
 
     const {
         isSignalingConnected,
@@ -23,37 +24,15 @@ const WebRTCMultiplayerSetup = ({ onConnect }: WebRTCMultiplayerSetupProps) => {
         error: webRTCError
     } = useWebRTC();
 
-    const [connectionAttempted, setConnectionAttempted] = useState(false);
-
-    // Verbesserte Verbindungsverwaltung
-    const handleSignalingConnection = useCallback(async () => {
-        // Nur verbinden, wenn nicht bereits verbunden und nicht bereits beim Verbinden
-        if (!isSignalingConnected && !connectionAttempted) {
-            console.log("Initialer Verbindungsversuch zum Signaling-Server");
-            setConnectionAttempted(true);
-            try {
-                await connectToSignalingServer();
-                console.log("Verbindung zum Signaling-Server hergestellt");
-            } catch (error) {
-                console.error("Fehler bei der Verbindung zum Signaling-Server:", error);
-                setError(`Verbindungsfehler: ${error}`);
-            }
-        }
-    }, [isSignalingConnected, connectionAttempted, connectToSignalingServer]);
-
-    // Verwalte Verbindung nur beim Komponenten-Mount
+    // Initialisiere den Spielernamen aus dem localStorage, falls vorhanden
     useEffect(() => {
-        console.log("WebRTCMultiplayerSetup mounted, Verbindungsstatus:", isSignalingConnected);
-        handleSignalingConnection();
+        const savedName = localStorage.getItem('brainbuster_player_name');
+        if (savedName) {
+            setPlayerName(savedName);
+        }
+    }, []);
 
-        // Bereinigungsfunktion beim Unmount der Komponente
-        return () => {
-            console.log("WebRTCMultiplayerSetup unmounted");
-            setConnectionAttempted(false);
-        };
-    }, [handleSignalingConnection, isSignalingConnected]);
-
-    // Überwache WebRTC-Fehler
+    // Verbesserte Fehlerbehandlung: Überwache WebRTC-Fehler
     useEffect(() => {
         if (webRTCError) {
             setError(webRTCError);
@@ -61,10 +40,45 @@ const WebRTCMultiplayerSetup = ({ onConnect }: WebRTCMultiplayerSetupProps) => {
         }
     }, [webRTCError]);
 
+    // Verbindung zum Signaling-Server herstellen
+    const handleSignalingConnection = useCallback(async () => {
+        if (isSignalingConnected) {
+            console.log("Bereits mit dem Signaling-Server verbunden");
+            return Promise.resolve();
+        }
+
+        setError("Verbinde mit dem Signaling-Server...");
+        setIsConnecting(true);
+
+        try {
+            await connectToSignalingServer();
+            console.log("Verbindung zum Signaling-Server hergestellt");
+            setError(null);
+            return Promise.resolve();
+        } catch (error) {
+            const errorMsg = `Verbindungsfehler: ${error}`;
+            console.error(errorMsg);
+            setError(errorMsg);
+            setConnectionAttempts(prev => prev + 1);
+            setIsConnecting(false);
+            return Promise.reject(error);
+        }
+    }, [isSignalingConnected, connectToSignalingServer]);
+
+    // Automatischer Verbindungsversuch beim Komponenten-Mount
+    useEffect(() => {
+        if (!isSignalingConnected && connectionAttempts === 0) {
+            console.log("Automatischer Verbindungsversuch zum Signaling-Server");
+            handleSignalingConnection().catch(err => {
+                console.warn("Initialer Verbindungsversuch fehlgeschlagen", err);
+            });
+        }
+    }, [isSignalingConnected, connectionAttempts, handleSignalingConnection]);
+
     // Spielraum erstellen
     const handleCreateRoom = () => {
         setSetupMode('create');
-        // Generiere eine zufällige Raum-ID mit weniger Komplexität
+        // Generiere eine zufällige Raum-ID (6 Zeichen, nur Großbuchstaben)
         const newRoomId = Math.random().toString(36).substring(2, 8).toUpperCase();
         setRoomId(newRoomId);
     };
@@ -72,6 +86,7 @@ const WebRTCMultiplayerSetup = ({ onConnect }: WebRTCMultiplayerSetupProps) => {
     // Spielraum beitreten
     const handleJoinRoom = () => {
         setSetupMode('join');
+        setRoomId('');
     };
 
     // Verbindung herstellen - mit verbesserter Fehlerbehandlung
@@ -83,15 +98,6 @@ const WebRTCMultiplayerSetup = ({ onConnect }: WebRTCMultiplayerSetupProps) => {
         }
 
         // Validierungen
-        if (!isSignalingConnected) {
-            try {
-                await connectToSignalingServer();
-            } catch (error) {
-                setError('Nicht mit dem Server verbunden. Bitte versuchen Sie es später erneut.');
-                return;
-            }
-        }
-
         if (!playerName.trim()) {
             setError('Bitte gib deinen Namen ein');
             return;
@@ -102,11 +108,24 @@ const WebRTCMultiplayerSetup = ({ onConnect }: WebRTCMultiplayerSetupProps) => {
             return;
         }
 
+        if (playerName.length > 20) {
+            setError('Der Name darf maximal 20 Zeichen lang sein');
+            return;
+        }
+
+        // Speichere den Namen für zukünftige Sitzungen
+        localStorage.setItem('brainbuster_player_name', playerName);
+
         // Zurücksetzen vorheriger Fehler
-        setError(null);
+        setError("Verbindung wird hergestellt...");
         setIsConnecting(true);
 
         try {
+            // Stelle sicher, dass eine Verbindung zum Signaling-Server besteht
+            if (!isSignalingConnected) {
+                await handleSignalingConnection();
+            }
+
             if (setupMode === 'create') {
                 // Raum erstellen
                 const createdRoomId = await createRoom(playerName, roomId);
@@ -114,23 +133,62 @@ const WebRTCMultiplayerSetup = ({ onConnect }: WebRTCMultiplayerSetupProps) => {
                 onConnect(playerName, createdRoomId, true);
             } else {
                 // Raum beitreten
-                await joinRoom(playerName, roomId);
+                await joinRoom(playerName, roomId.toUpperCase());
                 console.log(`Raum beigetreten: ${roomId}`);
-                onConnect(playerName, roomId, false);
+                onConnect(playerName, roomId.toUpperCase(), false);
             }
 
             // Erfolg!
             setIsConnecting(false);
+            setError(null);
         } catch (error) {
             console.error("Fehler bei der Raumverbindung:", error);
             setError(`Fehler: ${error}`);
             setIsConnecting(false);
         }
-    }, [isConnecting, isSignalingConnected, playerName, roomId, setupMode, connectToSignalingServer, createRoom, joinRoom, onConnect]);
+    }, [isConnecting, playerName, roomId, setupMode, isSignalingConnected, handleSignalingConnection, createRoom, joinRoom, onConnect]);
+
+    // Erzwinge einen neuen Verbindungsversuch
+    const handleForceReconnect = async () => {
+        setConnectionAttempts(0);
+        setError("Verbindung wird neu aufgebaut...");
+
+        try {
+            await handleSignalingConnection();
+            setError(null);
+        } catch (error) {
+            setError(`Verbindungsfehler: ${error}`);
+        }
+    };
 
     return (
         <Card>
             <h2 className="text-xl font-bold mb-6">Multiplayer-Setup</h2>
+
+            {/* Verbindungsstatus-Anzeige */}
+            <div className="mb-4">
+                <div className={`flex items-center ${isSignalingConnected ? 'text-green-500' : 'text-yellow-500'}`}>
+                    <div className={`w-3 h-3 rounded-full mr-2 ${isSignalingConnected ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+                    <span>
+                        {isSignalingConnected
+                            ? 'Verbunden mit dem Signaling-Server'
+                            : 'Nicht verbunden mit dem Signaling-Server'}
+                    </span>
+                </div>
+
+                {!isSignalingConnected && (
+                    <div className="mt-2">
+                        <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={handleForceReconnect}
+                            disabled={isConnecting}
+                        >
+                            Verbindung herstellen
+                        </Button>
+                    </div>
+                )}
+            </div>
 
             {!setupMode ? (
                 <div className="space-y-4">
@@ -139,10 +197,20 @@ const WebRTCMultiplayerSetup = ({ onConnect }: WebRTCMultiplayerSetupProps) => {
                     </p>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <Button fullWidth variant="primary" onClick={handleCreateRoom}>
+                        <Button
+                            fullWidth
+                            variant="primary"
+                            onClick={handleCreateRoom}
+                            disabled={!isSignalingConnected}
+                        >
                             Raum erstellen
                         </Button>
-                        <Button fullWidth variant="secondary" onClick={handleJoinRoom}>
+                        <Button
+                            fullWidth
+                            variant="secondary"
+                            onClick={handleJoinRoom}
+                            disabled={!isSignalingConnected}
+                        >
                             Raum beitreten
                         </Button>
                     </div>
@@ -176,7 +244,7 @@ const WebRTCMultiplayerSetup = ({ onConnect }: WebRTCMultiplayerSetupProps) => {
                                 value={roomId}
                                 onChange={(e) => setRoomId(e.target.value.toUpperCase())}
                                 className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
-                                placeholder="Gib die Raum-ID ein"
+                                placeholder="Gib die Raum-ID ein (z.B. ABC123)"
                                 disabled={isConnecting}
                                 maxLength={6}
                             />
@@ -198,7 +266,10 @@ const WebRTCMultiplayerSetup = ({ onConnect }: WebRTCMultiplayerSetupProps) => {
                                 <button
                                     onClick={() => {
                                         navigator.clipboard.writeText(roomId)
-                                            .then(() => alert('Raum-ID kopiert!'))
+                                            .then(() => {
+                                                setError("Raum-ID kopiert!");
+                                                setTimeout(() => setError(null), 2000);
+                                            })
                                             .catch(err => console.error('Fehler beim Kopieren', err));
                                     }}
                                     className="bg-violet-600 px-4 rounded-r-lg hover:bg-violet-700"
@@ -213,7 +284,12 @@ const WebRTCMultiplayerSetup = ({ onConnect }: WebRTCMultiplayerSetupProps) => {
 
                     {error && (
                         <div
-                            className="p-3 bg-red-500/20 border border-red-500/40 rounded-lg text-red-300 text-sm">
+                            className={`p-3 rounded-lg text-sm ${
+                                error.includes("kopiert")
+                                    ? "bg-green-500/20 border border-green-500/40 text-green-300"
+                                    : "bg-red-500/20 border border-red-500/40 text-red-300"
+                            }`}
+                        >
                             {error}
                         </div>
                     )}
@@ -232,7 +308,7 @@ const WebRTCMultiplayerSetup = ({ onConnect }: WebRTCMultiplayerSetupProps) => {
                         <Button
                             variant="primary"
                             onClick={handleConnect}
-                            disabled={isConnecting}
+                            disabled={isConnecting || !isSignalingConnected}
                         >
                             {isConnecting ? 'Verbinde...' : 'Verbinden'}
                         </Button>

@@ -14,7 +14,7 @@
 
 :root.dark-theme {
     /* Dark theme */
-    --primary-color: #34495e;
+    --primary-color: #5F85AB;
     --secondary-color: #3498db;
     --accent-color: #e74c3c;
     --background-color: #1a1a1a;
@@ -804,4 +804,151 @@ input:checked + .slider:before {
     margin-top: 15px;
     font-size: 0.9rem;
     min-height: 20px;
+}
+
+.restart-game-container {
+    margin-top: 1.5rem;
+    text-align: center;
+    position: relative;
+}
+
+.restart-btn {
+    background-color: #2C2E3B;
+    color: white;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.restart-btn:hover {
+    background-color: #3a3d4f;
+}
+
+.confirmation-dialog {
+    position: absolute;
+    top: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 1rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+}
+
+.dark-theme .confirmation-dialog {
+    background-color: #2C2E3B;
+    border-color: #444;
+    color: #fff;
+}
+
+.confirmation-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+}
+
+.confirmation-buttons button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#confirm-restart {
+    background-color: #e74c3c;
+    color: white;
+}
+
+#cancel-restart {
+    background-color: #7f8c8d;
+    color: white;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Stelle sicher, dass der Confirmation Dialog korrekt positioniert ist */
+.restart-game-container {
+    margin-top: 1.5rem;
+    text-align: center;
+    position: relative;
+    min-height: 100px; /* Platz für den Dialog */
+}
+
+.confirmation-dialog {
+    position: absolute;
+    top: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 1rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000; /* Erhöht um sicherzugehen, dass er über anderen Elementen liegt */
+}
+
+#restart-confirmation {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #34495e; /* Etwas helleres Dunkelblau für besseren Kontrast */
+    color: white;
+    width: 300px; /* Feste Breite für bessere Lesbarkeit */
+    padding: 20px; /* Mehr Innenabstand */
+    border-radius: 8px; /* Weichere Ecken */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Stärkerer Schatten für Tiefe */
+    z-index: 1000;
+    text-align: center; /* Text zentrieren */
+    font-size: 1.1em; /* Etwas größere Schrift */
+}
+
+#restart-confirmation.hidden {
+    display: none;
+}
+
+#confirm-restart,
+#cancel-restart {
+    padding: 8px 20px; /* Größere Buttons */
+    margin: 0 10px; /* Mehr Abstand zwischen den Buttons */
+    border: none;
+    border-radius: 5px; /* Weichere Ecken */
+    cursor: pointer;
+    font-size: 1em; /* Schriftgröße anpassen */
+    transition: background-color 0.3s ease; /* Sanfte Farbänderung bei Hover */
+}
+
+#confirm-restart {
+    background-color: #e74c3c; /* Roter Button für "Ja" */
+    color: white;
+}
+
+#confirm-restart:hover {
+    background-color: #c0392b; /* Dunkleres Rot bei Hover */
+}
+
+#cancel-restart {
+    background-color: #7f8c8d; /* Grauer Button für "Nein" */
+    color: white;
+}
+
+#cancel-restart:hover {
+    background-color: #6c757d; /* Dunkleres Grau bei Hover */
+}
+
+/* Optional: Buttons in einer eigenen Zeile zentrieren */
+#restart-confirmation .button-container {
+    margin-top: 15px; /* Abstand zwischen Text und Buttons */
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* Abstand zwischen den Buttons */
 }

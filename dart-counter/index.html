@@ -148,7 +148,6 @@
         </div>
     </div>
 
-    <button id="restart-game" class="restart-btn hidden">Neues Spiel starten</button>
     <audio id="relight-sound" preload="auto">
         <source src="relight.m4a" type="audio/mp4">
         Ihr Browser unterstützt das Audio-Element nicht.
@@ -165,7 +164,19 @@
         <!-- Verstecktes File-Input-Element -->
         <input type="file" id="file-input" accept=".json" class="hidden">
     </div>
+</div>
 
+<div class="restart-game-container">
+    <button id="restart-game" class="restart-btn hidden" data-confirmed="false">Neues Spiel
+        starten
+    </button>
+    <div id="restart-confirmation" class="confirmation-dialog hidden">
+        <p>Wirklich neues Spiel starten?</p>
+        <div class="confirmation-buttons">
+            <button id="confirm-restart">Ja</button>
+            <button id="cancel-restart">Nein</button>
+        </div>
+    </div>
 </div>
 
 <script src="dart.js"></script>

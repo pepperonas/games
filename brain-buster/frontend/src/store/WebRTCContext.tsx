@@ -1,5 +1,5 @@
 // src/store/WebRTCContext.tsx
-import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import React, { createContext, ReactNode, useContext, useEffect, useState, useCallback } from 'react';
 import WebRTCService from '../services/webRTCService';
 import { Question } from '../types';
 
@@ -38,7 +38,10 @@ const WebRTCContext = createContext<WebRTCContextProps | undefined>(undefined);
 
 // Signaling-Server-URL basierend auf der aktuellen Domain
 const getSignalingServerUrl = () => {
+  // Protokoll basierend auf der aktuellen Seite wählen
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+
+  // Komplette URL mit korrektem Pfad erstellen - kritisch für die Verbindung!
   return `${protocol}//${window.location.host}/games/brain-buster/api/socket.io/`;
 };
 
@@ -51,81 +54,96 @@ export const WebRTCProvider: React.FC<WebRTCProviderProps> = ({ children }) => {
   const [isHost, setIsHost] = useState(false);
   const [players, setPlayers] = useState<PlayerInfo[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Initialisiere den WebRTC-Service
+  // Initialisiere den WebRTC-Service - nur einmal
   useEffect(() => {
-    const webRTCService = new WebRTCService();
-    
-    // Registriere Callbacks
-    webRTCService.registerCallbacks({
-      onConnectionStateChange: (state) => {
-        console.log('WebRTC Verbindungsstatus:', state);
-        setConnectionState(state);
-        setIsConnected(state === 'connected');
-      },
-      onPlayerJoined: (player) => {
-        console.log('Spieler beigetreten:', player);
-      },
-      onPlayerLeft: (playerId) => {
-        console.log('Spieler hat verlassen:', playerId);
-      },
-      onPlayersUpdate: (updatedPlayers) => {
-        console.log('Spielerliste aktualisiert:', updatedPlayers);
-        setPlayers(updatedPlayers);
-      },
-      onError: (message) => {
-        console.error('WebRTC Fehler:', message);
-        setError(message);
-      }
-    });
-    
-    setWebRTC(webRTCService);
-    
-    // Bereinige beim Unmounten
-    return () => {
-      // Keine explizite Bereinigung nötig, da der Service selbst bereinigt
-    };
-  }, []);
+    if (isInitialized) return;
+
+    console.log("WebRTCProvider: Initialisiere WebRTC-Service");
+
+    try {
+      const webRTCService = new WebRTCService();
+
+      // Registriere Callbacks
+      webRTCService.registerCallbacks({
+        onConnectionStateChange: (state) => {
+          console.log('WebRTC Verbindungsstatus:', state);
+          setConnectionState(state);
+          setIsConnected(state === 'connected');
+        },
+        onPlayerJoined: (player) => {
+          console.log('Spieler beigetreten:', player);
+        },
+        onPlayerLeft: (playerId) => {
+          console.log('Spieler hat verlassen:', playerId);
+        },
+        onPlayersUpdate: (updatedPlayers) => {
+          console.log('Spielerliste aktualisiert:', updatedPlayers);
+          setPlayers(updatedPlayers);
+        },
+        onError: (message) => {
+          console.error('WebRTC Fehler:', message);
+          setError(message);
+        },
+        onReconnect: () => {
+          console.log('WebRTC wurde neu verbunden');
+          setError(null);
+        }
+      });
+
+      setWebRTC(webRTCService);
+      setIsInitialized(true);
+
+    } catch (error) {
+      console.error("Fehler bei WebRTC-Initialisierung:", error);
+      setError(`Initialisierungsfehler: ${error}`);
+    }
+  }, [isInitialized]);
 
   // Verbinde mit dem Signaling-Server
-  const connectToSignalingServer = async () => {
+  const connectToSignalingServer = useCallback(async () => {
     if (!webRTC) {
-      setError('WebRTC-Service nicht initialisiert');
-      return Promise.reject('WebRTC-Service nicht initialisiert');
+      console.error('WebRTC-Service wurde noch nicht initialisiert');
+      setError('WebRTC-Service wurde noch nicht initialisiert');
+      return Promise.reject('WebRTC-Service wurde noch nicht initialisiert');
     }
-    
+
     try {
       const serverUrl = getSignalingServerUrl();
       console.log('Verbinde mit Signaling-Server:', serverUrl);
-      
+
       await webRTC.connectToSignalingServer(serverUrl);
       setIsSignalingConnected(true);
       setError(null);
       return Promise.resolve();
     } catch (error) {
       console.error('Fehler bei der Verbindung mit dem Signaling-Server:', error);
-      setError(`Fehler bei der Verbindung: ${error}`);
+      setError(`Verbindungsfehler: ${error}`);
       setIsSignalingConnected(false);
       return Promise.reject(error);
     }
-  };
+  }, [webRTC]);
 
   // Erstelle einen neuen Raum
-  const createRoom = async (playerName: string, roomId: string) => {
+  const createRoom = useCallback(async (playerName: string, roomId: string) => {
     if (!webRTC) {
-      setError('WebRTC-Service nicht initialisiert');
-      return Promise.reject('WebRTC-Service nicht initialisiert');
+      setError('WebRTC-Service wurde noch nicht initialisiert');
+      return Promise.reject('WebRTC-Service wurde noch nicht initialisiert');
     }
-    
+
     if (!isSignalingConnected) {
       try {
+        console.log("Keine Verbindung zum Signaling-Server, versuche zu verbinden...");
         await connectToSignalingServer();
       } catch (error) {
+        console.error("Verbindung zum Signaling-Server fehlgeschlagen:", error);
         return Promise.reject('Keine Verbindung zum Signaling-Server');
       }
     }
-    
+
     try {
+      console.log(`Erstelle Raum: ${roomId}, Spieler: ${playerName}`);
       const createdRoomId = await webRTC.createRoom(playerName, roomId);
       setCurrentRoom(createdRoomId);
       setIsHost(true);
@@ -136,24 +154,27 @@ export const WebRTCProvider: React.FC<WebRTCProviderProps> = ({ children }) => {
       setError(`Fehler beim Erstellen des Raums: ${error}`);
       return Promise.reject(error);
     }
-  };
+  }, [webRTC, isSignalingConnected, connectToSignalingServer]);
 
   // Tritt einem existierenden Raum bei
-  const joinRoom = async (playerName: string, roomId: string) => {
+  const joinRoom = useCallback(async (playerName: string, roomId: string) => {
     if (!webRTC) {
-      setError('WebRTC-Service nicht initialisiert');
-      return Promise.reject('WebRTC-Service nicht initialisiert');
+      setError('WebRTC-Service wurde noch nicht initialisiert');
+      return Promise.reject('WebRTC-Service wurde noch nicht initialisiert');
     }
-    
+
     if (!isSignalingConnected) {
       try {
+        console.log("Keine Verbindung zum Signaling-Server, versuche zu verbinden...");
         await connectToSignalingServer();
       } catch (error) {
+        console.error("Verbindung zum Signaling-Server fehlgeschlagen:", error);
         return Promise.reject('Keine Verbindung zum Signaling-Server');
       }
     }
-    
+
     try {
+      console.log(`Betrete Raum: ${roomId}, Spieler: ${playerName}`);
       await webRTC.joinRoom(playerName, roomId);
       setCurrentRoom(roomId);
       setIsHost(false);
@@ -164,70 +185,90 @@ export const WebRTCProvider: React.FC<WebRTCProviderProps> = ({ children }) => {
       setError(`Fehler beim Beitreten zum Raum: ${error}`);
       return Promise.reject(error);
     }
-  };
+  }, [webRTC, isSignalingConnected, connectToSignalingServer]);
 
   // Verlasse den aktuellen Raum
-  const leaveRoom = () => {
+  const leaveRoom = useCallback(() => {
     if (!webRTC) {
-      setError('WebRTC-Service nicht initialisiert');
+      setError('WebRTC-Service wurde noch nicht initialisiert');
       return;
     }
-    
+
+    console.log("Verlasse Raum");
     webRTC.leaveRoom();
     setCurrentRoom(null);
     setIsHost(false);
     setPlayers([]);
-  };
+  }, [webRTC]);
 
   // Setze den Bereit-Status
-  const setReady = (isReady: boolean) => {
+  const setReady = useCallback((isReady: boolean) => {
     if (!webRTC) {
-      setError('WebRTC-Service nicht initialisiert');
+      setError('WebRTC-Service wurde noch nicht initialisiert');
       return;
     }
-    
+
+    console.log(`Setze Bereit-Status: ${isReady}`);
     webRTC.setReady(isReady);
-  };
+  }, [webRTC]);
 
   // Starte das Spiel
-  const startGame = (questions: Question[]) => {
+  const startGame = useCallback((questions: Question[]) => {
     if (!webRTC) {
-      setError('WebRTC-Service nicht initialisiert');
+      setError('WebRTC-Service wurde noch nicht initialisiert');
       return;
     }
-    
+
     if (!isHost) {
       setError('Nur der Host kann das Spiel starten');
       return;
     }
-    
+
+    if (!questions || questions.length === 0) {
+      setError('Keine Fragen zum Starten des Spiels verfügbar');
+      return;
+    }
+
+    console.log(`Starte Spiel mit ${questions.length} Fragen`);
     webRTC.startGame(questions);
-  };
+  }, [webRTC, isHost]);
 
   // Beantworte eine Frage
-  const answerQuestion = (questionIndex: number, answer: number) => {
+  const answerQuestion = useCallback((questionIndex: number, answer: number) => {
     if (!webRTC) {
-      setError('WebRTC-Service nicht initialisiert');
+      setError('WebRTC-Service wurde noch nicht initialisiert');
       return;
     }
-    
+
+    console.log(`Beantworte Frage ${questionIndex} mit Antwort ${answer}`);
     webRTC.answerQuestion(questionIndex, answer);
-  };
+  }, [webRTC]);
 
   // Gehe zur nächsten Frage
-  const nextQuestion = () => {
+  const nextQuestion = useCallback(() => {
     if (!webRTC) {
-      setError('WebRTC-Service nicht initialisiert');
+      setError('WebRTC-Service wurde noch nicht initialisiert');
       return;
     }
-    
+
     if (!isHost) {
       setError('Nur der Host kann zur nächsten Frage wechseln');
       return;
     }
-    
+
+    console.log('Wechsle zur nächsten Frage');
     webRTC.nextQuestion();
-  };
+  }, [webRTC, isHost]);
+
+  // Automatischer Verbindungsversuch beim Laden
+  useEffect(() => {
+    if (webRTC && !isSignalingConnected) {
+      console.log("Automatischer Verbindungsversuch zum Signaling-Server");
+      connectToSignalingServer().catch(err =>
+          console.warn("Anfänglicher Verbindungsversuch fehlgeschlagen, manuelle Verbindung erforderlich", err)
+      );
+    }
+  }, [webRTC, isSignalingConnected, connectToSignalingServer]);
 
   const value = {
     webRTC,
@@ -249,18 +290,18 @@ export const WebRTCProvider: React.FC<WebRTCProviderProps> = ({ children }) => {
   };
 
   return (
-    <WebRTCContext.Provider value={value}>
-      {children}
-    </WebRTCContext.Provider>
+      <WebRTCContext.Provider value={value}>
+        {children}
+      </WebRTCContext.Provider>
   );
 };
 
 export const useWebRTC = () => {
   const context = useContext(WebRTCContext);
-  
+
   if (context === undefined) {
-    throw new Error('useWebRTC must be used within a WebRTCProvider');
+    throw new Error('useWebRTC muss innerhalb eines WebRTCProviders verwendet werden');
   }
-  
+
   return context;
 };

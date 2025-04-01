@@ -1,12 +1,12 @@
 // src/components/multiplayer/WebRTCMultiplayerGame.tsx
-import {useEffect, useState} from 'react';
-import {motion} from 'framer-motion';
+import { useEffect, useState, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import QuestionCard from '../game/QuestionCard';
-import {useGame} from '../../store/GameContext';
-import {useWebRTC} from '../../store/WebRTCContext';
-import {Question} from '../../types';
+import { useGame } from '../../store/GameContext';
+import { useWebRTC } from '../../store/WebRTCContext';
+import { Question } from '../../types';
 
 interface PlayerScore {
     id: string;
@@ -31,7 +31,7 @@ const WebRTCMultiplayerGame = ({
                                    onBackToLobby,
                                    onLeave
                                }: WebRTCMultiplayerGameProps) => {
-    const {startGame: startGameContext, endGame} = useGame();
+    const { startGame: startGameContext, endGame } = useGame();
     const {
         webRTC,
         players,
@@ -53,22 +53,33 @@ const WebRTCMultiplayerGame = ({
     const [initComplete, setInitComplete] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [debugMode, setDebugMode] = useState(false);
+    const [countdown, setCountdown] = useState<number | null>(null);
+    const [timeLeft, setTimeLeft] = useState<number | null>(null);
+    const [questionStartTime, setQuestionStartTime] = useState<number | null>(null);
 
+    // Versuche Fragen aus dem localStorage zu laden bei Start
     useEffect(() => {
-        // Wenn wir keine Fragen haben, aber initComplete ist noch false
         if (questions.length === 0 && !initComplete) {
-            // Prüfen, ob die Fragen im lokalen Speicher sind
             const savedQuestions = localStorage.getItem('lastGameQuestions');
             if (savedQuestions) {
                 try {
                     const parsedQuestions = JSON.parse(savedQuestions);
+                    const questionsTimestamp = localStorage.getItem('lastGameTimestamp');
+                    const timestamp = questionsTimestamp ? parseInt(questionsTimestamp) : 0;
 
-                    if (Array.isArray(parsedQuestions) && parsedQuestions.length > 0) {
+                    // Prüfe, ob die Fragen nicht älter als 10 Minuten sind
+                    const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
+
+                    if (Array.isArray(parsedQuestions) && parsedQuestions.length > 0 && timestamp > tenMinutesAgo) {
                         console.log("🛟 Fragen aus dem lokalen Speicher geladen:", parsedQuestions.length);
                         setQuestions(parsedQuestions);
                         setCurrentQuestionIndex(0);
                         setInitComplete(true);
                         startGameContext('multiplayer', parsedQuestions);
+                    } else {
+                        console.log("Gespeicherte Fragen sind zu alt oder ungültig");
+                        localStorage.removeItem('lastGameQuestions');
+                        localStorage.removeItem('lastGameTimestamp');
                     }
                 } catch (error) {
                     console.error("Fehler beim Analysieren gespeicherter Fragen:", error);
@@ -76,6 +87,48 @@ const WebRTCMultiplayerGame = ({
             }
         }
     }, [questions.length, initComplete, startGameContext]);
+
+    // Timer-Funktion für den Countdown am Anfang des Spiels
+    const startCountdown = useCallback(() => {
+        setCountdown(3);
+
+        const interval = setInterval(() => {
+            setCountdown(prev => {
+                if (prev !== null && prev > 1) {
+                    return prev - 1;
+                } else {
+                    clearInterval(interval);
+                    return null;
+                }
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    // Timer-Funktion für die verbleibende Zeit pro Frage
+    const startQuestionTimer = useCallback((duration: number) => {
+        setQuestionStartTime(Date.now());
+        setTimeLeft(duration);
+
+        const interval = setInterval(() => {
+            const now = Date.now();
+            const elapsed = questionStartTime ? (now - questionStartTime) / 1000 : 0;
+            const remaining = Math.max(0, duration - elapsed);
+
+            setTimeLeft(Math.round(remaining));
+
+            if (remaining <= 0) {
+                clearInterval(interval);
+                // Wenn die Zeit abgelaufen ist und noch keine Antwort gegeben wurde
+                if (!waitingForOthers) {
+                    handleAnswerQuestion(-1); // Automatisch "keine Antwort" senden
+                }
+            }
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [questionStartTime, waitingForOthers]);
 
     // Registriere Callbacks für WebRTC-Spielereignisse
     useEffect(() => {
@@ -86,6 +139,11 @@ const WebRTCMultiplayerGame = ({
         }
 
         console.log("Richte Spielereignis-Listener in WebRTCMultiplayerGame ein");
+
+        // Starte den Countdown nach dem Laden der Komponente
+        if (!countdown) {
+            startCountdown();
+        }
 
         // Lese Punktzahlen aus den Spielern
         const updatePlayerScores = () => {
@@ -111,7 +169,7 @@ const WebRTCMultiplayerGame = ({
                 // Defensives Validieren mit besserem Feedback
                 if (!gameState || !gameState.questions || !Array.isArray(gameState.questions) || gameState.questions.length === 0) {
                     console.error("❌ Ungültige Daten im game-started Event:", gameState);
-                    setErrorMsg("Ungültige Spielstart-Daten empfangen. Versuche Neustart...");
+                    setErrorMsg("Ungültige Spielstart-Daten empfangen. Versuche es erneut...");
                     return;
                 }
 
@@ -133,6 +191,9 @@ const WebRTCMultiplayerGame = ({
                 setInitComplete(true);
                 setErrorMsg(null);
 
+                // Starte Timer für die erste Frage
+                startQuestionTimer(gameState.timePerQuestion);
+
                 // Initialisiere Spiel im Kontext
                 startGameContext('multiplayer', gameState.questions);
             },
@@ -150,9 +211,6 @@ const WebRTCMultiplayerGame = ({
                 // Wenn dies die letzte Frage war, beende das Spiel
                 if (questionIndex >= questions.length - 1) {
                     console.log("Letzte Frage beantwortet, bereite Spielende vor");
-                    if (isHost) {
-                        // Das Spielende wird durch onGameEnded verarbeitet
-                    }
                 }
             },
 
@@ -160,12 +218,19 @@ const WebRTCMultiplayerGame = ({
                 console.log("Wechsel zur nächsten Frage:", nextIndex);
                 setCurrentQuestionIndex(nextIndex);
                 setWaitingForOthers(false);
+
+                // Starte den Timer für die nächste Frage
+                if (questions.length > 0) {
+                    startQuestionTimer(20); // Standard: 20 Sekunden pro Frage
+                }
             },
 
             onQuestionTimerEnded: (questionIndex) => {
                 console.log("Timer für Frage abgelaufen:", questionIndex);
+                setTimeLeft(0);
+
                 // Zeit ist abgelaufen, aber noch nicht geantwortet
-                if (waitingForOthers === false) {
+                if (!waitingForOthers) {
                     // Automatische Antwort senden (-1 für keine Antwort)
                     handleAnswerQuestion(-1);
                 }
@@ -209,10 +274,10 @@ const WebRTCMultiplayerGame = ({
         return () => {
             // WebRTC-Service behält seine Callbacks intern bei
         };
-    }, [webRTC, players, isHost, questions.length, endGame, startGameContext, playerId, waitingForOthers]);
+    }, [webRTC, players, isHost, questions.length, endGame, startGameContext, playerId, waitingForOthers, countdown, startCountdown, startQuestionTimer]);
 
     // Frage beantworten
-    const handleAnswerQuestion = (answer: number) => {
+    const handleAnswerQuestion = useCallback((answer: number) => {
         if (!webRTC || !initComplete) return;
 
         console.log("Sende Antwort:", {
@@ -224,24 +289,24 @@ const WebRTCMultiplayerGame = ({
         answerQuestionWebRTC(currentQuestionIndex, answer);
 
         setWaitingForOthers(true);
-    };
+    }, [webRTC, initComplete, roomId, playerId, currentQuestionIndex, answerQuestionWebRTC]);
 
     // Zur nächsten Frage (nur für Host)
-    const handleNextQuestion = () => {
+    const handleNextQuestion = useCallback(() => {
         if (!webRTC || !isHost || !initComplete) return;
 
         console.log("Host wechselt zur nächsten Frage von Index", currentQuestionIndex);
         nextQuestionWebRTC();
-    };
+    }, [webRTC, isHost, initComplete, currentQuestionIndex, nextQuestionWebRTC]);
 
     // Spiel verlassen
-    const handleLeaveGame = () => {
+    const handleLeaveGame = useCallback(() => {
         leaveRoom();
         onLeave();
-    };
+    }, [leaveRoom, onLeave]);
 
     // Status-Aktualisierung erzwingen
-    const handleForceRefresh = () => {
+    const handleForceRefresh = useCallback(() => {
         if (!webRTC) return;
 
         setErrorMsg("Verbindung wird neu aufgebaut...");
@@ -250,7 +315,7 @@ const WebRTCMultiplayerGame = ({
         setTimeout(() => {
             window.location.reload();
         }, 1500);
-    };
+    }, [webRTC]);
 
     // Berechne Punktzahl des aktuellen Spielers
     const currentPlayerScore = playerScores.find(p => p.id === playerId)?.score || 0;
@@ -258,22 +323,23 @@ const WebRTCMultiplayerGame = ({
     // Berechne Punktzahlen der Gegner
     const opponentScores = playerScores.filter(p => p.id !== playerId);
 
-    // Berechne aktuellen Spielzustand für Logging
-    const gameStatus = {
-        initComplete,
-        questionsLength: questions.length,
-        currentQuestionIndex,
-        waitingForOthers,
-        gameEnded
-    };
-
-    if (debugMode) {
-        console.log("Spielzustand:", gameStatus);
-    }
-
     return (
         <div>
-            {!gameEnded ? (
+            {countdown !== null ? (
+                <Card className="text-center py-12 bg-violet-900/30">
+                    <motion.div
+                        key={countdown}
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 1.5, opacity: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="text-7xl font-bold text-violet-400"
+                    >
+                        {countdown}
+                    </motion.div>
+                    <p className="mt-4 text-lg">Das Spiel startet gleich...</p>
+                </Card>
+            ) : !gameEnded ? (
                 <div className="space-y-6">
                     <div className="flex justify-between items-center">
                         <Card className="w-full p-4">
@@ -299,6 +365,7 @@ const WebRTCMultiplayerGame = ({
                         </Card>
                     </div>
 
+                    {/* Spielerscores anzeigen */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <Card className="p-4">
                             <div className="flex justify-between items-center">
@@ -348,8 +415,9 @@ const WebRTCMultiplayerGame = ({
                                     waitingForOthers,
                                     isHost,
                                     webRTCConnected: isConnected,
+                                    timeLeft,
                                     firstQuestion: questions[0] ?
-                                        {id: questions[0].id, question: questions[0].question} :
+                                        {id: questions[0].id, question: questions[0].question.substring(0, 30) + "..."} :
                                         null
                                 }, null, 2)}</pre>
                             </div>
@@ -375,17 +443,42 @@ const WebRTCMultiplayerGame = ({
                         </Card>
                     )}
 
+                    {/* Verbindungsstatus */}
+                    {!isConnected && (
+                        <Card className="p-4 bg-yellow-600/20 border border-yellow-600/40">
+                            <div className="flex items-center">
+                                <div className="text-lg mr-2">🔌</div>
+                                <p className="font-medium text-yellow-300">
+                                    Verbindung zum Server verloren. Versuche, die Verbindung wiederherzustellen...
+                                </p>
+                            </div>
+                            <div className="mt-2">
+                                <Button variant="primary" size="sm" onClick={handleForceRefresh}>
+                                    Neu verbinden
+                                </Button>
+                            </div>
+                        </Card>
+                    )}
+
                     {/* Hauptspielinhalt */}
                     {initComplete && questions.length > 0 && currentQuestionIndex < questions.length ? (
                         <div>
                             <div className="mb-4 flex justify-between items-center">
                                 <div>
-                                    <span
-                                        className="text-sm font-medium text-violet-300">Frage</span>
+                                    <span className="text-sm font-medium text-violet-300">Frage</span>
                                     <h2 className="text-xl font-bold">
                                         {currentQuestionIndex + 1} / {questions.length}
                                     </h2>
                                 </div>
+
+                                {timeLeft !== null && (
+                                    <div className="text-right">
+                                        <span className="text-sm font-medium text-violet-300">Zeit</span>
+                                        <h2 className="text-xl font-bold">
+                                            {timeLeft}s
+                                        </h2>
+                                    </div>
+                                )}
                             </div>
 
                             <QuestionCard
@@ -408,7 +501,9 @@ const WebRTCMultiplayerGame = ({
                                         `(${questions.length} Fragen empfangen)` : ''}
                                     </p>
 
-                                    <Button variant="secondary" onClick={handleForceRefresh}>
+                                    <div className="loader mx-auto w-12 h-12 border-4 border-t-4 border-gray-200 rounded-full border-t-violet-500 animate-spin"></div>
+
+                                    <Button className="mt-6" variant="secondary" onClick={handleForceRefresh}>
                                         Status aktualisieren
                                     </Button>
                                 </>
@@ -417,6 +512,8 @@ const WebRTCMultiplayerGame = ({
                                     <h3 className="text-xl font-bold mb-4">Alle Fragen
                                         beantwortet!</h3>
                                     <p className="mb-6">Warte auf die anderen Spieler...</p>
+
+                                    <div className="loader mx-auto w-12 h-12 border-4 border-t-4 border-gray-200 rounded-full border-t-violet-500 animate-spin"></div>
                                 </>
                             )}
                         </Card>
