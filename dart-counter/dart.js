@@ -59,6 +59,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const fileDropArea = document.getElementById('file-drop-area');
     const importStatus = document.getElementById('import-status');
     const exportButton = document.getElementById('export-data');
+    const exportPlayersButton = document.getElementById('export-players');
+    const exportAllGamesButton = document.getElementById('export-all-games');
     const resetDataButton = document.getElementById('reset-data');
 
     // Game state
@@ -252,8 +254,221 @@ document.addEventListener('DOMContentLoaded', function () {
         };
     }
 
-    // Import game data
-    function importGameData(jsonData) {
+    // Export all player data as JSON
+    function exportAllPlayerData() {
+        if (!db) {
+            alert('Keine Datenbankverbindung vorhanden.');
+            return;
+        }
+
+        const transaction = db.transaction(['players', 'throws', 'games'], 'readonly');
+        const playersStore = transaction.objectStore('players');
+        const throwsStore = transaction.objectStore('throws');
+        const gamesStore = transaction.objectStore('games');
+
+        // Alle Spieler laden
+        const playersRequest = playersStore.getAll();
+
+        playersRequest.onsuccess = function(event) {
+            const players = event.target.result;
+            if (players.length === 0) {
+                alert('Keine Spielerdaten vorhanden.');
+                return;
+            }
+
+            // Alle Spiele laden
+            const gamesRequest = gamesStore.getAll();
+            gamesRequest.onsuccess = function(event) {
+                const games = event.target.result;
+
+                // Alle Würfe laden
+                const throwsRequest = throwsStore.getAll();
+                throwsRequest.onsuccess = function(event) {
+                    const throws = event.target.result;
+
+                    // Spieler mit ihren Würfen und Spielen verknüpfen
+                    const enrichedPlayers = players.map(player => {
+                        const playerThrows = throws.filter(t => t.playerId === player.id);
+
+                        // Spiele finden, in denen der Spieler teilgenommen hat
+                        const playerGames = games.filter(game =>
+                            game.players && game.players.some(p => p.name === player.name)
+                        );
+
+                        // Statistiken berechnen
+                        const totalThrows = playerThrows.length;
+                        const totalScore = playerThrows.reduce((sum, t) => sum + t.score, 0);
+                        const avgScore = totalThrows > 0 ? (totalScore / totalThrows) : 0;
+                        const highestScore = playerThrows.length > 0 ? Math.max(...playerThrows.map(t => t.score)) : 0;
+
+                        return {
+                            id: player.id,
+                            name: player.name,
+                            firstSeen: player.firstSeen,
+                            statistics: {
+                                totalThrows,
+                                totalScore,
+                                averageScore: avgScore,
+                                highestScore
+                            },
+                            throws: playerThrows,
+                            games: playerGames.map(g => g.id) // Nur die IDs der Spiele speichern
+                        };
+                    });
+
+                    // Export-Daten zusammenstellen
+                    const exportData = {
+                        players: enrichedPlayers,
+                        exportVersion: "1.0",
+                        exportDate: new Date().toISOString(),
+                        exportType: "players"
+                    };
+
+                    // Als JSON-Datei exportieren
+                    const dataStr = JSON.stringify(exportData, null, 2);
+                    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+                    const exportFileName = 'dart-players-' + new Date().toISOString().slice(0, 19).replace(/:/g, '-') + '.json';
+
+                    const linkElement = document.createElement('a');
+                    linkElement.setAttribute('href', dataUri);
+                    linkElement.setAttribute('download', exportFileName);
+                    linkElement.click();
+                };
+            };
+        };
+
+        playersRequest.onerror = function(event) {
+            console.error('Fehler beim Laden der Spielerdaten:', event.target.error);
+            alert('Fehler beim Laden der Spielerdaten.');
+        };
+    }
+
+    // Funktion zum Exportieren aller Spieldaten
+    function exportAllGames() {
+        if (!db) {
+            alert('Keine Datenbankverbindung vorhanden.');
+            return;
+        }
+
+        const transaction = db.transaction(['games', 'throws', 'players'], 'readonly');
+        const gamesStore = transaction.objectStore('games');
+        const throwsStore = transaction.objectStore('throws');
+        const playersStore = transaction.objectStore('players');
+
+        // Alle Spiele laden
+        const gamesRequest = gamesStore.getAll();
+
+        gamesRequest.onsuccess = function(event) {
+            const games = event.target.result;
+            if (games.length === 0) {
+                alert('Keine Spieldaten vorhanden.');
+                return;
+            }
+
+            // Alle Würfe laden
+            const throwsRequest = throwsStore.getAll();
+            throwsRequest.onsuccess = function(event) {
+                const allThrows = event.target.result;
+
+                // Spieler zum Referenzieren laden
+                const playersRequest = playersStore.getAll();
+                playersRequest.onsuccess = function(event) {
+                    const allPlayers = event.target.result;
+
+                    // Spieler-Lookup erstellen
+                    const playerLookup = {};
+                    allPlayers.forEach(player => {
+                        playerLookup[player.id] = player;
+                    });
+
+                    // Anreicherung der Spieldaten mit zugehörigen Würfen
+                    const enrichedGames = games.map(game => {
+                        // Würfe für dieses Spiel finden
+                        const gameThrows = allThrows.filter(t => t.gameId === game.id);
+
+                        // Spielerdetails anreichern
+                        const enrichedPlayers = game.players.map(player => {
+                            // Spieler-ID finden, falls vorhanden
+                            const playerId = allPlayers.find(p => p.name === player.name)?.id;
+
+                            // Spielerwürfe für dieses Spiel
+                            const playerThrows = gameThrows.filter(t => t.playerName === player.name);
+
+                            return {
+                                ...player,
+                                id: playerId,
+                                throws: playerThrows.length, // Anzahl der Würfe
+                                totalScore: playerThrows.reduce((sum, t) => sum + t.score, 0)
+                            };
+                        });
+
+                        return {
+                            ...game,
+                            players: enrichedPlayers,
+                            throws: gameThrows,
+                            throwCount: gameThrows.length
+                        };
+                    });
+
+                    // Export-Daten zusammenstellen
+                    const exportData = {
+                        games: enrichedGames,
+                        exportVersion: "1.0",
+                        exportDate: new Date().toISOString(),
+                        exportType: "all_games"
+                    };
+
+                    // Als JSON-Datei exportieren
+                    const dataStr = JSON.stringify(exportData, null, 2);
+                    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+                    const exportFileName = 'dart-games-all-' + new Date().toISOString().slice(0, 19).replace(/:/g, '-') + '.json';
+
+                    const linkElement = document.createElement('a');
+                    linkElement.setAttribute('href', dataUri);
+                    linkElement.setAttribute('download', exportFileName);
+                    linkElement.click();
+                };
+            };
+        };
+
+        gamesRequest.onerror = function(event) {
+            console.error('Fehler beim Laden der Spieldaten:', event.target.error);
+            alert('Fehler beim Laden der Spieldaten.');
+        };
+    }
+
+    // Funktion zum Löschen aller Daten in der Datenbank
+    function clearAllDataBeforeImport() {
+        return new Promise((resolve, reject) => {
+            if (!db) {
+                reject(new Error('Keine Datenbankverbindung vorhanden.'));
+                return;
+            }
+
+            const transaction = db.transaction(['throws', 'games', 'players'], 'readwrite');
+            const throwsStore = transaction.objectStore('throws');
+            const gamesStore = transaction.objectStore('games');
+            const playersStore = transaction.objectStore('players');
+
+            // Alle Object Stores leeren
+            throwsStore.clear();
+            gamesStore.clear();
+            playersStore.clear();
+
+            transaction.oncomplete = function () {
+                console.log('Alle Daten wurden vor dem Import gelöscht');
+                resolve();
+            };
+
+            transaction.onerror = function (event) {
+                console.error('Fehler beim Löschen aller Daten:', event.target.error);
+                reject(new Error('Beim Löschen der Daten ist ein Fehler aufgetreten.'));
+            };
+        });
+    }
+
+    // Verbesserte Import-Funktion mit Option zum vorherigen Löschen der Daten
+    function importGameData(jsonData, clearBeforeImport = false) {
         if (!db) {
             alert('Keine Datenbankverbindung vorhanden.');
             return;
@@ -261,74 +476,228 @@ document.addEventListener('DOMContentLoaded', function () {
 
         try {
             const data = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
-            if (!data.game || !data.throws) throw new Error('Ungültiges Datenformat');
 
-            const transaction = db.transaction(['games', 'throws', 'players'], 'readwrite');
-            const gamesStore = transaction.objectStore('games');
-            const throwsStore = transaction.objectStore('throws');
-            const playersStore = transaction.objectStore('players');
+            // Bestimme den Typ des Exports basierend auf der Struktur
+            let exportType = '';
+            if (data.game && data.throws) {
+                exportType = 'single_game';
+            } else if (data.games && Array.isArray(data.games)) {
+                exportType = 'all_games';
+            } else if (data.players && Array.isArray(data.players)) {
+                exportType = 'players';
+            } else {
+                throw new Error('Unbekanntes oder ungültiges Datenformat');
+            }
 
-            const gameRequest = gamesStore.add(data.game);
-            gameRequest.onsuccess = function (event) {
-                const gameId = event.target.result;
-                console.log('Spiel importiert mit ID:', gameId);
+            console.log('Erkannter Export-Typ:', exportType);
 
-                const playerPromises = [];
-                const playerIds = {};
+            // Funktion zum eigentlichen Import
+            const performImport = () => {
+                const transaction = db.transaction(['games', 'throws', 'players'], 'readwrite');
+                const gamesStore = transaction.objectStore('games');
+                const throwsStore = transaction.objectStore('throws');
+                const playersStore = transaction.objectStore('players');
 
-                data.game.players.forEach(player => {
-                    playerPromises.push(new Promise((resolve) => {
-                        const nameIndex = playersStore.index('name');
-                        const nameRequest = nameIndex.get(player.name);
+                let importStats = {
+                    games: 0,
+                    throws: 0,
+                    players: 0
+                };
 
-                        nameRequest.onsuccess = function (event) {
-                            const existingPlayer = event.target.result;
-                            if (existingPlayer) {
-                                playerIds[player.name] = existingPlayer.id;
-                                resolve();
-                            } else {
-                                const playerData = { name: player.name, firstSeen: new Date() };
-                                const addRequest = playersStore.add(playerData);
-                                addRequest.onsuccess = function (event) {
-                                    playerIds[player.name] = event.target.result;
-                                    resolve();
-                                };
-                                addRequest.onerror = function () { resolve(); };
+                // Funktion zum Importieren eines einzelnen Spiels
+                const importSingleGame = (gameData, throwsData) => {
+                    return new Promise((resolveGame) => {
+                        // Spielerdaten aus dem Spiel extrahieren
+                        const playerPromises = [];
+                        const playerIds = {};
+
+                        const gameRequest = gamesStore.add(gameData);
+
+                        gameRequest.onsuccess = function(event) {
+                            const gameId = event.target.result;
+                            importStats.games++;
+                            console.log('Spiel importiert mit ID:', gameId);
+
+                            if (gameData.players && Array.isArray(gameData.players)) {
+                                gameData.players.forEach(player => {
+                                    playerPromises.push(new Promise((resolve) => {
+                                        const nameIndex = playersStore.index('name');
+                                        const nameRequest = nameIndex.get(player.name);
+
+                                        nameRequest.onsuccess = function(event) {
+                                            const existingPlayer = event.target.result;
+                                            if (existingPlayer) {
+                                                playerIds[player.name] = existingPlayer.id;
+                                                resolve();
+                                            } else {
+                                                const playerData = {
+                                                    name: player.name,
+                                                    firstSeen: player.firstSeen || new Date()
+                                                };
+                                                const addRequest = playersStore.add(playerData);
+                                                addRequest.onsuccess = function(event) {
+                                                    importStats.players++;
+                                                    playerIds[player.name] = event.target.result;
+                                                    resolve();
+                                                };
+                                                addRequest.onerror = function() { resolve(); };
+                                            }
+                                        };
+                                        nameRequest.onerror = function() { resolve(); };
+                                    }));
+                                });
                             }
+
+                            Promise.all(playerPromises).then(() => {
+                                let importedThrows = 0;
+                                const throws = Array.isArray(throwsData) ? throwsData : [];
+
+                                if (throws.length === 0) {
+                                    resolveGame();
+                                    return;
+                                }
+
+                                throws.forEach(throwData => {
+                                    // Kopie erstellen und ID löschen (wird neu generiert)
+                                    const throwCopy = {...throwData};
+                                    delete throwCopy.id;
+
+                                    // GameID aktualisieren
+                                    throwCopy.gameId = gameId;
+
+                                    // PlayerID aktualisieren falls möglich
+                                    if (playerIds[throwCopy.playerName]) {
+                                        throwCopy.playerId = playerIds[throwCopy.playerName];
+                                    }
+
+                                    const throwRequest = throwsStore.add(throwCopy);
+                                    throwRequest.onsuccess = function() {
+                                        importedThrows++;
+                                        importStats.throws++;
+                                        if (importedThrows === throws.length) {
+                                            resolveGame();
+                                        }
+                                    };
+                                    throwRequest.onerror = function(e) {
+                                        console.error('Fehler beim Importieren eines Wurfs:', e);
+                                        importedThrows++;
+                                        if (importedThrows === throws.length) {
+                                            resolveGame();
+                                        }
+                                    };
+                                });
+                            });
                         };
-                        nameRequest.onerror = function () { resolve(); };
-                    }));
-                });
 
-                Promise.all(playerPromises).then(() => {
-                    let importedThrows = 0;
-                    data.throws.forEach(throwData => {
-                        throwData.gameId = gameId;
-                        if (playerIds[throwData.playerName]) throwData.playerId = playerIds[throwData.playerName];
-                        delete throwData.id;
-
-                        const throwRequest = throwsStore.add(throwData);
-                        throwRequest.onsuccess = function () {
-                            importedThrows++;
-                            if (importedThrows === data.throws.length) {
-                                alert(`Import abgeschlossen: 1 Spiel und ${importedThrows} Würfe importiert.`);
-                            }
+                        gameRequest.onerror = function(event) {
+                            console.error('Fehler beim Importieren des Spiels:', event.target.error);
+                            resolveGame();
                         };
                     });
-                });
+                };
+
+                // Import basierend auf dem Typ starten
+                switch (exportType) {
+                    case 'single_game':
+                        // Einzelnes Spiel importieren
+                        importSingleGame(data.game, data.throws).then(() => {
+                            alert(`Import abgeschlossen: ${importStats.games} Spiel und ${importStats.throws} Würfe importiert.`);
+                        });
+                        break;
+
+                    case 'all_games':
+                        // Mehrere Spiele importieren
+                        const gamePromises = [];
+
+                        data.games.forEach(game => {
+                            // Für jedes Spiel Würfe extrahieren
+                            const gameThrows = game.throws || [];
+
+                            // Spieldaten bereinigen (throws entfernen, da diese separat importiert werden)
+                            const gameCopy = {...game};
+                            delete gameCopy.throws;
+                            delete gameCopy.throwCount; // Nicht in der Datenbank benötigt
+
+                            // Spiel importieren
+                            gamePromises.push(importSingleGame(gameCopy, gameThrows));
+                        });
+
+                        Promise.all(gamePromises).then(() => {
+                            alert(`Import abgeschlossen: ${importStats.games} Spiele, ${importStats.throws} Würfe und ${importStats.players} Spieler importiert.`);
+                        });
+                        break;
+
+                    case 'players':
+                        // Spielerdaten importieren
+                        const playerPromises = [];
+
+                        data.players.forEach(player => {
+                            // Kopie erstellen und Würfe entfernen (werden separat behandelt)
+                            const playerCopy = {
+                                name: player.name,
+                                firstSeen: player.firstSeen || new Date()
+                            };
+
+                            playerPromises.push(new Promise(resolvePlayer => {
+                                // Prüfen, ob Spieler bereits existiert
+                                const nameIndex = playersStore.index('name');
+                                const nameRequest = nameIndex.get(player.name);
+
+                                nameRequest.onsuccess = function(event) {
+                                    const existingPlayer = event.target.result;
+                                    let playerId = null;
+
+                                    if (existingPlayer) {
+                                        // Spieler existiert bereits
+                                        playerId = existingPlayer.id;
+                                        resolvePlayer(playerId);
+                                    } else {
+                                        // Neuen Spieler anlegen
+                                        const addRequest = playersStore.add(playerCopy);
+                                        addRequest.onsuccess = function(event) {
+                                            importStats.players++;
+                                            playerId = event.target.result;
+                                            resolvePlayer(playerId);
+                                        };
+                                        addRequest.onerror = function() {
+                                            resolvePlayer(null);
+                                        };
+                                    }
+                                };
+                            }));
+                        });
+
+                        Promise.all(playerPromises).then(() => {
+                            alert(`Import abgeschlossen: ${importStats.players} Spieler importiert.`);
+                        });
+                        break;
+
+                    default:
+                        throw new Error('Unbekanntes Format');
+                }
             };
 
-            gameRequest.onerror = function (event) {
-                console.error('Fehler beim Importieren des Spiels:', event.target.error);
-                alert('Beim Importieren ist ein Fehler aufgetreten.');
-            };
+            // Wenn gewünscht, erst alle Daten löschen
+            if (clearBeforeImport) {
+                clearAllDataBeforeImport()
+                    .then(() => {
+                        performImport();
+                    })
+                    .catch(error => {
+                        alert(`Fehler beim Löschen der Daten: ${error.message}`);
+                    });
+            } else {
+                // Direkt mit dem Import fortfahren
+                performImport();
+            }
+
         } catch (error) {
             console.error('Fehler beim Parsen oder Importieren:', error);
-            alert('Die Datei konnte nicht importiert werden. Bitte überprüfe das Format.');
+            alert('Die Datei konnte nicht importiert werden. Bitte überprüfe das Format: ' + error.message);
         }
     }
 
-    // Handle imported file
+    // Aktualisierter Code für den Import-Handler
     function handleImportFile(file) {
         if (!file || file.type !== 'application/json') {
             importStatus.textContent = 'Fehler: Bitte wähle eine JSON-Datei aus.';
@@ -339,11 +708,14 @@ document.addEventListener('DOMContentLoaded', function () {
         importStatus.textContent = 'Datei wird verarbeitet...';
         importStatus.style.color = '';
 
+        // Prüfen, ob alle Daten vor dem Import gelöscht werden sollen
+        const clearBeforeImport = document.getElementById('clear-before-import').checked;
+
         const reader = new FileReader();
         reader.onload = function (event) {
             try {
                 const jsonData = event.target.result;
-                importGameData(jsonData);
+                importGameData(jsonData, clearBeforeImport);
                 setTimeout(() => importModal.style.display = 'none', 2000);
             } catch (error) {
                 console.error('Fehler beim Lesen der Datei:', error);
@@ -410,6 +782,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 gameContainer.classList.remove('hidden');
                 restartGameButton.classList.remove('hidden');
                 console.log('Spielstand wiederhergestellt');
+
+                // Setze den Fokus auf das Eingabefeld
+                if (currentInputField) {
+                    currentInputField.focus();
+                }
+
                 return true;
             } catch (error) {
                 console.error('Fehler beim Wiederherstellen des Spielstands:', error);
@@ -493,6 +871,11 @@ document.addEventListener('DOMContentLoaded', function () {
         setupContainer.classList.add('hidden');
         gameContainer.classList.remove('hidden');
         restartGameButton.classList.remove('hidden');
+
+        // Setze den Fokus auf das Eingabefeld
+        if (currentInputField) {
+            currentInputField.focus();
+        }
     }
 
     // Render player cards
@@ -615,6 +998,7 @@ document.addEventListener('DOMContentLoaded', function () {
             renderHistory();
             renderPlayerStatistics();
             clearInput();
+            currentInputField.focus(); // Fokus auf Eingabefeld setzen
             return;
         }
 
@@ -629,6 +1013,7 @@ document.addEventListener('DOMContentLoaded', function () {
         renderPlayerCards();
         renderHistory();
         renderPlayerStatistics();
+        currentInputField.focus(); // Fokus auf Eingabefeld setzen
     }
 
     // Move to next player
@@ -648,6 +1033,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Clear input
     function clearInput() {
         currentInputField.value = '';
+        currentInputField.focus(); // Fokus auf Eingabefeld setzen
     }
 
     // Add history entry
@@ -727,6 +1113,7 @@ document.addEventListener('DOMContentLoaded', function () {
         renderPlayerCards();
         renderHistory();
         renderPlayerStatistics();
+        currentInputField.focus(); // Fokus auf Eingabefeld setzen
     }
 
     // Reset all settings
@@ -895,6 +1282,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
     if (exportButton) exportButton.addEventListener('click', exportGameData);
+    if (exportPlayersButton) exportPlayersButton.addEventListener('click', exportAllPlayerData);
+    if (exportAllGamesButton) exportAllGamesButton.addEventListener('click', exportAllGames);
     if (viewStatsButton) viewStatsButton.addEventListener('click', openStatisticsPage);
     if (resetDataButton) resetDataButton.addEventListener('click', resetAllData);
     if (importDataButton) {

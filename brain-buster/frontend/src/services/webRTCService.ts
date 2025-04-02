@@ -144,7 +144,7 @@ class WebRTCService {
                 this.signalingServer = new WebSocket(serverUrl);
 
                 this.signalingServer.onopen = () => {
-                    console.log('✓ Verbindung zum Signaling-Server hergestellt');
+                    console.log('✓ Verbindung zum Signaling-Server hergestellt - URL:', serverUrl);
 
                     if (this.wsConnectionTimeout) {
                         clearTimeout(this.wsConnectionTimeout);

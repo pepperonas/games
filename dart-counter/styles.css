@@ -952,3 +952,76 @@ input:checked + .slider:before {
     justify-content: center;
     gap: 20px; /* Abstand zwischen den Buttons */
 }
+
+/* Stile für die Import-Optionen */
+.import-options {
+    margin: 20px 0;
+    padding: 10px;
+    background-color: var(--container-background);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    position: relative;
+    padding-left: 30px;
+    user-select: none;
+}
+
+.checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    background-color: var(--container-background);
+    border: 2px solid var(--secondary-color);
+    border-radius: 4px;
+}
+
+.checkbox-container:hover input ~ .checkmark {
+    background-color: var(--hover-color);
+}
+
+.checkbox-container input:checked ~ .checkmark {
+    background-color: var(--secondary-color);
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.checkbox-container .checkmark:after {
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.warning-text {
+    color: var(--accent-color);
+    font-size: 0.8rem;
+    margin-top: 5px;
+}

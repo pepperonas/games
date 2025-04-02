@@ -118,7 +118,7 @@
                 <h3>Punkteeingabe</h3>
                 <div class="input-container">
                     <div class="input-group">
-                        <input type="number" id="current-input"
+                        <input type="number" id="current-input" autofocus
                                placeholder="Gesamtpunkte für 3 Würfe" min="0" max="180">
                         <button id="clear-input" class="accent">Löschen</button>
                     </div>
@@ -157,7 +157,9 @@
         <h3>Datenbank</h3>
         <div class="data-controls">
             <button id="view-stats">Statistiken anzeigen</button>
-            <button id="export-data">Spieldaten exportieren</button>
+            <button id="export-data">Aktuelles Spiel exportieren</button>
+            <button id="export-players">Alle Spielerdaten exportieren</button>
+            <button id="export-all-games">Alle Spiele exportieren</button>
             <button id="import-data">Daten importieren</button>
             <button id="reset-data" class="btn-danger">Alle Daten zurücksetzen</button>
         </div>
@@ -189,6 +191,15 @@
         <div class="file-drop-area" id="file-drop-area">
             <span class="file-message">Datei hier ablegen oder</span>
             <button class="file-select-button">Datei auswählen</button>
+        </div>
+
+        <div class="import-options">
+            <label class="checkbox-container">
+                <input type="checkbox" id="clear-before-import">
+                <span class="checkmark"></span>
+                Alle Daten vor dem Import löschen (Vollständiger Reset)
+            </label>
+            <p class="warning-text">Achtung: Dies löscht alle vorhandenen Spiele, Spieler und Würfe!</p>
         </div>
 
         <div class="import-status" id="import-status"></div>
