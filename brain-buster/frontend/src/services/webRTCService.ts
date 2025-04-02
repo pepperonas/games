@@ -78,9 +78,10 @@ export interface WebRTCCallbacks {
     onPlayerLeft?: (playerId: string) => void;
     onPlayersUpdate?: (players: PlayerInfo[]) => void;
     onGameStarted?: (gameState: GameState) => void;
+    onSyncMessage?: (syncData: any) => void; // Callback für Synchronisierungsnachrichten
     onQuestionTimerEnded?: (questionIndex: number) => void;
     onAllPlayersAnswered?: (questionIndex: number, playerScores: Record<string, number>) => void;
-    onNextQuestion?: (nextIndex: number) => void;
+    onNextQuestion?: (nextIndex: number, duration?: number, startTime?: number) => void;
     onGameEnded?: (results: any) => void;
     onError?: (message: string) => void;
     onReconnect?: () => void;
@@ -491,7 +492,9 @@ class WebRTCService {
         this.sendGameMessage({
             type: 'next-question',
             content: {
-                nextQuestionIndex: nextIndex
+                nextQuestionIndex: this.gameState.currentQuestionIndex,
+                newTimerDuration: 20, // Standard: 20 Sekunden pro Frage
+                startTime: Date.now() // Aktueller Zeitstempel für Synchronisation
             }
         });
 
@@ -593,7 +596,6 @@ class WebRTCService {
             // Erweiterte Konfiguration mit allen nötigen STUN/TURN-Servern
             this.peerConnection = new RTCPeerConnection({
                 ...iceServers,
-                sdpSemantics: 'unified-plan',
                 bundlePolicy: 'max-bundle',
                 rtcpMuxPolicy: 'require',
                 iceTransportPolicy: 'all' // Versuche sowohl UDP als auch TCP
@@ -679,9 +681,6 @@ class WebRTCService {
                 const statsInterval = setInterval(() => {
                     if (this.peerConnection && this.isConnected) {
                         this.peerConnection.getStats().then(stats => {
-                            let inboundRtcStats = null;
-                            let outboundRtcStats = null;
-
                             stats.forEach(report => {
                                 if (report.type === 'candidate-pair' && report.state === 'succeeded') {
                                     console.log(`Aktive ICE-Verbindung: ${report.localCandidateId} -> ${report.remoteCandidateId}`);
@@ -842,6 +841,16 @@ class WebRTCService {
     private handleDataChannelMessage(message: any): void {
         console.log('Datenkanal-Nachricht empfangen:', message.type);
 
+        // Zuerst prüfen, ob es eine Synchronisierungsnachricht ist
+        if (message.isSyncMessage === true) {
+            console.log('Synchronisierungsnachricht erkannt:', message.type);
+            if (this.callbacks.onSyncMessage) {
+                this.callbacks.onSyncMessage(message);
+                return; // Wichtig: Return hier, um nicht in den normalen Switch zu fallen
+            }
+        }
+
+        // Normaler Fluss für normale Nachrichten
         switch (message.type) {
             case 'game-started':
                 // Spiel wurde gestartet
@@ -1089,6 +1098,32 @@ class WebRTCService {
             }
 
             this.attemptReconnect();
+        }
+    }
+
+    /**
+     * Sendet eine Synchronisierungsnachricht über den Datenkanal
+     * Diese Methode wird verwendet, um Spielstatus explizit zu synchronisieren
+     */
+    public sendSyncMessage(message: any): void {
+        if (this.dataChannel && this.dataChannel.readyState === 'open') {
+            try {
+                const messageStr = JSON.stringify({
+                    ...message,
+                    sender: this.playerId,
+                    isSyncMessage: true // Kennzeichnung als Synchronisierungsnachricht
+                });
+                this.dataChannel.send(messageStr);
+                console.log(`Synchronisierungsnachricht gesendet: ${message.type}`);
+            } catch (error) {
+                console.error('Fehler beim Senden der Synchronisierungsnachricht:', error);
+            }
+        } else {
+            console.error('Datenkanal ist nicht geöffnet');
+
+            if (this.callbacks.onError) {
+                this.callbacks.onError('Verbindung zum anderen Spieler verloren - Synchronisierung nicht möglich');
+            }
         }
     }
 

@@ -25,6 +25,7 @@ const WebRTCMultiplayerLobby = ({
     const [statusMessage, setStatusMessage] = useState<string | null>(null);
     const [isStarting, setIsStarting] = useState(false);
     const [debugMode, setDebugMode] = useState(false);
+    const [gameStartingInProgress, setGameStartingInProgress] = useState(false);
     const {players, isConnected, setReady, startGame, leaveRoom, error: webRTCError} = useWebRTC();
     const {state} = useGame();
 
@@ -49,6 +50,7 @@ const WebRTCMultiplayerLobby = ({
         // Setze eigene Zustände zurück
         setIsReady(false);
         setIsStarting(false);
+        setGameStartingInProgress(false);
 
         // Informiere den Server
         leaveRoom();
@@ -75,6 +77,12 @@ const WebRTCMultiplayerLobby = ({
 
     // Spiel starten (nur für Host)
     const handleStartGame = () => {
+        // Verhindere doppelte Klicks/Starts
+        if (gameStartingInProgress) {
+            console.log("Spiel wird bereits gestartet, ignoriere erneuten Start-Versuch");
+            return;
+        }
+
         console.log("Spiel wird gestartet, Spieler-Status:", {
             players,
             allPlayersReady,
@@ -97,7 +105,8 @@ const WebRTCMultiplayerLobby = ({
             return;
         }
 
-        // Starte den Spielstart-Prozess
+        // Sperre erneute Starts
+        setGameStartingInProgress(true);
         setIsStarting(true);
         setStatusMessage("Spiel wird gestartet... Bereite Fragen vor.");
 
@@ -131,11 +140,17 @@ const WebRTCMultiplayerLobby = ({
             setTimeout(() => {
                 onStart();
                 setIsStarting(false);
+
+                // Entsperre den Start-Button nach dem Spielstart (für den Fall einer Rückkehr zur Lobby)
+                setTimeout(() => {
+                    setGameStartingInProgress(false);
+                }, 5000);
             }, 2500);
         } catch (error) {
             console.error("Fehler beim Starten des Spiels:", error);
             setStatusMessage(`Fehler beim Starten des Spiels: ${error}`);
             setIsStarting(false);
+            setGameStartingInProgress(false);
         }
     };
 
@@ -185,6 +200,7 @@ const WebRTCMultiplayerLobby = ({
                                 isConnected,
                                 playerCount: players.length,
                                 allReady: allPlayersReady,
+                                gameStartingInProgress,
                                 questions: state.questions.length,
                             }, null, 2)}
                         </pre>
@@ -260,7 +276,7 @@ const WebRTCMultiplayerLobby = ({
                     <Button
                         variant={isReady ? 'danger' : 'success'}
                         onClick={toggleReady}
-                        disabled={isStarting}
+                        disabled={isStarting || gameStartingInProgress}
                     >
                         {isReady ? 'Nicht bereit' : 'Bereit'}
                     </Button>
@@ -269,7 +285,7 @@ const WebRTCMultiplayerLobby = ({
                     {isHost && (
                         <Button
                             variant="primary"
-                            disabled={!canStartGame}
+                            disabled={!canStartGame || gameStartingInProgress}
                             onClick={handleStartGame}
                         >
                             {isStarting ? 'Starte Spiel...' : 'Spiel starten'}

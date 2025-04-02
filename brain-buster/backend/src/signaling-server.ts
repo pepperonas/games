@@ -49,10 +49,10 @@ app.get('*', (req, res) => {
 });
 
 // WebSocket-Server erstellen
-// WICHTIG: Der Pfad muss exakt mit der Nginx-Konfiguration und Frontend-Erwartung übereinstimmen
+// WICHTIG: Der Pfad muss exakt mit der Frontend-Erwartung übereinstimmen
 const wss = new WebSocketServer({
     server,
-    path: '/socket.io/'
+    path: '/socket.io/' // Vereinfachter Pfad für bessere Kompatibilität
 });
 
 // Räume speichern
@@ -67,46 +67,59 @@ const logMessage = (type: string, message: string) => {
 wss.on('connection', (ws: WSSocket) => {
     logMessage('CONNECTION', 'Neue WebSocket-Verbindung');
 
+    // NEUE Verbindungs-ID generieren für besseres Tracking
+    const connectionId = `conn-${Math.random().toString(36).substring(2, 10)}`;
+    logMessage('CONNECTION', `Neue Verbindung mit ID: ${connectionId}`);
+
     let playerId = '';
     let currentRoomId = '';
 
-    // Ping-Pong-Mechanismus zur Überprüfung der Verbindung
+    // Verbindungsstatus regelmäßig prüfen
     const pingInterval = setInterval(() => {
         if (ws.readyState === ws.OPEN) {
             try {
                 ws.ping();
-                logMessage('PING', `Ping an Spieler ${playerId || 'unknown'}`);
+                logMessage('PING', `Ping an Spieler ${playerId || 'unknown'} / ${connectionId}`);
             } catch (error) {
-                logMessage('ERROR', `Ping-Fehler: ${error}`);
+                logMessage('ERROR', `Ping-Fehler für ${connectionId}: ${error}`);
             }
         }
-    }, 30000);
+    }, 15000); // Auf 15 Sekunden reduziert
 
-    // Nachrichtenverarbeitung
+    // Nachrichtenverarbeitung mit besserer Fehlerhandhabung
     ws.on('message', (message: Buffer | string) => {
         try {
             const messageStr = message.toString();
-            logMessage('RECEIVED', `Nachricht: ${messageStr.substring(0, 100)}${messageStr.length > 100 ? '...' : ''}`);
+            logMessage('RECEIVED', `Nachricht von ${connectionId}: ${messageStr.substring(0, 100)}${messageStr.length > 100 ? '...' : ''}`);
 
             const data = JSON.parse(messageStr);
+
+            // Bei game-started und related Nachrichten bessere Logs
+            if (data.type && data.type.includes('game')) {
+                logMessage('GAME', `Spielnachricht Typ: ${data.type} von ${data.sender || 'unknown'}`);
+            }
+
             handleMessage(ws, data);
         } catch (error) {
-            logMessage('ERROR', `Fehler beim Verarbeiten der Nachricht: ${error}`);
+            // Verbesserte Fehlerbehandlung mit korrekter Typisierung
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            logMessage('ERROR', `Fehler beim Verarbeiten der Nachricht von ${connectionId}: ${errorMessage}`);
             sendTo(ws, {
                 type: 'error',
-                content: {message: 'Ungültige Nachricht'}
+                content: {message: 'Ungültige Nachricht: ' + errorMessage}
             });
         }
     });
 
-    // Verbindungsabbruch
-    ws.on('close', () => {
-        logMessage('CLOSE', `WebSocket-Verbindung geschlossen für Player ${playerId || 'unknown'}`);
+    // Verbesserte Behandlung für geschlossene Verbindungen
+    ws.on('close', (code: number, reason: string) => {
+        logMessage('CLOSE', `WebSocket-Verbindung geschlossen für Spieler ${playerId || 'unknown'} / ${connectionId}, Code: ${code}, Grund: ${reason || 'keine Angabe'}`);
 
         clearInterval(pingInterval);
 
         // Spieler aus dem Raum entfernen, wenn vorhanden
         if (currentRoomId && playerId) {
+            logMessage('ROOM', `Spieler ${playerId} verlässt Raum ${currentRoomId} aufgrund von geschlossener Verbindung`);
             handlePlayerLeave(currentRoomId, playerId);
         }
     });
@@ -212,6 +225,7 @@ wss.on('connection', (ws: WSSocket) => {
     function handleJoinRoom(roomId: string, playerId: string, playerName: string, ws: WSSocket): void {
         // Prüfe, ob der Raum existiert
         if (!rooms.has(roomId)) {
+            logMessage('ERROR', `Raum ${roomId} existiert nicht für Spieler ${playerId}`);
             sendTo(ws, {
                 type: 'error',
                 content: {message: 'Raum existiert nicht'}
@@ -220,9 +234,11 @@ wss.on('connection', (ws: WSSocket) => {
         }
 
         const room = rooms.get(roomId)!;
+        logMessage('ROOM', `Spieler ${playerName} (${playerId}) versucht, Raum ${roomId} beizutreten`);
 
         // Prüfe, ob das Spiel bereits gestartet ist
         if (room.isGameStarted) {
+            logMessage('ROOM', `Zugriff verweigert: Spiel in Raum ${roomId} bereits gestartet`);
             sendTo(ws, {
                 type: 'error',
                 content: {message: 'Spiel bereits gestartet'}
@@ -232,6 +248,7 @@ wss.on('connection', (ws: WSSocket) => {
 
         // Prüfe, ob der Raum bereits voll ist (max. 8 Spieler)
         if (room.players.length >= 8) {
+            logMessage('ROOM', `Zugriff verweigert: Raum ${roomId} ist voll`);
             sendTo(ws, {
                 type: 'error',
                 content: {message: 'Raum ist voll'}
@@ -243,14 +260,18 @@ wss.on('connection', (ws: WSSocket) => {
         const existingPlayerIndex = room.players.findIndex(p => p.id === playerId);
         if (existingPlayerIndex >= 0) {
             // Spieler ist bereits im Raum - aktualisiere WebSocket
+            logMessage('ROOM', `Spieler ${playerName} (${playerId}) bereits in Raum ${roomId} - WebSocket aktualisiert`);
             room.players[existingPlayerIndex].ws = ws;
             room.players[existingPlayerIndex].name = playerName;
 
-            logMessage('ROOM', `Spieler wiederverbunden: ${playerName} (${playerId}) in Raum ${roomId}`);
-
             sendTo(ws, {
                 type: 'room-joined',
-                content: {roomId, playerId}
+                content: {
+                    roomId,
+                    playerId,
+                    success: true,
+                    message: 'Reconnected to room'
+                }
             });
 
             broadcastPlayerList(roomId);
@@ -270,12 +291,16 @@ wss.on('connection', (ws: WSSocket) => {
         // Füge den Spieler dem Raum hinzu
         room.players.push(player);
 
-        logMessage('ROOM', `Spieler beigetreten: ${playerName} (${playerId}) in Raum ${roomId}`);
+        logMessage('ROOM', `Spieler beigetreten: ${playerName} (${playerId}) in Raum ${roomId}, Spieler insgesamt: ${room.players.length}`);
 
         // Bestätige den Raumbeitritt
         sendTo(ws, {
             type: 'room-joined',
-            content: {roomId, playerId}
+            content: {
+                roomId,
+                playerId,
+                success: true
+            }
         });
 
         // Informiere alle Spieler im Raum

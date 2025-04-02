@@ -56,40 +56,84 @@ const WebRTCMultiplayerGame = ({
     const [countdown, setCountdown] = useState<number | null>(null);
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
     const [questionStartTime, setQuestionStartTime] = useState<number | null>(null);
+    const [countdownStarted, setCountdownStarted] = useState(false);
+    const [syncAttempt, setSyncAttempt] = useState(0);
 
-    // Versuche Fragen aus dem localStorage zu laden bei Start
-    useEffect(() => {
-        if (questions.length === 0 && !initComplete) {
-            const savedQuestions = localStorage.getItem('lastGameQuestions');
-            if (savedQuestions) {
-                try {
-                    const parsedQuestions = JSON.parse(savedQuestions);
-                    const questionsTimestamp = localStorage.getItem('lastGameTimestamp');
-                    const timestamp = questionsTimestamp ? parseInt(questionsTimestamp) : 0;
+    // Timer-Funktion für die verbleibende Zeit pro Frage
+    const startQuestionTimer = useCallback((duration: number) => {
+        setQuestionStartTime(Date.now());
+        setTimeLeft(duration);
 
-                    // Prüfe, ob die Fragen nicht älter als 10 Minuten sind
-                    const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
+        const interval = setInterval(() => {
+            const now = Date.now();
+            const elapsed = questionStartTime ? (now - questionStartTime) / 1000 : 0;
+            const remaining = Math.max(0, duration - elapsed);
 
-                    if (Array.isArray(parsedQuestions) && parsedQuestions.length > 0 && timestamp > tenMinutesAgo) {
-                        console.log("🛟 Fragen aus dem lokalen Speicher geladen:", parsedQuestions.length);
-                        setQuestions(parsedQuestions);
-                        setCurrentQuestionIndex(0);
-                        setInitComplete(true);
-                        startGameContext('multiplayer', parsedQuestions);
-                    } else {
-                        console.log("Gespeicherte Fragen sind zu alt oder ungültig");
-                        localStorage.removeItem('lastGameQuestions');
-                        localStorage.removeItem('lastGameTimestamp');
-                    }
-                } catch (error) {
-                    console.error("Fehler beim Analysieren gespeicherter Fragen:", error);
+            setTimeLeft(Math.round(remaining));
+
+            if (remaining <= 0) {
+                clearInterval(interval);
+                // Wenn die Zeit abgelaufen ist und noch keine Antwort gegeben wurde
+                if (!waitingForOthers) {
+                    handleAnswerQuestion(-1); // Automatisch "keine Antwort" senden
                 }
             }
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [questionStartTime, waitingForOthers]);
+
+    // Spielsynchronisierung - wird vom Host verwendet, um das Spiel mit allen Clients zu synchronisieren
+    const forceGameSync = useCallback(() => {
+        if (!isHost || !webRTC) {
+            console.log("Nur der Host kann das Spiel synchronisieren");
+            return;
         }
-    }, [questions.length, initComplete, startGameContext]);
+
+        // Fragen aus dem lokalen Speicher laden
+        const savedQuestions = localStorage.getItem('lastGameQuestions');
+        if (savedQuestions) {
+            try {
+                const parsedQuestions = JSON.parse(savedQuestions);
+                console.log("Sende erneute Spielsynchronisation mit Fragen:", parsedQuestions.length);
+
+                // Sichere Fragen erneut für mögliche Wiederherstellung
+                localStorage.setItem('lastGameQuestions', JSON.stringify(parsedQuestions));
+                localStorage.setItem('lastGameTimestamp', Date.now().toString());
+
+                // Inkrementiere den Synchronisierungsversuch für Debugging
+                setSyncAttempt(prev => prev + 1);
+
+                // Manuelle Nachricht an alle Clients senden
+                webRTC.sendSyncMessage({
+                    type: 'game-started',
+                    content: {
+                        questions: parsedQuestions,
+                        timePerQuestion: 20,
+                        startTime: Date.now(),
+                        syncAttempt: syncAttempt + 1
+                    }
+                });
+
+                setErrorMsg("Spielsynchronisierung an Clients gesendet...");
+                setTimeout(() => setErrorMsg(null), 3000);
+            } catch (error) {
+                console.error("Fehler beim Synchronisieren:", error);
+                setErrorMsg("Fehler beim Synchronisieren: " + error);
+            }
+        } else {
+            setErrorMsg("Keine Fragen zum Synchronisieren gefunden");
+        }
+    }, [isHost, webRTC, syncAttempt]);
 
     // In WebRTCMultiplayerGame.tsx, ändere die startCountdown-Funktion:
     const startCountdown = useCallback(() => {
+        // Wenn bereits eine Initialisierung läuft, abbrechen
+        if (initComplete || questions.length > 0) {
+            console.log("Spiel bereits initialisiert, Countdown nicht neu gestartet");
+            return;
+        }
+
         // Setze Debug-Modus für bessere Fehleranalyse
         setDebugMode(true);
         setCountdown(3);
@@ -155,29 +199,58 @@ const WebRTCMultiplayerGame = ({
         return () => clearInterval(interval);
     }, [initComplete, questions.length, isConnected, startGameContext, startQuestionTimer]);
 
-    // Timer-Funktion für die verbleibende Zeit pro Frage
-    const startQuestionTimer = useCallback((duration: number) => {
-        setQuestionStartTime(Date.now());
-        setTimeLeft(duration);
+    // Implementiere regelmäßige automatische Synchronisierung (nur Host)
+    useEffect(() => {
+        let syncInterval: ReturnType<typeof setInterval> | null = null;
 
-        const interval = setInterval(() => {
-            const now = Date.now();
-            const elapsed = questionStartTime ? (now - questionStartTime) / 1000 : 0;
-            const remaining = Math.max(0, duration - elapsed);
+        // Nur für den Host und wenn das Spiel noch nicht initialisiert ist
+        if (isHost && isConnected && !initComplete && countdown === null) {
+            syncInterval = setInterval(() => {
+                const savedQuestions = localStorage.getItem('lastGameQuestions');
+                if (savedQuestions) {
+                    console.log("Automatische Spielsynchronisierung...");
+                    forceGameSync();
+                }
+            }, 3000); // Alle 3 Sekunden versuchen, falls das Spiel noch nicht gestartet hat
+        }
 
-            setTimeLeft(Math.round(remaining));
+        return () => {
+            if (syncInterval) {
+                clearInterval(syncInterval);
+            }
+        };
+    }, [isHost, isConnected, initComplete, countdown, forceGameSync]);
 
-            if (remaining <= 0) {
-                clearInterval(interval);
-                // Wenn die Zeit abgelaufen ist und noch keine Antwort gegeben wurde
-                if (!waitingForOthers) {
-                    handleAnswerQuestion(-1); // Automatisch "keine Antwort" senden
+    // Versuche Fragen aus dem localStorage zu laden bei Start
+    useEffect(() => {
+        if (questions.length === 0 && !initComplete) {
+            const savedQuestions = localStorage.getItem('lastGameQuestions');
+            if (savedQuestions) {
+                try {
+                    const parsedQuestions = JSON.parse(savedQuestions);
+                    const questionsTimestamp = localStorage.getItem('lastGameTimestamp');
+                    const timestamp = questionsTimestamp ? parseInt(questionsTimestamp) : 0;
+
+                    // Prüfe, ob die Fragen nicht älter als 10 Minuten sind
+                    const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
+
+                    if (Array.isArray(parsedQuestions) && parsedQuestions.length > 0 && timestamp > tenMinutesAgo) {
+                        console.log("🛟 Fragen aus dem lokalen Speicher geladen:", parsedQuestions.length);
+                        setQuestions(parsedQuestions);
+                        setCurrentQuestionIndex(0);
+                        setInitComplete(true);
+                        startGameContext('multiplayer', parsedQuestions);
+                    } else {
+                        console.log("Gespeicherte Fragen sind zu alt oder ungültig");
+                        localStorage.removeItem('lastGameQuestions');
+                        localStorage.removeItem('lastGameTimestamp');
+                    }
+                } catch (error) {
+                    console.error("Fehler beim Analysieren gespeicherter Fragen:", error);
                 }
             }
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, [questionStartTime, waitingForOthers]);
+        }
+    }, [questions.length, initComplete, startGameContext]);
 
     // Registriere Callbacks für WebRTC-Spielereignisse
     useEffect(() => {
@@ -190,7 +263,8 @@ const WebRTCMultiplayerGame = ({
         console.log("Richte Spielereignis-Listener in WebRTCMultiplayerGame ein");
 
         // Starte den Countdown nach dem Laden der Komponente
-        if (!countdown) {
+        if (!countdown && !countdownStarted) {
+            setCountdownStarted(true);
             startCountdown();
         }
 
@@ -213,7 +287,7 @@ const WebRTCMultiplayerGame = ({
                 console.log("Spiel gestartet Event empfangen:", gameState);
 
                 // Detaillierteres Logging
-                console.log(`Empfangene Fragen: ${gameState.questions.length}`);
+                console.log(`Empfangene Fragen: ${gameState?.questions?.length || 0}`);
 
                 // Defensives Validieren mit besserem Feedback
                 if (!gameState || !gameState.questions || !Array.isArray(gameState.questions) || gameState.questions.length === 0) {
@@ -241,10 +315,48 @@ const WebRTCMultiplayerGame = ({
                 setErrorMsg(null);
 
                 // Starte Timer für die erste Frage
-                startQuestionTimer(gameState.timePerQuestion);
+                startQuestionTimer(gameState.timePerQuestion || 20);
 
                 // Initialisiere Spiel im Kontext
                 startGameContext('multiplayer', gameState.questions);
+            },
+
+            onSyncMessage: (syncData) => {
+                console.log("Synchronisierungsnachricht empfangen:", syncData);
+
+                // Nur relevant für Clients, nicht für den Host
+                if (isHost) {
+                    console.log("Host ignoriert Sync-Nachricht");
+                    return;
+                }
+
+                if (syncData.type === 'game-started') {
+                    // Behandle die Synchronisierung wie ein normales game-started Event
+                    if (!syncData.content || !syncData.content.questions || !Array.isArray(syncData.content.questions)) {
+                        console.error("❌ Ungültige Sync-Daten erhalten:", syncData);
+                        return;
+                    }
+
+                    console.log(`📥 Sync: Empfange ${syncData.content.questions.length} Fragen (Versuch ${syncData.content.syncAttempt || 'unbekannt'})`);
+
+                    // Sichere Fragen für mögliche Wiederherstellung
+                    localStorage.setItem('lastGameQuestions', JSON.stringify(syncData.content.questions));
+                    localStorage.setItem('lastGameTimestamp', Date.now().toString());
+
+                    // Setze Spielstatus
+                    if (!initComplete || questions.length === 0) {
+                        setQuestions(syncData.content.questions);
+                        setCurrentQuestionIndex(0);
+                        setInitComplete(true);
+                        setErrorMsg(null);
+
+                        // Initialisiere Spiel im Kontext
+                        startGameContext('multiplayer', syncData.content.questions);
+
+                        // Starte Timer für die erste Frage
+                        startQuestionTimer(syncData.content.timePerQuestion || 20);
+                    }
+                }
             },
 
             onPlayerAnswer: (data) => {
@@ -323,7 +435,7 @@ const WebRTCMultiplayerGame = ({
         return () => {
             // WebRTC-Service behält seine Callbacks intern bei
         };
-    }, [webRTC, players, isHost, questions.length, endGame, startGameContext, playerId, waitingForOthers, countdown, startCountdown, startQuestionTimer]);
+    }, [webRTC, players, isHost, questions.length, endGame, startGameContext, playerId, waitingForOthers, countdown, startCountdown, countdownStarted, startQuestionTimer]);
 
     // Frage beantworten
     const handleAnswerQuestion = useCallback((answer: number) => {
@@ -399,6 +511,15 @@ const WebRTCMultiplayerGame = ({
                                 </div>
 
                                 <div className="flex items-center space-x-2">
+                                    {isHost && (
+                                        <Button
+                                            variant="primary"
+                                            size="sm"
+                                            onClick={forceGameSync}
+                                        >
+                                            Spiel synchronisieren
+                                        </Button>
+                                    )}
                                     <Button
                                         variant="outline"
                                         size="sm"
@@ -459,12 +580,15 @@ const WebRTCMultiplayerGame = ({
                             <div className="overflow-auto max-h-40">
                                 <pre>{JSON.stringify({
                                     initComplete,
+                                    syncAttempt,
                                     questionsLength: questions.length,
                                     currentIndex: currentQuestionIndex,
                                     waitingForOthers,
                                     isHost,
                                     webRTCConnected: isConnected,
                                     timeLeft,
+                                    countdownStarted,
+                                    storageHasQuestions: Boolean(localStorage.getItem('lastGameQuestions')),
                                     firstQuestion: questions[0] ?
                                         {
                                             id: questions[0].id,
@@ -559,6 +683,11 @@ const WebRTCMultiplayerGame = ({
                                     <div
                                         className="loader mx-auto w-12 h-12 border-4 border-t-4 border-gray-200 rounded-full border-t-violet-500 animate-spin"></div>
 
+                                    {isHost && (
+                                        <Button className="mt-6 mr-2" variant="primary" onClick={forceGameSync}>
+                                            Spiel manuell synchronisieren
+                                        </Button>
+                                    )}
                                     <Button className="mt-6" variant="secondary"
                                             onClick={handleForceRefresh}>
                                         Status aktualisieren
