@@ -1,10 +1,10 @@
 // src/components/multiplayer/WebRTCMultiplayerLobby.tsx
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
-import { useWebRTC } from '../../store/WebRTCContext';
-import { useGame } from '../../store/GameContext';
-import { motion } from 'framer-motion';
+import {useWebRTC} from '../../store/WebRTCContext';
+import {useGame} from '../../store/GameContext';
+import {motion} from 'framer-motion';
 
 interface WebRTCMultiplayerLobbyProps {
     roomId: string;
@@ -25,8 +25,8 @@ const WebRTCMultiplayerLobby = ({
     const [statusMessage, setStatusMessage] = useState<string | null>(null);
     const [isStarting, setIsStarting] = useState(false);
     const [debugMode, setDebugMode] = useState(false);
-    const { players, isConnected, setReady, startGame, leaveRoom, error: webRTCError } = useWebRTC();
-    const { state } = useGame();
+    const {players, isConnected, setReady, startGame, leaveRoom, error: webRTCError} = useWebRTC();
+    const {state} = useGame();
 
     // Überwache den eigenen Ready-Status
     useEffect(() => {
@@ -75,6 +75,13 @@ const WebRTCMultiplayerLobby = ({
 
     // Spiel starten (nur für Host)
     const handleStartGame = () => {
+        console.log("Spiel wird gestartet, Spieler-Status:", {
+            players,
+            allPlayersReady,
+            roomId,
+            isHost
+        });
+
         if (!isHost) {
             setStatusMessage("Nur der Host kann das Spiel starten");
             return;
@@ -124,7 +131,7 @@ const WebRTCMultiplayerLobby = ({
             setTimeout(() => {
                 onStart();
                 setIsStarting(false);
-            }, 1500);
+            }, 2500);
         } catch (error) {
             console.error("Fehler beim Starten des Spiels:", error);
             setStatusMessage(`Fehler beim Starten des Spiels: ${error}`);
@@ -144,7 +151,8 @@ const WebRTCMultiplayerLobby = ({
                 <div className="flex justify-between items-center mb-6">
                     <div>
                         <h2 className="text-xl font-bold">Lobby: {roomId}</h2>
-                        <div className={`text-sm ${isConnected ? 'text-green-400' : 'text-red-400'}`}>
+                        <div
+                            className={`text-sm ${isConnected ? 'text-green-400' : 'text-red-400'}`}>
                             {isConnected ? 'Verbunden' : 'Nicht verbunden'}
                         </div>
                     </div>
@@ -194,9 +202,9 @@ const WebRTCMultiplayerLobby = ({
                             players.map((player, index) => (
                                 <motion.div
                                     key={player.id}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.1 }}
+                                    initial={{opacity: 0, y: 10}}
+                                    animate={{opacity: 1, y: 0}}
+                                    transition={{delay: index * 0.1}}
                                     className={`flex justify-between items-center p-3 rounded-lg ${
                                         player.id === playerId
                                             ? 'bg-violet-900/30 border border-violet-500/30'
@@ -278,7 +286,9 @@ const WebRTCMultiplayerLobby = ({
                     <li>Jeder Spieler hat 20 Sekunden Zeit, eine Frage zu beantworten.</li>
                     <li>Wer am Ende die meisten Fragen richtig beantwortet hat, gewinnt.</li>
                     <li>Alle Spieler müssen bereit sein, bevor das Spiel starten kann.</li>
-                    {isHost && (<li className="text-yellow-400">Als Host kannst du das Spiel starten, sobald alle bereit sind.</li>)}
+                    {isHost && (
+                        <li className="text-yellow-400">Als Host kannst du das Spiel starten, sobald
+                            alle bereit sind.</li>)}
                 </ul>
             </Card>
         </div>

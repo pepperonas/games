@@ -5,11 +5,13 @@ import {Question} from '../types';
 // Erweiterte Konfiguration für WebRTC
 const iceServers = {
     iceServers: [
+        // Google STUN Server
         {urls: 'stun:stun.l.google.com:19302'},
         {urls: 'stun:stun1.l.google.com:19302'},
         {urls: 'stun:stun2.l.google.com:19302'},
         {urls: 'stun:stun3.l.google.com:19302'},
         {urls: 'stun:stun4.l.google.com:19302'},
+
         // Kostenlose TURN-Server für bessere Verbindungschancen
         {
             urls: 'turn:openrelay.metered.ca:80',
@@ -20,8 +22,30 @@ const iceServers = {
             urls: 'turn:openrelay.metered.ca:443',
             username: 'openrelayproject',
             credential: 'openrelayproject'
+        },
+
+        // Zusätzliche öffentliche STUN Server
+        {urls: 'stun:stun.stunprotocol.org:3478'},
+        {urls: 'stun:stun.voip.blackberry.com:3478'},
+
+        // Zusätzliche kostenlose TURN-Server für erhöhte Erfolgsrate
+        {
+            urls: 'turn:relay.metered.ca:80',
+            username: 'e8dd65f53c0711eea950a727ccd50f73',
+            credential: 'kIH7AI8t25zHkVUp'
+        },
+        {
+            urls: 'turn:relay.metered.ca:443',
+            username: 'e8dd65f53c0711eea950a727ccd50f73',
+            credential: 'kIH7AI8t25zHkVUp'
+        },
+        {
+            urls: 'turn:relay.metered.ca:443?transport=tcp',
+            username: 'e8dd65f53c0711eea950a727ccd50f73',
+            credential: 'kIH7AI8t25zHkVUp'
         }
-    ]
+    ],
+    iceCandidatePoolSize: 10
 };
 
 export interface RTCMessage {
@@ -559,61 +583,122 @@ class WebRTCService {
     private initializePeerConnection(): void {
         // Bereinige zuerst eventuell vorhandene Verbindungen
         if (this.peerConnection) {
+            console.log('Schließe bestehende RTCPeerConnection');
             this.peerConnection.close();
         }
 
-        console.log('Initialisiere neue RTCPeerConnection');
-        this.peerConnection = new RTCPeerConnection(iceServers);
+        console.log('Initialisiere neue RTCPeerConnection mit erweiterten Optionen');
 
-        // Überwache Verbindungsänderungen
-        this.peerConnection.onconnectionstatechange = () => {
-            const state = this.peerConnection?.connectionState || 'unknown';
-            console.log('WebRTC Verbindungsstatus:', state);
+        try {
+            // Erweiterte Konfiguration mit allen nötigen STUN/TURN-Servern
+            this.peerConnection = new RTCPeerConnection({
+                ...iceServers,
+                sdpSemantics: 'unified-plan',
+                bundlePolicy: 'max-bundle',
+                rtcpMuxPolicy: 'require',
+                iceTransportPolicy: 'all' // Versuche sowohl UDP als auch TCP
+            });
 
-            if (this.callbacks.onConnectionStateChange) {
-                this.callbacks.onConnectionStateChange(state);
+            // Log aller ICE-Kandidaten für besseres Debugging
+            this.peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    console.log(`ICE-Kandidat gefunden: ${event.candidate.candidate.split(' ')[7]} (${event.candidate.protocol})`);
+                    this.sendMessage({
+                        type: 'ice-candidate',
+                        sender: this.playerId,
+                        roomId: this.roomId,
+                        content: event.candidate
+                    });
+                } else {
+                    console.log('ICE-Kandidatensammlung abgeschlossen');
+                }
+            };
+
+            // Detailliertes Logging für ICE-Verbindungsstatus
+            this.peerConnection.oniceconnectionstatechange = () => {
+                const state = this.peerConnection?.iceConnectionState;
+                console.log(`ICE-Verbindungsstatus geändert: ${state}`);
+
+                if (state === 'connected' || state === 'completed') {
+                    console.log('⭐ ICE-Verbindung erfolgreich hergestellt!');
+                    this.isConnected = true;
+                    this.reconnectAttempts = 0;
+                } else if (state === 'failed' || state === 'disconnected') {
+                    console.warn(`❌ ICE-Verbindung ${state} - Versuche Wiederverbindung...`);
+                    this.isConnected = false;
+
+                    // Bei Verbindungsverlust versuchen wir die ICE-Konfiguration zu aktualisieren
+                    if (this.peerConnection) {
+                        console.log('Versuche ICE-Neuverhandlung...');
+                        this.peerConnection.restartIce();
+                    }
+
+                    // Falls das nicht klappt, versuchen wir eine komplette Wiederverbindung
+                    setTimeout(() => {
+                        if (this.peerConnection?.iceConnectionState === 'failed') {
+                            this.attemptReconnect();
+                        }
+                    }, 5000);
+                }
+
+                if (this.callbacks.onConnectionStateChange) {
+                    this.callbacks.onConnectionStateChange(state || 'unknown');
+                }
+            };
+
+            // Überwache Verbindungsänderungen
+            this.peerConnection.onconnectionstatechange = () => {
+                const state = this.peerConnection?.connectionState || 'unknown';
+                console.log('WebRTC Verbindungsstatus:', state);
+
+                if (this.callbacks.onConnectionStateChange) {
+                    this.callbacks.onConnectionStateChange(state);
+                }
+
+                if (state === 'connected') {
+                    console.log('✅ WebRTC-Verbindung erfolgreich hergestellt');
+                    this.isConnected = true;
+                    this.reconnectAttempts = 0;
+                } else if (state === 'disconnected' || state === 'failed') {
+                    console.warn(`❌ WebRTC-Verbindung ${state}`);
+                    this.isConnected = false;
+                    this.attemptReconnect();
+                }
+            };
+
+            // Datenkanal-Handler (als Empfänger)
+            this.peerConnection.ondatachannel = (event) => {
+                console.log('Datenkanal vom Peer empfangen:', event.channel.label);
+                this.dataChannel = event.channel;
+                this.setupDataChannel();
+            };
+
+            // Überwachung von Verbindungsstatistiken für besseres Debugging
+            if (this.peerConnection.getStats) {
+                // Periodisches Logging von Verbindungsstatistiken
+                const statsInterval = setInterval(() => {
+                    if (this.peerConnection && this.isConnected) {
+                        this.peerConnection.getStats().then(stats => {
+                            let inboundRtcStats = null;
+                            let outboundRtcStats = null;
+
+                            stats.forEach(report => {
+                                if (report.type === 'candidate-pair' && report.state === 'succeeded') {
+                                    console.log(`Aktive ICE-Verbindung: ${report.localCandidateId} -> ${report.remoteCandidateId}`);
+                                }
+                            });
+                        });
+                    } else {
+                        clearInterval(statsInterval);
+                    }
+                }, 10000); // Alle 10 Sekunden
             }
-
-            if (state === 'connected') {
-                console.log('WebRTC-Verbindung hergestellt');
-                this.isConnected = true;
-                this.reconnectAttempts = 0;
-            } else if (state === 'disconnected' || state === 'failed') {
-                console.warn(`WebRTC-Verbindung ${state}`);
-                this.isConnected = false;
-                this.attemptReconnect();
+        } catch (error) {
+            console.error('Fehler bei RTCPeerConnection-Initialisierung:', error);
+            if (this.callbacks.onError) {
+                this.callbacks.onError(`Fehler bei WebRTC-Initialisierung: ${error}`);
             }
-        };
-
-        // ICE-Verbindungsstatus überwachen
-        this.peerConnection.oniceconnectionstatechange = () => {
-            console.log('ICE Verbindungsstatus:', this.peerConnection?.iceConnectionState);
-
-            if (this.peerConnection?.iceConnectionState === 'failed') {
-                console.error('ICE-Verbindung fehlgeschlagen, versuche Wiederverbindung');
-                this.attemptReconnect();
-            }
-        };
-
-        // ICE-Kandidaten-Handler
-        this.peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
-                console.log('Neuer ICE-Kandidat gefunden, sende an Peer');
-                this.sendMessage({
-                    type: 'ice-candidate',
-                    sender: this.playerId,
-                    roomId: this.roomId,
-                    content: event.candidate
-                });
-            }
-        };
-
-        // Datenkanal-Handler (als Empfänger)
-        this.peerConnection.ondatachannel = (event) => {
-            console.log('Datenkanal vom Peer empfangen:', event.channel.label);
-            this.dataChannel = event.channel;
-            this.setupDataChannel();
-        };
+        }
     }
 
     /**

@@ -1,12 +1,12 @@
 // src/components/multiplayer/WebRTCMultiplayerGame.tsx
-import { useEffect, useState, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import {useCallback, useEffect, useState} from 'react';
+import {motion} from 'framer-motion';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import QuestionCard from '../game/QuestionCard';
-import { useGame } from '../../store/GameContext';
-import { useWebRTC } from '../../store/WebRTCContext';
-import { Question } from '../../types';
+import {useGame} from '../../store/GameContext';
+import {useWebRTC} from '../../store/WebRTCContext';
+import {Question} from '../../types';
 
 interface PlayerScore {
     id: string;
@@ -31,7 +31,7 @@ const WebRTCMultiplayerGame = ({
                                    onBackToLobby,
                                    onLeave
                                }: WebRTCMultiplayerGameProps) => {
-    const { startGame: startGameContext, endGame } = useGame();
+    const {startGame: startGameContext, endGame} = useGame();
     const {
         webRTC,
         players,
@@ -88,8 +88,10 @@ const WebRTCMultiplayerGame = ({
         }
     }, [questions.length, initComplete, startGameContext]);
 
-    // Timer-Funktion für den Countdown am Anfang des Spiels
+    // In WebRTCMultiplayerGame.tsx, ändere die startCountdown-Funktion:
     const startCountdown = useCallback(() => {
+        // Setze Debug-Modus für bessere Fehleranalyse
+        setDebugMode(true);
         setCountdown(3);
 
         const interval = setInterval(() => {
@@ -98,13 +100,60 @@ const WebRTCMultiplayerGame = ({
                     return prev - 1;
                 } else {
                     clearInterval(interval);
+
+                    // Ausführlicheres Logging nach Countdown-Ende
+                    console.log("Countdown beendet, Spielstatus:", {
+                        initComplete,
+                        questionsLength: questions.length,
+                        isConnected,
+                        savedQuestionsExist: Boolean(localStorage.getItem('lastGameQuestions'))
+                    });
+
+                    // Verzögerung vor dem Fortfahren, um WebRTC-Verbindung Zeit zu geben
+                    setTimeout(() => {
+                        // Wenn wir nach dem Countdown noch keine Fragen haben, versuche sie aus dem lokalen Speicher zu laden
+                        if (!initComplete && questions.length === 0) {
+                            const savedQuestions = localStorage.getItem('lastGameQuestions');
+                            if (savedQuestions) {
+                                try {
+                                    const parsedQuestions = JSON.parse(savedQuestions);
+                                    const questionsTimestamp = localStorage.getItem('lastGameTimestamp');
+                                    const timestamp = questionsTimestamp ? parseInt(questionsTimestamp) : 0;
+
+                                    // Prüfe, ob die Fragen nicht älter als 30 Minuten sind (erhöhte Toleranz)
+                                    const thirtyMinutesAgo = Date.now() - 30 * 60 * 1000;
+
+                                    if (Array.isArray(parsedQuestions) && parsedQuestions.length > 0 && timestamp > thirtyMinutesAgo) {
+                                        console.log("🚨 Fragen aus lokalem Speicher nach Countdown geladen:", parsedQuestions.length);
+                                        setQuestions(parsedQuestions);
+                                        setCurrentQuestionIndex(0);
+                                        setInitComplete(true);
+                                        startGameContext('multiplayer', parsedQuestions);
+
+                                        // Starte Timer für die erste Frage
+                                        startQuestionTimer(20);
+                                        setErrorMsg(null);
+                                    } else {
+                                        setErrorMsg("Keine aktuellen Fragedaten gefunden. Bitte zurück zur Lobby und erneut starten.");
+                                    }
+                                } catch (error) {
+                                    console.error("Fehler beim Laden der Fragen nach Countdown:", error);
+                                    setErrorMsg("Fehler beim Laden der Fragen. Bitte neu starten.");
+                                }
+                            } else {
+                                // Keine gespeicherten Fragen gefunden
+                                setErrorMsg("Verbindungsproblem: Keine Fragedaten empfangen. Zurück zur Lobby.");
+                            }
+                        }
+                    }, 1000); // Eine Sekunde Verzögerung
+
                     return null;
                 }
             });
         }, 1000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [initComplete, questions.length, isConnected, startGameContext, startQuestionTimer]);
 
     // Timer-Funktion für die verbleibende Zeit pro Frage
     const startQuestionTimer = useCallback((duration: number) => {
@@ -329,10 +378,10 @@ const WebRTCMultiplayerGame = ({
                 <Card className="text-center py-12 bg-violet-900/30">
                     <motion.div
                         key={countdown}
-                        initial={{ scale: 0.5, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 1.5, opacity: 0 }}
-                        transition={{ duration: 0.5 }}
+                        initial={{scale: 0.5, opacity: 0}}
+                        animate={{scale: 1, opacity: 1}}
+                        exit={{scale: 1.5, opacity: 0}}
+                        transition={{duration: 0.5}}
                         className="text-7xl font-bold text-violet-400"
                     >
                         {countdown}
@@ -417,7 +466,10 @@ const WebRTCMultiplayerGame = ({
                                     webRTCConnected: isConnected,
                                     timeLeft,
                                     firstQuestion: questions[0] ?
-                                        {id: questions[0].id, question: questions[0].question.substring(0, 30) + "..."} :
+                                        {
+                                            id: questions[0].id,
+                                            question: questions[0].question.substring(0, 30) + "..."
+                                        } :
                                         null
                                 }, null, 2)}</pre>
                             </div>
@@ -449,7 +501,8 @@ const WebRTCMultiplayerGame = ({
                             <div className="flex items-center">
                                 <div className="text-lg mr-2">🔌</div>
                                 <p className="font-medium text-yellow-300">
-                                    Verbindung zum Server verloren. Versuche, die Verbindung wiederherzustellen...
+                                    Verbindung zum Server verloren. Versuche, die Verbindung
+                                    wiederherzustellen...
                                 </p>
                             </div>
                             <div className="mt-2">
@@ -465,7 +518,8 @@ const WebRTCMultiplayerGame = ({
                         <div>
                             <div className="mb-4 flex justify-between items-center">
                                 <div>
-                                    <span className="text-sm font-medium text-violet-300">Frage</span>
+                                    <span
+                                        className="text-sm font-medium text-violet-300">Frage</span>
                                     <h2 className="text-xl font-bold">
                                         {currentQuestionIndex + 1} / {questions.length}
                                     </h2>
@@ -473,7 +527,8 @@ const WebRTCMultiplayerGame = ({
 
                                 {timeLeft !== null && (
                                     <div className="text-right">
-                                        <span className="text-sm font-medium text-violet-300">Zeit</span>
+                                        <span
+                                            className="text-sm font-medium text-violet-300">Zeit</span>
                                         <h2 className="text-xl font-bold">
                                             {timeLeft}s
                                         </h2>
@@ -501,9 +556,11 @@ const WebRTCMultiplayerGame = ({
                                         `(${questions.length} Fragen empfangen)` : ''}
                                     </p>
 
-                                    <div className="loader mx-auto w-12 h-12 border-4 border-t-4 border-gray-200 rounded-full border-t-violet-500 animate-spin"></div>
+                                    <div
+                                        className="loader mx-auto w-12 h-12 border-4 border-t-4 border-gray-200 rounded-full border-t-violet-500 animate-spin"></div>
 
-                                    <Button className="mt-6" variant="secondary" onClick={handleForceRefresh}>
+                                    <Button className="mt-6" variant="secondary"
+                                            onClick={handleForceRefresh}>
                                         Status aktualisieren
                                     </Button>
                                 </>
@@ -513,7 +570,8 @@ const WebRTCMultiplayerGame = ({
                                         beantwortet!</h3>
                                     <p className="mb-6">Warte auf die anderen Spieler...</p>
 
-                                    <div className="loader mx-auto w-12 h-12 border-4 border-t-4 border-gray-200 rounded-full border-t-violet-500 animate-spin"></div>
+                                    <div
+                                        className="loader mx-auto w-12 h-12 border-4 border-t-4 border-gray-200 rounded-full border-t-violet-500 animate-spin"></div>
                                 </>
                             )}
                         </Card>
