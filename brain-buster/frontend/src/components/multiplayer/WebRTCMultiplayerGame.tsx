@@ -168,7 +168,7 @@ const WebRTCMultiplayerGame = ({
     // In WebRTCMultiplayerGame.tsx, ändere die startCountdown-Funktion:
     const startCountdown = useCallback(() => {
         // Wenn bereits eine Initialisierung läuft, abbrechen
-        if (initComplete || questions.length > 0) {
+        if (initComplete) {
             console.log("Spiel bereits initialisiert, Countdown nicht neu gestartet");
             return;
         }
@@ -184,51 +184,49 @@ const WebRTCMultiplayerGame = ({
                 } else {
                     clearInterval(interval);
 
-                    // Ausführlicheres Logging nach Countdown-Ende
-                    console.log("Countdown beendet, Spielstatus:", {
-                        initComplete,
-                        questionsLength: questions.length,
-                        isConnected,
-                        savedQuestionsExist: Boolean(localStorage.getItem('lastGameQuestions'))
-                    });
-
                     // Verzögerung vor dem Fortfahren, um WebRTC-Verbindung Zeit zu geben
                     setTimeout(() => {
-                        // Wenn wir nach dem Countdown noch keine Fragen haben, versuche sie aus dem lokalen Speicher zu laden
+                        // Wenn wir nach dem Countdown noch keine Fragen haben
                         if (!initComplete && questions.length === 0) {
-                            const savedQuestions = localStorage.getItem('lastGameQuestions');
-                            if (savedQuestions) {
-                                try {
-                                    const parsedQuestions = JSON.parse(savedQuestions);
-                                    const questionsTimestamp = localStorage.getItem('lastGameTimestamp');
-                                    const timestamp = questionsTimestamp ? parseInt(questionsTimestamp) : 0;
-
-                                    // Prüfe, ob die Fragen nicht älter als 30 Minuten sind (erhöhte Toleranz)
-                                    const thirtyMinutesAgo = Date.now() - 30 * 60 * 1000;
-
-                                    if (Array.isArray(parsedQuestions) && parsedQuestions.length > 0 && timestamp > thirtyMinutesAgo) {
-                                        console.log("🚨 Fragen aus lokalem Speicher nach Countdown geladen:", parsedQuestions.length);
-                                        setQuestions(parsedQuestions);
-                                        setCurrentQuestionIndex(0);
-                                        setInitComplete(true);
-                                        startGameContext('multiplayer', parsedQuestions);
-
-                                        // Starte Timer für die erste Frage
-                                        startQuestionTimer(20);
-                                        setErrorMsg(null);
-                                    } else {
-                                        setErrorMsg("Keine aktuellen Fragedaten gefunden. Bitte zurück zur Lobby und erneut starten.");
-                                    }
-                                } catch (error) {
-                                    console.error("Fehler beim Laden der Fragen nach Countdown:", error);
-                                    setErrorMsg("Fehler beim Laden der Fragen. Bitte neu starten.");
-                                }
+                            // Prüfe, ob der Host eine Synchronisation durchführen sollte
+                            if (isHost && isConnected) {
+                                console.log("Host: Sende Spielsynchronisation nach Countdown");
+                                forceGameSync();
                             } else {
-                                // Keine gespeicherten Fragen gefunden
-                                setErrorMsg("Verbindungsproblem: Keine Fragedaten empfangen. Zurück zur Lobby.");
+                                // Client: Versuche Fragen aus dem lokalen Speicher zu laden
+                                const savedQuestions = localStorage.getItem('lastGameQuestions');
+                                if (savedQuestions) {
+                                    try {
+                                        const parsedQuestions = JSON.parse(savedQuestions);
+                                        const questionsTimestamp = localStorage.getItem('lastGameTimestamp');
+                                        const timestamp = questionsTimestamp ? parseInt(questionsTimestamp) : 0;
+
+                                        // Tolerantere Zeitprüfung
+                                        const thirtyMinutesAgo = Date.now() - 30 * 60 * 1000;
+
+                                        if (Array.isArray(parsedQuestions) && parsedQuestions.length > 0 && timestamp > thirtyMinutesAgo) {
+                                            console.log("Fragen aus lokalem Speicher nach Countdown geladen:", parsedQuestions.length);
+                                            setQuestions(parsedQuestions);
+                                            setCurrentQuestionIndex(0);
+                                            setInitComplete(true);
+                                            startGameContext('multiplayer', parsedQuestions);
+
+                                            // Starte Timer für die erste Frage
+                                            startQuestionTimer(20);
+                                            setErrorMsg(null);
+                                        } else {
+                                            setErrorMsg("Warte auf Spielstart vom Host...");
+                                        }
+                                    } catch (error) {
+                                        console.error("Fehler beim Laden der Fragen:", error);
+                                        setErrorMsg("Fehler beim Laden der Fragen. Warte auf den Host.");
+                                    }
+                                } else {
+                                    setErrorMsg("Warte auf Spielstart vom Host...");
+                                }
                             }
                         }
-                    }, 1000); // Eine Sekunde Verzögerung
+                    }, 500); // Kürzere Verzögerung
 
                     return null;
                 }
@@ -236,7 +234,7 @@ const WebRTCMultiplayerGame = ({
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [initComplete, questions.length, isConnected, startGameContext, startQuestionTimer]);
+    }, [initComplete, questions.length, isConnected, isHost, startGameContext, startQuestionTimer, forceGameSync]);
 
     // Implementiere regelmäßige automatische Synchronisierung (nur Host)
     useEffect(() => {
