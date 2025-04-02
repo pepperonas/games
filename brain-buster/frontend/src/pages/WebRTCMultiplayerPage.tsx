@@ -1,9 +1,9 @@
 // src/pages/WebRTCMultiplayerPage.tsx
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import {useEffect, useState} from 'react';
+import {motion} from 'framer-motion';
 import Card from '../components/ui/Card';
-import { useGame } from '../store/GameContext';
-import { useWebRTC } from '../store/WebRTCContext';
+import {useGame} from '../store/GameContext';
+import {useWebRTC} from '../store/WebRTCContext';
 import WebRTCMultiplayerSetup from '../components/multiplayer/WebRTCMultiplayerSetup';
 import WebRTCMultiplayerLobby from '../components/multiplayer/WebRTCMultiplayerLobby';
 import WebRTCMultiplayerGame from '../components/multiplayer/WebRTCMultiplayerGame';
@@ -15,7 +15,12 @@ type MultiplayerStatus = 'setup' | 'lobby' | 'playing' | 'result';
 const WebRTCMultiplayerPage = () => {
     // Sichere Verwendung des useGame hooks mit Fehlerbehandlung
     const gameContext = useGame();
-    const { isConnected, error: webRTCError, connectToSignalingServer } = useWebRTC();
+    const {
+        isConnected,
+        isSignalingConnected,
+        error: webRTCError,
+        connectToSignalingServer
+    } = useWebRTC();
 
     // Debug mode state
     const [showDebug, setShowDebug] = useState(false);
@@ -25,15 +30,17 @@ const WebRTCMultiplayerPage = () => {
         return (
             <Card>
                 <div className="text-center py-8">
-                    <h2 className="text-xl font-bold text-red-400 mb-2">Fehler beim Laden des Spielkontexts</h2>
-                    <p>Bitte starten Sie die Anwendung neu oder kehren Sie zur Startseite zurück.</p>
+                    <h2 className="text-xl font-bold text-red-400 mb-2">Fehler beim Laden des
+                        Spielkontexts</h2>
+                    <p>Bitte starten Sie die Anwendung neu oder kehren Sie zur Startseite
+                        zurück.</p>
                 </div>
             </Card>
         );
     }
 
     // Destrukturiere erst nach der Überprüfung
-    const { resetGame } = gameContext;
+    const {resetGame} = gameContext;
 
     const [status, setStatus] = useState<MultiplayerStatus>('setup');
     const [playerName, setPlayerName] = useState('');
@@ -74,14 +81,15 @@ const WebRTCMultiplayerPage = () => {
 
     // Verbindung zum Multiplayer-Server herstellen
     const connectToServer = (name: string, room: string, hostStatus: boolean) => {
-        if (!isConnected) {
-            setConnectionError("Nicht mit dem Server verbunden. Bitte versuchen Sie es später erneut.");
+        // Prüfe auf Signaling-Server-Verbindung statt auf WebRTC-Verbindung
+        if (!isSignalingConnected) {  // isConnected -> isSignalingConnected
+            setConnectionError("Nicht mit dem Signaling-Server verbunden. Bitte versuchen Sie es später erneut.");
             return;
         }
 
         setConnectionError(null);
         console.log(`Raum beigetreten: ${room} als ${hostStatus ? 'Host' : 'Gast'}`);
-        
+
         setPlayerName(name);
         setRoomId(room);
         setPlayerId(hostStatus ? 'host-' + Math.random().toString(36).substring(2, 9) : 'guest-' + Math.random().toString(36).substring(2, 9));
@@ -114,7 +122,7 @@ const WebRTCMultiplayerPage = () => {
     // Erzwinge Neu-Verbindung
     const handleForceReconnect = async () => {
         setConnectionError("Verbindung wird neu aufgebaut...");
-        
+
         try {
             await connectToSignalingServer();
             setConnectionError(null);
@@ -144,8 +152,11 @@ const WebRTCMultiplayerPage = () => {
                     <div className="flex items-center">
                         <div className="text-lg mr-2">⚠️</div>
                         <div>
-                            <p className="font-medium">Verbindung zum WebRTC-Server wird hergestellt...</p>
-                            <p className="text-sm text-gray-300">Falls die Verbindung nicht hergestellt werden kann, überprüfen Sie bitte Ihre Internetverbindung.</p>
+                            <p className="font-medium">Verbindung zum WebRTC-Server wird
+                                hergestellt...</p>
+                            <p className="text-sm text-gray-300">Falls die Verbindung nicht
+                                hergestellt werden kann, überprüfen Sie bitte Ihre
+                                Internetverbindung.</p>
                         </div>
                     </div>
                     <div className="mt-2">
@@ -171,19 +182,19 @@ const WebRTCMultiplayerPage = () => {
 
             {status === 'setup' && (
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
+                    initial={{opacity: 0, y: 20}}
+                    animate={{opacity: 1, y: 0}}
+                    transition={{duration: 0.3}}
                 >
-                    <WebRTCMultiplayerSetup onConnect={connectToServer} />
+                    <WebRTCMultiplayerSetup onConnect={connectToServer}/>
                 </motion.div>
             )}
 
             {status === 'lobby' && (
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
+                    initial={{opacity: 0, y: 20}}
+                    animate={{opacity: 1, y: 0}}
+                    transition={{duration: 0.3}}
                 >
                     <WebRTCMultiplayerLobby
                         roomId={roomId}
@@ -197,9 +208,9 @@ const WebRTCMultiplayerPage = () => {
 
             {status === 'playing' && (
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3 }}
+                    initial={{opacity: 0, scale: 0.95}}
+                    animate={{opacity: 1, scale: 1}}
+                    transition={{duration: 0.3}}
                 >
                     <WebRTCMultiplayerGame
                         playerName={playerName}
@@ -219,7 +230,8 @@ const WebRTCMultiplayerPage = () => {
                     <div className="grid grid-cols-2 gap-2 mb-4">
                         <div>
                             <span className="text-sm text-gray-400">Connection Status:</span>
-                            <div className={`ml-2 ${isConnected ? 'text-green-500' : 'text-red-500'}`}>
+                            <div
+                                className={`ml-2 ${isConnected ? 'text-green-500' : 'text-red-500'}`}>
                                 {isConnected ? 'Connected' : 'Disconnected'}
                             </div>
                         </div>

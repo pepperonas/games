@@ -1,14 +1,14 @@
 // src/components/multiplayer/WebRTCMultiplayerSetup.tsx
-import { useCallback, useEffect, useState } from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
-import { useWebRTC } from '../../store/WebRTCContext';
+import {useWebRTC} from '../../store/WebRTCContext';
 
 interface WebRTCMultiplayerSetupProps {
     onConnect: (playerName: string, roomId: string, isHost: boolean) => void;
 }
 
-const WebRTCMultiplayerSetup = ({ onConnect }: WebRTCMultiplayerSetupProps) => {
+const WebRTCMultiplayerSetup = ({onConnect}: WebRTCMultiplayerSetupProps) => {
     const [playerName, setPlayerName] = useState('');
     const [roomId, setRoomId] = useState('');
     const [setupMode, setSetupMode] = useState<'create' | 'join' | null>(null);
@@ -91,6 +91,12 @@ const WebRTCMultiplayerSetup = ({ onConnect }: WebRTCMultiplayerSetupProps) => {
 
     // Verbindung herstellen - mit verbesserter Fehlerbehandlung
     const handleConnect = useCallback(async () => {
+        console.log("Verbindungsstatus beim Klick:", {
+            isConnecting,
+            isSignalingConnected,
+            setupMode,
+            roomId
+        });
         // Verhindere mehrfache Verbindungsversuche
         if (isConnecting) {
             console.log("Bereits beim Verbinden, ignoriere doppelte Anfrage");
@@ -167,8 +173,10 @@ const WebRTCMultiplayerSetup = ({ onConnect }: WebRTCMultiplayerSetupProps) => {
 
             {/* Verbindungsstatus-Anzeige */}
             <div className="mb-4">
-                <div className={`flex items-center ${isSignalingConnected ? 'text-green-500' : 'text-yellow-500'}`}>
-                    <div className={`w-3 h-3 rounded-full mr-2 ${isSignalingConnected ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+                <div
+                    className={`flex items-center ${isSignalingConnected ? 'text-green-500' : 'text-yellow-500'}`}>
+                    <div
+                        className={`w-3 h-3 rounded-full mr-2 ${isSignalingConnected ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
                     <span>
                         {isSignalingConnected
                             ? 'Verbunden mit dem Signaling-Server'

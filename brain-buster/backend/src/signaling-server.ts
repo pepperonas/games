@@ -52,7 +52,7 @@ app.get('*', (req, res) => {
 // WICHTIG: Der Pfad muss exakt mit der Nginx-Konfiguration und Frontend-Erwartung übereinstimmen
 const wss = new WebSocketServer({
     server,
-    path: '/games/brain-buster/api/socket.io/'  // Pfad passt zur Nginx location /games/brain-buster/api/socket.io/
+    path: '/socket.io/'
 });
 
 // Räume speichern
