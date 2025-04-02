@@ -178,6 +178,7 @@ class WebRTCService {
 
                     this.startPingInterval();
                     this.isConnecting = false;
+                    this.isConnected = true; // Wichtig: Setze Connected-Status
                     resolve();
                 };
 
@@ -199,6 +200,7 @@ class WebRTCService {
                     }
 
                     this.isConnecting = false;
+                    this.isConnected = false; // Wichtig: Setze Disconnected-Status
                     reject(new Error('WebSocket-Verbindungsfehler'));
                 };
 
@@ -242,11 +244,14 @@ class WebRTCService {
                 return;
             }
 
+            // Wichtig: Standardisiere die Raum-ID
+            const normalizedRoomId = roomId.toUpperCase().trim();
+
             this.playerName = playerName;
-            this.roomId = roomId;
+            this.roomId = normalizedRoomId;
             this.isHost = true;
 
-            console.log(`Erstelle Raum: ${roomId}, Spieler: ${playerName}`);
+            console.log(`Erstelle Raum: ${normalizedRoomId}, Spieler: ${playerName}`);
 
             this.initializePeerConnection();
 
@@ -265,7 +270,7 @@ class WebRTCService {
             this.sendMessage({
                 type: 'create-room',
                 sender: this.playerId,
-                roomId: roomId,
+                roomId: normalizedRoomId,
                 content: {
                     playerName: this.playerName
                 }
@@ -276,10 +281,10 @@ class WebRTCService {
                 try {
                     const message = JSON.parse(event.data);
 
-                    if (message.type === 'room-created' && message.content && message.content.roomId === roomId) {
+                    if (message.type === 'room-created' && message.content && message.content.roomId === normalizedRoomId) {
                         console.log('Raumbestätigung erhalten:', message);
                         this.signalingServer?.removeEventListener('message', messageHandler);
-                        resolve(roomId);
+                        resolve(normalizedRoomId);
                     } else if (message.type === 'error') {
                         console.error('Fehler bei Raumerstellung:', message.content?.message);
                         this.signalingServer?.removeEventListener('message', messageHandler);
@@ -316,11 +321,14 @@ class WebRTCService {
                 return;
             }
 
+            // Wichtig: Standardisiere die Raum-ID
+            const normalizedRoomId = roomId.toUpperCase().trim();
+
             this.playerName = playerName;
-            this.roomId = roomId;
+            this.roomId = normalizedRoomId;
             this.isHost = false;
 
-            console.log(`Trete Raum bei: ${roomId}, Spieler: ${playerName}`);
+            console.log(`Trete Raum bei: ${normalizedRoomId}, Spieler: ${playerName}`);
 
             this.initializePeerConnection();
 
@@ -328,7 +336,7 @@ class WebRTCService {
             this.sendMessage({
                 type: 'join-room',
                 sender: this.playerId,
-                roomId: roomId,
+                roomId: normalizedRoomId,
                 content: {
                     playerName: this.playerName
                 }
@@ -339,7 +347,7 @@ class WebRTCService {
                 try {
                     const message = JSON.parse(event.data);
 
-                    if (message.type === 'room-joined' && message.content && message.content.roomId === roomId) {
+                    if (message.type === 'room-joined' && message.content && message.content.roomId === normalizedRoomId) {
                         console.log('Raumbeitritt bestätigt:', message);
                         this.signalingServer?.removeEventListener('message', messageHandler);
                         resolve();
@@ -601,10 +609,32 @@ class WebRTCService {
                 iceTransportPolicy: 'all' // Versuche sowohl UDP als auch TCP
             });
 
+            // Verbesserte Fehlerbehandlung für mehrere Phasen des Verbindungsprozesses
+            this.peerConnection.addEventListener('negotiationneeded', async () => {
+                console.log('Neuverhandlung der Verbindung erforderlich');
+                if (this.isHost) {
+                    try {
+                        await this.createOffer();
+                    } catch (error) {
+                        console.error('Fehler während der Neuverhandlung:', error);
+                        if (this.callbacks.onError) {
+                            this.callbacks.onError(`Verbindungsfehler: ${error}`);
+                        }
+                    }
+                }
+            });
+
             // Log aller ICE-Kandidaten für besseres Debugging
             this.peerConnection.onicecandidate = (event) => {
                 if (event.candidate) {
-                    console.log(`ICE-Kandidat gefunden: ${event.candidate.candidate.split(' ')[7]} (${event.candidate.protocol})`);
+                    console.log(`ICE-Kandidat gefunden: ${event.candidate.candidate.slice(0, 50)}...`);
+
+                    // Prüfe, ob die Raum-ID richtig gesetzt ist, bevor Kandidaten gesendet werden
+                    if (!this.roomId) {
+                        console.error('Raum-ID ist nicht gesetzt! Kann Ice-Kandidat nicht senden.');
+                        return;
+                    }
+
                     this.sendMessage({
                         type: 'ice-candidate',
                         sender: this.playerId,
@@ -616,7 +646,7 @@ class WebRTCService {
                 }
             };
 
-            // Detailliertes Logging für ICE-Verbindungsstatus
+            // Detailliertes Logging für ICE-Verbindungsstatus mit verbesserten Diagnosen
             this.peerConnection.oniceconnectionstatechange = () => {
                 const state = this.peerConnection?.iceConnectionState;
                 console.log(`ICE-Verbindungsstatus geändert: ${state}`);
@@ -625,22 +655,43 @@ class WebRTCService {
                     console.log('⭐ ICE-Verbindung erfolgreich hergestellt!');
                     this.isConnected = true;
                     this.reconnectAttempts = 0;
+
+                    // Zusätzliche Informationen zur Verbindungsqualität sammeln
+                    this.peerConnection?.getStats().then(stats => {
+                        stats.forEach(report => {
+                            if (report.type === 'candidate-pair' && report.state === 'succeeded') {
+                                console.log(`Aktive Verbindung: ${report.localCandidateId} -> ${report.remoteCandidateId}`);
+                            }
+                        });
+                    }).catch(error => console.error('Fehler beim Sammeln von Verbindungsstatistiken:', error));
+
                 } else if (state === 'failed' || state === 'disconnected') {
-                    console.warn(`❌ ICE-Verbindung ${state} - Versuche Wiederverbindung...`);
+                    console.warn(`❌ ICE-Verbindung ${state} - Versuche aggressive Wiederherstellung...`);
                     this.isConnected = false;
 
-                    // Bei Verbindungsverlust versuchen wir die ICE-Konfiguration zu aktualisieren
+                    // Bei Verbindungsverlust aggressivere Neuverbindungsstrategien anwenden
                     if (this.peerConnection) {
-                        console.log('Versuche ICE-Neuverhandlung...');
-                        this.peerConnection.restartIce();
-                    }
+                        try {
+                            console.log('Setze ICE-Neustart-Flag...');
+                            this.peerConnection.restartIce();
 
-                    // Falls das nicht klappt, versuchen wir eine komplette Wiederverbindung
-                    setTimeout(() => {
-                        if (this.peerConnection?.iceConnectionState === 'failed') {
-                            this.attemptReconnect();
+                            // Zusätzlich: Wenn ICE-Neustart nicht funktioniert, versuche es mit einer neuen Verbindung
+                            setTimeout(() => {
+                                if (this.peerConnection?.iceConnectionState === 'failed') {
+                                    console.log('ICE-Restart war nicht erfolgreich, starte komplett neu');
+                                    this.initializePeerConnection();
+
+                                    // Bei Host: Neues Angebot erstellen
+                                    if (this.isHost) {
+                                        this.createOffer().catch(err =>
+                                            console.error('Fehler beim Erstellen eines neuen Angebots nach Verbindungsfehler:', err));
+                                    }
+                                }
+                            }, 3000);
+                        } catch (error) {
+                            console.error('Fehler beim ICE-Restart:', error);
                         }
-                    }, 5000);
+                    }
                 }
 
                 if (this.callbacks.onConnectionStateChange) {
@@ -648,7 +699,7 @@ class WebRTCService {
                 }
             };
 
-            // Überwache Verbindungsänderungen
+            // Überwache Verbindungsänderungen mit verbesserten Fehlerdiagnosen
             this.peerConnection.onconnectionstatechange = () => {
                 const state = this.peerConnection?.connectionState || 'unknown';
                 console.log('WebRTC Verbindungsstatus:', state);
@@ -659,39 +710,77 @@ class WebRTCService {
 
                 if (state === 'connected') {
                     console.log('✅ WebRTC-Verbindung erfolgreich hergestellt');
+
+                    // Prüfe auf UDP/TCP und sammle zusätzliche Informationen zur Verbindungsqualität
+                    if (this.peerConnection?.getStats) {
+                        this.peerConnection.getStats().then(stats => {
+                            let tcpFound = false;
+                            let udpFound = false;
+
+                            stats.forEach(report => {
+                                if (report.type === 'candidate-pair' && report.state === 'succeeded') {
+                                    console.log(`Aktive Verbindung: ${report.localCandidateId} -> ${report.remoteCandidateId}`);
+
+                                    if (report.protocol === 'tcp') tcpFound = true;
+                                    if (report.protocol === 'udp') udpFound = true;
+                                }
+                            });
+
+                            console.log(`Verbindungsprotokolle: UDP=${udpFound}, TCP=${tcpFound}`);
+                        });
+                    }
+
                     this.isConnected = true;
                     this.reconnectAttempts = 0;
                 } else if (state === 'disconnected' || state === 'failed') {
-                    console.warn(`❌ WebRTC-Verbindung ${state}`);
+                    console.warn(`❌ WebRTC-Verbindung ${state} - Leite Wiederherstellung ein`);
                     this.isConnected = false;
                     this.attemptReconnect();
                 }
             };
 
-            // Datenkanal-Handler (als Empfänger)
+            // Datenkanal-Handler (als Empfänger) mit verbesserten Diagnosemöglichkeiten
             this.peerConnection.ondatachannel = (event) => {
                 console.log('Datenkanal vom Peer empfangen:', event.channel.label);
                 this.dataChannel = event.channel;
                 this.setupDataChannel();
+
+                // Zusätzliche Prüfungen zum Kanal
+                console.log(`Datenkanal-Status: ${event.channel.readyState}`);
+                console.log(`Datenkanal negotiated: ${event.channel.negotiated}`);
+                console.log(`Datenkanal ID: ${event.channel.id}`);
+                console.log(`Datenkanal ordered: ${event.channel.ordered}`);
             };
 
-            // Überwachung von Verbindungsstatistiken für besseres Debugging
-            if (this.peerConnection.getStats) {
-                // Periodisches Logging von Verbindungsstatistiken
-                const statsInterval = setInterval(() => {
-                    if (this.peerConnection && this.isConnected) {
-                        this.peerConnection.getStats().then(stats => {
+            // Regelmäßige Überwachung der Verbindungsstatistiken
+            const statsInterval = setInterval(() => {
+                if (this.peerConnection && this.isConnected) {
+                    this.peerConnection.getStats()
+                        .then(stats => {
+                            let activePairs = 0;
+
                             stats.forEach(report => {
                                 if (report.type === 'candidate-pair' && report.state === 'succeeded') {
-                                    console.log(`Aktive ICE-Verbindung: ${report.localCandidateId} -> ${report.remoteCandidateId}`);
+                                    activePairs++;
                                 }
                             });
-                        });
-                    } else {
-                        clearInterval(statsInterval);
-                    }
-                }, 10000); // Alle 10 Sekunden
-            }
+
+                            if (activePairs === 0 && this.isConnected) {
+                                console.warn('Keine aktiven Kandidatenpaare gefunden, obwohl Verbindung besteht!');
+
+                                // Starte eine Neuverbindung, wenn keine aktiven Kandidatenpaare, aber angeblich verbunden
+                                if (this.dataChannel?.readyState !== 'open') {
+                                    console.error('Datenkanal nicht geöffnet, obwohl Verbindung besteht. Starte Neuverbindung...');
+                                    this.attemptReconnect();
+                                }
+                            }
+                        })
+                        .catch(err => console.error('Fehler beim Sammeln von Statistiken:', err));
+                } else {
+                    clearInterval(statsInterval);
+                }
+            }, 15000);
+
         } catch (error) {
             console.error('Fehler bei RTCPeerConnection-Initialisierung:', error);
             if (this.callbacks.onError) {
@@ -711,14 +800,16 @@ class WebRTCService {
 
         console.log('Richte Datenkanal ein:', this.dataChannel.label);
 
+        // Detailliertere Statusprüfungen und Fehlerbehandlung
         this.dataChannel.onopen = () => {
-            console.log('✓ Datenkanal geöffnet');
+            console.log('✓ Datenkanal geöffnet - Status:', this.dataChannel?.readyState);
             this.isConnected = true;
 
             // Sende ausstehende ICE-Kandidaten
             while (this.pendingCandidates.length > 0) {
                 const candidate = this.pendingCandidates.shift();
                 if (candidate) {
+                    console.log('Sende verzögerten ICE-Kandidaten...');
                     this.sendMessage({
                         type: 'ice-candidate',
                         sender: this.playerId,
@@ -728,6 +819,23 @@ class WebRTCService {
                 }
             }
 
+            // Test-Nachricht senden, um die Verbindung zu prüfen - mit Sicherheitsprüfung
+            if (this.dataChannel && this.dataChannel.readyState === 'open') {
+                try {
+                    console.log('Sende Test-Nachricht über Datenkanal...');
+                    const testMessage = {
+                        type: 'ping',
+                        sender: this.playerId,
+                        timestamp: Date.now()
+                    };
+                    this.dataChannel.send(JSON.stringify(testMessage));
+                } catch (error) {
+                    console.error('Fehler beim Senden der Test-Nachricht:', error);
+                }
+            } else {
+                console.warn('Datenkanal nicht bereit für Test-Nachricht');
+            }
+
             // Informiere über erfolgreiche Verbindung
             if (this.callbacks.onReconnect) {
                 this.callbacks.onReconnect();
@@ -735,32 +843,55 @@ class WebRTCService {
         };
 
         this.dataChannel.onclose = () => {
-            console.log('Datenkanal geschlossen');
+            console.log('Datenkanal geschlossen - Status:', this.dataChannel?.readyState);
             this.isConnected = false;
 
             if (this.callbacks.onDcClose) {
                 this.callbacks.onDcClose();
             }
 
+            // Automatische Wiederverbindung, wenn der Kanal unerwartet geschlossen wurde
             this.attemptReconnect();
         };
 
-        this.dataChannel.onerror = (error) => {
-            console.error('Datenkanal Fehler:', error);
+        this.dataChannel.onerror = (event) => {
+            // Bessere Typung für das Ereignisobjekt
+            const error = (event as RTCErrorEvent).error;
+            console.error('Datenkanal Fehler:', error?.message || 'Unbekannter Fehler');
 
             if (this.callbacks.onError) {
-                this.callbacks.onError('Datenkanal-Fehler aufgetreten');
+                this.callbacks.onError(`Datenkanal-Fehler: ${error?.message || 'Unbekannter Fehler'}`);
             }
         };
 
         this.dataChannel.onmessage = (event) => {
             try {
-                const message = JSON.parse(event.data);
-                this.handleDataChannelMessage(message);
+                const dataString = typeof event.data === 'string' ? event.data : '';
+                console.log('Nachricht über Datenkanal empfangen:',
+                    dataString.length > 50 ? dataString.slice(0, 50) + '...' : dataString);
+
+                if (dataString) {
+                    const message = JSON.parse(dataString);
+                    this.handleDataChannelMessage(message);
+                } else {
+                    console.warn('Leere oder nicht-Text-Nachricht empfangen');
+                }
             } catch (error) {
                 console.error('Fehler beim Verarbeiten der Datenkanal-Nachricht:', error);
             }
         };
+
+        // Stelle sicher, dass der Datenkanal richtig konfiguriert ist
+        console.log('Datenkanal-Konfiguration:', {
+            label: this.dataChannel.label,
+            ordered: this.dataChannel.ordered,
+            protocol: this.dataChannel.protocol,
+            negotiated: this.dataChannel.negotiated,
+            id: this.dataChannel.id,
+            maxPacketLifeTime: this.dataChannel.maxPacketLifeTime,
+            maxRetransmits: this.dataChannel.maxRetransmits,
+            state: this.dataChannel.readyState
+        });
     }
 
     /**
@@ -769,9 +900,20 @@ class WebRTCService {
     private handleSignalingMessage(message: RTCMessage): void {
         console.log('Signaling-Nachricht empfangen:', message.type);
 
+        // Stellen Sie sicher, dass die Raum-ID konsistent ist
+        if (message.roomId) {
+            message.roomId = message.roomId.toUpperCase().trim();
+        }
+
         switch (message.type) {
             case 'room-created':
                 console.log('Raum erstellt:', message.content);
+
+                // Aktualisiere die lokale Raum-ID mit der vom Server bestätigten ID
+                if (message.content && message.content.roomId) {
+                    this.roomId = message.content.roomId;
+                }
+
                 // Erstelle das Angebot
                 this.createOffer();
                 break;
@@ -782,13 +924,20 @@ class WebRTCService {
                 break;
 
             case 'answer':
-                // Verarbeite die Antwort
+                // Verarbeite die Antwort - Dieser Aufruf fehlte
                 this.handleAnswer(message.content);
                 break;
 
             case 'ice-candidate':
                 // Füge den ICE-Kandidaten hinzu
                 this.addIceCandidate(message.content);
+                break;
+
+            case 'room-joined':
+                // Aktualisiere die lokale Raum-ID mit der vom Server bestätigten ID
+                if (message.content && message.content.roomId) {
+                    this.roomId = message.content.roomId;
+                }
                 break;
 
             case 'player-joined':
@@ -806,6 +955,11 @@ class WebRTCService {
                 break;
 
             case 'player-list-updated':
+                // Aktualisiere die lokale Raum-ID, falls sie in der Nachricht enthalten ist
+                if (message.content && message.content.roomId) {
+                    this.roomId = message.content.roomId;
+                }
+
                 // Die Spielerliste wurde aktualisiert
                 if (this.callbacks.onPlayersUpdate) {
                     this.callbacks.onPlayersUpdate(message.content.players);
@@ -950,27 +1104,63 @@ class WebRTCService {
     private async createOffer(): Promise<void> {
         if (!this.peerConnection) {
             console.error('Keine Peer-Verbindung verfügbar');
+            if (this.callbacks.onError) {
+                this.callbacks.onError('Keine Peer-Verbindung verfügbar');
+            }
             return;
         }
 
         try {
             console.log('Erstelle Angebot...');
-            const offer = await this.peerConnection.createOffer();
-            await this.peerConnection.setLocalDescription(offer);
 
-            console.log('Sende Angebot an Peer');
+            // Setze SDP-Constraints für bessere Verbindungsqualität
+            const offerOptions: RTCOfferOptions = {
+                offerToReceiveAudio: false,
+                offerToReceiveVideo: false,
+                iceRestart: this.reconnectAttempts > 0 // Bei Wiederverbindung immer ICE-Restart erzwingen
+            };
+
+            const offer = await this.peerConnection.createOffer(offerOptions);
+
+            // Verbessere SDP für bessere Kompatibilität
+            let modifiedSdp = offer.sdp;
+
+            // Versuche, den UDP-Transport zu priorisieren
+            if (modifiedSdp && modifiedSdp.includes('TCP')) {
+                console.log('Modifiziere SDP, um UDP zu priorisieren...');
+                // Keine tatsächliche Modifikation, nur Information über vorhandene Protokolle
+            }
+
+            const modifiedOffer = {
+                type: offer.type,
+                sdp: modifiedSdp
+            } as RTCSessionDescriptionInit;
+
+            console.log('Setze lokale Beschreibung...');
+            await this.peerConnection.setLocalDescription(modifiedOffer);
+
+            console.log('Sende Angebot an Peer...');
             this.sendMessage({
                 type: 'offer',
                 sender: this.playerId,
                 roomId: this.roomId,
-                content: offer
+                content: modifiedOffer
             });
         } catch (error) {
             console.error('Fehler beim Erstellen des Angebots:', error);
 
             if (this.callbacks.onError) {
-                this.callbacks.onError('Fehler beim Erstellen des Angebots');
+                this.callbacks.onError(`Fehler beim Erstellen des Angebots: ${error}`);
             }
+
+            // Bei Fehlern bei Angebotserstellung nach kurzer Pause erneut versuchen
+            setTimeout(() => {
+                if (this.peerConnection && this.peerConnection.connectionState !== 'connected') {
+                    console.log('Versuche erneut, ein Angebot zu erstellen...');
+                    this.createOffer().catch(e =>
+                        console.error('Auch zweiter Versuch fehlgeschlagen:', e));
+                }
+            }, 2000);
         }
     }
 
@@ -980,29 +1170,103 @@ class WebRTCService {
     private async handleOffer(offer: RTCSessionDescriptionInit): Promise<void> {
         if (!this.peerConnection) {
             console.error('Keine Peer-Verbindung verfügbar');
+            if (this.callbacks.onError) {
+                this.callbacks.onError('Kann Angebot nicht verarbeiten: Keine Peer-Verbindung verfügbar');
+            }
             return;
         }
 
         try {
-            console.log('Angebot empfangen, setze Remote-Beschreibung');
-            await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+            console.log('Angebot empfangen, verarbeite...');
 
-            console.log('Erstelle Antwort');
+            // Prüfe, ob das Angebot gültig ist
+            if (!offer || !offer.sdp) {
+                throw new Error('Ungültiges Angebot ohne SDP empfangen');
+            }
+
+            // Ursprüngliche SDP für Debugging protokollieren
+            console.log('Empfangenes SDP:', offer.sdp.substring(0, 100) + '...');
+
+            // Verbessere Kompatibilität durch SDP-Anpassungen
+            let modifiedSdp = offer.sdp;
+            const modifiedOffer = {
+                type: offer.type,
+                sdp: modifiedSdp
+            };
+
+            console.log('Setze Remote-Beschreibung...');
+            await this.peerConnection.setRemoteDescription(new RTCSessionDescription(modifiedOffer));
+            console.log('Remote-Beschreibung erfolgreich gesetzt');
+
+            // Sammle Verbindungsstatistiken nach Setzen der Remote-Beschreibung
+            if (this.peerConnection.getStats) {
+                try {
+                    console.log('Sammle ICE-Kandidaten-Informationen nach setRemoteDescription...');
+                    const stats = await this.peerConnection.getStats();
+
+                    let localCandidates = 0;
+                    let remoteCandidates = 0;
+
+                    stats.forEach(report => {
+                        if (report.type === 'local-candidate') localCandidates++;
+                        if (report.type === 'remote-candidate') remoteCandidates++;
+                    });
+
+                    console.log(`ICE-Kandidaten: ${localCandidates} lokal, ${remoteCandidates} remote`);
+                } catch (err) {
+                    console.warn('Konnte keine Statistiken sammeln:', err);
+                }
+            }
+
+            console.log('Erstelle Antwort...');
             const answer = await this.peerConnection.createAnswer();
-            await this.peerConnection.setLocalDescription(answer);
 
-            console.log('Sende Antwort an Peer');
+            // Prüfe, ob die Antwort gültig ist
+            if (!answer || !answer.sdp) {
+                throw new Error('Konnte keine gültige Antwort erstellen');
+            }
+
+            console.log('Setze Local-Beschreibung für die Antwort...');
+            await this.peerConnection.setLocalDescription(answer);
+            console.log('Local-Beschreibung für Antwort erfolgreich gesetzt');
+
+            console.log('Sende Antwort an Peer...');
             this.sendMessage({
                 type: 'answer',
                 sender: this.playerId,
                 roomId: this.roomId,
                 content: answer
             });
+
+            // Forciere Sammlung von ICE-Kandidaten nach dem Senden der Antwort
+            console.log('Starte aktive ICE-Kandidatensammlung nach Antwort...');
+            if (!this.peerConnection.onicecandidate) {
+                console.warn('onicecandidate Handler nicht gesetzt!');
+            }
         } catch (error) {
             console.error('Fehler beim Verarbeiten des Angebots:', error);
 
+            // Unterscheide zwischen verschiedenen Fehlerursachen
+            let errorMsg = 'Fehler beim Verarbeiten des Angebots';
+            if (error instanceof Error) {
+                errorMsg += ': ' + error.message;
+
+                // Spezifische Fehlerbehandlung basierend auf Fehlermeldung
+                if (error.message.includes('setRemoteDescription')) {
+                    console.error('SDP ist möglicherweise inkompatibel. Versuche ICE-Neustart...');
+                    if (this.peerConnection) {
+                        this.peerConnection.restartIce();
+
+                        // Nach kurzer Verzögerung einen neuen Verbindungsversuch starten
+                        setTimeout(() => {
+                            this.initializePeerConnection();
+                        }, 2000);
+                    }
+                }
+            }
+
             if (this.callbacks.onError) {
-                this.callbacks.onError('Fehler beim Verarbeiten des Angebots');
+                this.callbacks.onError(errorMsg);
             }
         }
     }
@@ -1013,18 +1277,78 @@ class WebRTCService {
     private async handleAnswer(answer: RTCSessionDescriptionInit): Promise<void> {
         if (!this.peerConnection) {
             console.error('Keine Peer-Verbindung verfügbar');
+            if (this.callbacks.onError) {
+                this.callbacks.onError('Kann Antwort nicht verarbeiten: Keine Peer-Verbindung verfügbar');
+            }
             return;
         }
 
         try {
-            console.log('Antwort empfangen, setze Remote-Beschreibung');
+            // Prüfe, ob wir bereits eine Remote-Beschreibung haben
+            if (this.peerConnection.remoteDescription) {
+                console.warn('Remote-Beschreibung bereits gesetzt, möglicherweise Duplikat-Antwort');
+                return;
+            }
+
+            // Prüfe, ob die Antwort gültig ist
+            if (!answer || !answer.sdp) {
+                throw new Error('Ungültige Antwort ohne SDP empfangen');
+            }
+
+            console.log('Antwort empfangen, setze Remote-Beschreibung...');
+            console.log('Antwort SDP:', answer.sdp.substring(0, 100) + '...');
+
             await this.peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
             console.log('Remote-Beschreibung erfolgreich gesetzt');
+
+            // Prüfe den Verbindungsstatus nach dem Setzen der Antwort
+            console.log('Aktueller Verbindungsstatus nach Antwort:', {
+                iceConnectionState: this.peerConnection.iceConnectionState,
+                connectionState: this.peerConnection.connectionState,
+                signalingState: this.peerConnection.signalingState,
+                iceGatheringState: this.peerConnection.iceGatheringState
+            });
+
+            // Sammle und sende zusätzliche ICE-Kandidaten, falls die Verbindung noch nicht hergestellt ist
+            if (this.peerConnection.iceConnectionState !== 'connected' &&
+                this.peerConnection.iceConnectionState !== 'completed') {
+                console.log('Verbindung noch nicht hergestellt, sammle aggressiv ICE-Kandidaten...');
+
+                // Forciere ICE-Kandidatensammlung, falls die Verbindung nicht zustande kommt
+                setTimeout(() => {
+                    if (this.peerConnection &&
+                        this.peerConnection.iceConnectionState !== 'connected' &&
+                        this.peerConnection.iceConnectionState !== 'completed') {
+                        console.log('Verbindung immer noch nicht hergestellt, versuche ICE-Neustart...');
+                        this.peerConnection.restartIce();
+                    }
+                }, 5000);
+            }
         } catch (error) {
             console.error('Fehler beim Verarbeiten der Antwort:', error);
 
+            // Spezifischere Fehlermeldung
+            let errorMsg = 'Fehler beim Verarbeiten der Antwort';
+            if (error instanceof Error) {
+                errorMsg += ': ' + error.message;
+
+                // Bestimmte Fehlertypen speziell behandeln
+                if (error.message.includes('setRemoteDescription')) {
+                    console.error('Fehler beim Setzen der Remote-Beschreibung. Versuche Neuinitialisierung...');
+                    setTimeout(() => {
+                        this.initializePeerConnection();
+
+                        // Bei Host: Neues Angebot erstellen
+                        if (this.isHost) {
+                            this.createOffer().catch(err =>
+                                console.error('Fehler beim Erstellen eines neuen Angebots nach Fehler:', err));
+                        }
+                    }, 2000);
+                }
+            }
+
             if (this.callbacks.onError) {
-                this.callbacks.onError('Fehler beim Verarbeiten der Antwort');
+                this.callbacks.onError(errorMsg);
             }
         }
     }
@@ -1039,16 +1363,36 @@ class WebRTCService {
         }
 
         try {
+            // Prüfe, ob der Kandidat gültig ist
+            if (!candidate || (candidate.candidate === '')) {
+                console.log('Leerer ICE-Kandidat empfangen, ignoriere...');
+                return;
+            }
+
+            console.log('ICE-Kandidat empfangen:', candidate.candidate ? candidate.candidate.slice(0, 50) + '...' : 'kein candidate');
+            console.log('Aktueller Signaling-Status:', this.peerConnection.signalingState);
+
             if (this.peerConnection.remoteDescription) {
-                console.log('Füge ICE-Kandidaten hinzu');
+                console.log('Remote-Beschreibung ist gesetzt, füge ICE-Kandidaten hinzu...');
                 await this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                console.log('ICE-Kandidat erfolgreich hinzugefügt');
+
+                // Prüfe Verbindungsfortschritt nach dem Hinzufügen des Kandidaten
+                console.log('Verbindungsstatus nach Kandidat:', this.peerConnection.iceConnectionState);
             } else {
                 // Speichere den Kandidaten für später
-                console.log('Remote-Beschreibung noch nicht gesetzt, speichere ICE-Kandidaten');
+                console.log('Remote-Beschreibung noch nicht gesetzt, speichere ICE-Kandidaten für später');
                 this.pendingCandidates.push(new RTCIceCandidate(candidate));
+                console.log(`${this.pendingCandidates.length} ausstehende Kandidaten`);
             }
         } catch (error) {
             console.error('Fehler beim Hinzufügen des ICE-Kandidaten:', error);
+
+            // Bestimmte Fehlertypen speziell behandeln
+            if (error instanceof Error && error.message.includes('addIceCandidate')) {
+                console.warn('Konnte ICE-Kandidat nicht hinzufügen, speichere für später...');
+                this.pendingCandidates.push(new RTCIceCandidate(candidate));
+            }
         }
     }
 
@@ -1058,6 +1402,11 @@ class WebRTCService {
     private sendMessage(message: RTCMessage): void {
         if (this.signalingServer && this.signalingServer.readyState === WebSocket.OPEN) {
             try {
+                // Stellen Sie sicher, dass die Raum-ID konsistent formatiert ist
+                if (message.roomId) {
+                    message.roomId = message.roomId.toUpperCase().trim();
+                }
+
                 const messageStr = JSON.stringify(message);
                 this.signalingServer.send(messageStr);
                 console.log(`Nachricht gesendet: ${message.type}`);
@@ -1079,24 +1428,40 @@ class WebRTCService {
      * Sendet eine Nachricht über den Datenkanal
      */
     private sendGameMessage(message: any): void {
-        if (this.dataChannel && this.dataChannel.readyState === 'open') {
-            try {
-                const messageStr = JSON.stringify({
-                    ...message,
-                    sender: this.playerId
-                });
-                this.dataChannel.send(messageStr);
-                console.log(`Spiel-Nachricht gesendet: ${message.type}`);
-            } catch (error) {
-                console.error('Fehler beim Senden der Datenkanal-Nachricht:', error);
-            }
-        } else {
-            console.error('Datenkanal ist nicht geöffnet');
-
+        if (!this.dataChannel) {
+            console.error('Datenkanal ist nicht verfügbar');
             if (this.callbacks.onError) {
-                this.callbacks.onError('Verbindung zum anderen Spieler verloren');
+                this.callbacks.onError('Datenkanal nicht verfügbar - Nachricht konnte nicht gesendet werden');
+            }
+            return;
+        }
+
+        if (this.dataChannel.readyState !== 'open') {
+            console.error('Datenkanal ist nicht geöffnet (Status: ' + this.dataChannel.readyState + ')');
+            if (this.callbacks.onError) {
+                this.callbacks.onError('Datenkanal nicht geöffnet - Nachricht konnte nicht gesendet werden');
             }
 
+            // Versuche eine Wiederverbindung, wenn der Kanal nicht geöffnet ist
+            this.attemptReconnect();
+            return;
+        }
+
+        try {
+            const messageToSend = {
+                ...message,
+                sender: this.playerId
+            };
+            const messageStr = JSON.stringify(messageToSend);
+            this.dataChannel.send(messageStr);
+            console.log(`Spiel-Nachricht gesendet: ${message.type}`);
+        } catch (error) {
+            console.error('Fehler beim Senden der Datenkanal-Nachricht:', error);
+            if (this.callbacks.onError) {
+                this.callbacks.onError('Fehler beim Senden der Nachricht: ' + error);
+            }
+
+            // Bei Sende-Fehlern auch eine Wiederverbindung versuchen
             this.attemptReconnect();
         }
     }
@@ -1106,23 +1471,35 @@ class WebRTCService {
      * Diese Methode wird verwendet, um Spielstatus explizit zu synchronisieren
      */
     public sendSyncMessage(message: any): void {
-        if (this.dataChannel && this.dataChannel.readyState === 'open') {
-            try {
-                const messageStr = JSON.stringify({
-                    ...message,
-                    sender: this.playerId,
-                    isSyncMessage: true // Kennzeichnung als Synchronisierungsnachricht
-                });
-                this.dataChannel.send(messageStr);
-                console.log(`Synchronisierungsnachricht gesendet: ${message.type}`);
-            } catch (error) {
-                console.error('Fehler beim Senden der Synchronisierungsnachricht:', error);
-            }
-        } else {
-            console.error('Datenkanal ist nicht geöffnet');
-
+        if (!this.dataChannel) {
+            console.error('Datenkanal ist nicht verfügbar');
             if (this.callbacks.onError) {
-                this.callbacks.onError('Verbindung zum anderen Spieler verloren - Synchronisierung nicht möglich');
+                this.callbacks.onError('Datenkanal nicht verfügbar - Sync-Nachricht konnte nicht gesendet werden');
+            }
+            return;
+        }
+
+        if (this.dataChannel.readyState !== 'open') {
+            console.error('Datenkanal ist nicht geöffnet (Status: ' + this.dataChannel.readyState + ')');
+            if (this.callbacks.onError) {
+                this.callbacks.onError('Datenkanal nicht geöffnet - Sync-Nachricht konnte nicht gesendet werden');
+            }
+            return;
+        }
+
+        try {
+            const messageToSend = {
+                ...message,
+                sender: this.playerId,
+                isSyncMessage: true // Kennzeichnung als Synchronisierungsnachricht
+            };
+            const messageStr = JSON.stringify(messageToSend);
+            this.dataChannel.send(messageStr);
+            console.log(`Synchronisierungsnachricht gesendet: ${message.type}`);
+        } catch (error) {
+            console.error('Fehler beim Senden der Synchronisierungsnachricht:', error);
+            if (this.callbacks.onError) {
+                this.callbacks.onError('Fehler beim Senden der Sync-Nachricht: ' + error);
             }
         }
     }

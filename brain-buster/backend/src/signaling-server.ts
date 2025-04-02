@@ -180,8 +180,11 @@ wss.on('connection', (ws: WSSocket) => {
 
     // Raum erstellen
     function handleCreateRoom(roomId: string, playerId: string, playerName: string, ws: WSSocket): void {
+        // WICHTIG: Konsistenten Raum-ID-Format sicherstellen
+        const normalizedRoomId = roomId.toUpperCase().trim();
+
         // Prüfe, ob der Raum bereits existiert
-        if (rooms.has(roomId)) {
+        if (rooms.has(normalizedRoomId)) {
             sendTo(ws, {
                 type: 'error',
                 content: {message: 'Raum existiert bereits'}
@@ -201,31 +204,34 @@ wss.on('connection', (ws: WSSocket) => {
 
         // Erstelle einen neuen Raum
         const room: Room = {
-            id: roomId,
+            id: normalizedRoomId,
             players: [player],
             isGameStarted: false
         };
 
         // Speichere den Raum
-        rooms.set(roomId, room);
+        rooms.set(normalizedRoomId, room);
 
-        logMessage('ROOM', `Raum erstellt: ${roomId} von ${playerName} (${playerId})`);
+        logMessage('ROOM', `Raum erstellt: ${normalizedRoomId} von ${playerName} (${playerId})`);
 
         // Bestätige die Raumerstellung
         sendTo(ws, {
             type: 'room-created',
-            content: {roomId, playerId}
+            content: {roomId: normalizedRoomId, playerId}
         });
 
         // Aktualisiere die Spielerliste
-        broadcastPlayerList(roomId);
+        broadcastPlayerList(normalizedRoomId);
     }
 
     // Raum beitreten
     function handleJoinRoom(roomId: string, playerId: string, playerName: string, ws: WSSocket): void {
+        // WICHTIG: Konsistenten Raum-ID-Format sicherstellen
+        const normalizedRoomId = roomId.toUpperCase().trim();
+
         // Prüfe, ob der Raum existiert
-        if (!rooms.has(roomId)) {
-            logMessage('ERROR', `Raum ${roomId} existiert nicht für Spieler ${playerId}`);
+        if (!rooms.has(normalizedRoomId)) {
+            logMessage('ERROR', `Raum ${normalizedRoomId} existiert nicht für Spieler ${playerId}`);
             sendTo(ws, {
                 type: 'error',
                 content: {message: 'Raum existiert nicht'}
@@ -233,12 +239,12 @@ wss.on('connection', (ws: WSSocket) => {
             return;
         }
 
-        const room = rooms.get(roomId)!;
-        logMessage('ROOM', `Spieler ${playerName} (${playerId}) versucht, Raum ${roomId} beizutreten`);
+        const room = rooms.get(normalizedRoomId)!;
+        logMessage('ROOM', `Spieler ${playerName} (${playerId}) versucht, Raum ${normalizedRoomId} beizutreten`);
 
         // Prüfe, ob das Spiel bereits gestartet ist
         if (room.isGameStarted) {
-            logMessage('ROOM', `Zugriff verweigert: Spiel in Raum ${roomId} bereits gestartet`);
+            logMessage('ROOM', `Zugriff verweigert: Spiel in Raum ${normalizedRoomId} bereits gestartet`);
             sendTo(ws, {
                 type: 'error',
                 content: {message: 'Spiel bereits gestartet'}
@@ -248,7 +254,7 @@ wss.on('connection', (ws: WSSocket) => {
 
         // Prüfe, ob der Raum bereits voll ist (max. 8 Spieler)
         if (room.players.length >= 8) {
-            logMessage('ROOM', `Zugriff verweigert: Raum ${roomId} ist voll`);
+            logMessage('ROOM', `Zugriff verweigert: Raum ${normalizedRoomId} ist voll`);
             sendTo(ws, {
                 type: 'error',
                 content: {message: 'Raum ist voll'}
@@ -260,21 +266,21 @@ wss.on('connection', (ws: WSSocket) => {
         const existingPlayerIndex = room.players.findIndex(p => p.id === playerId);
         if (existingPlayerIndex >= 0) {
             // Spieler ist bereits im Raum - aktualisiere WebSocket
-            logMessage('ROOM', `Spieler ${playerName} (${playerId}) bereits in Raum ${roomId} - WebSocket aktualisiert`);
+            logMessage('ROOM', `Spieler ${playerName} (${playerId}) bereits in Raum ${normalizedRoomId} - WebSocket aktualisiert`);
             room.players[existingPlayerIndex].ws = ws;
             room.players[existingPlayerIndex].name = playerName;
 
             sendTo(ws, {
                 type: 'room-joined',
                 content: {
-                    roomId,
+                    roomId: normalizedRoomId,
                     playerId,
                     success: true,
                     message: 'Reconnected to room'
                 }
             });
 
-            broadcastPlayerList(roomId);
+            broadcastPlayerList(normalizedRoomId);
             return;
         }
 
@@ -291,20 +297,20 @@ wss.on('connection', (ws: WSSocket) => {
         // Füge den Spieler dem Raum hinzu
         room.players.push(player);
 
-        logMessage('ROOM', `Spieler beigetreten: ${playerName} (${playerId}) in Raum ${roomId}, Spieler insgesamt: ${room.players.length}`);
+        logMessage('ROOM', `Spieler beigetreten: ${playerName} (${playerId}) in Raum ${normalizedRoomId}, Spieler insgesamt: ${room.players.length}`);
 
         // Bestätige den Raumbeitritt
         sendTo(ws, {
             type: 'room-joined',
             content: {
-                roomId,
+                roomId: normalizedRoomId,
                 playerId,
                 success: true
             }
         });
 
         // Informiere alle Spieler im Raum
-        broadcastToRoom(roomId, {
+        broadcastToRoom(normalizedRoomId, {
             type: 'player-joined',
             content: {
                 id: playerId,
@@ -316,34 +322,37 @@ wss.on('connection', (ws: WSSocket) => {
         });
 
         // Aktualisiere die Spielerliste
-        broadcastPlayerList(roomId);
+        broadcastPlayerList(normalizedRoomId);
     }
 
     // Spieler verlässt den Raum
     function handlePlayerLeave(roomId: string, playerId: string): void {
-        if (!rooms.has(roomId)) return;
+        // WICHTIG: Konsistenten Raum-ID-Format sicherstellen
+        const normalizedRoomId = roomId.toUpperCase().trim();
 
-        const room = rooms.get(roomId)!;
+        if (!rooms.has(normalizedRoomId)) return;
+
+        const room = rooms.get(normalizedRoomId)!;
         const playerIndex = room.players.findIndex(p => p.id === playerId);
 
         if (playerIndex === -1) return;
 
         const player = room.players[playerIndex];
-        logMessage('ROOM', `Spieler verlässt Raum: ${player.name} (${playerId}) aus Raum ${roomId}`);
+        logMessage('ROOM', `Spieler verlässt Raum: ${player.name} (${playerId}) aus Raum ${normalizedRoomId}`);
 
         // Entferne den Spieler aus dem Raum
         room.players.splice(playerIndex, 1);
 
         // Informiere alle verbleibenden Spieler
-        broadcastToRoom(roomId, {
+        broadcastToRoom(normalizedRoomId, {
             type: 'player-left',
             content: {playerId}
         });
 
         // Wenn der Raum leer ist, entferne ihn
         if (room.players.length === 0) {
-            logMessage('ROOM', `Raum wird entfernt: ${roomId}`);
-            rooms.delete(roomId);
+            logMessage('ROOM', `Raum wird entfernt: ${normalizedRoomId}`);
+            rooms.delete(normalizedRoomId);
             return;
         }
 
@@ -354,14 +363,17 @@ wss.on('connection', (ws: WSSocket) => {
         }
 
         // Aktualisiere die Spielerliste
-        broadcastPlayerList(roomId);
+        broadcastPlayerList(normalizedRoomId);
     }
 
     // Spieler ändert Bereit-Status
     function handlePlayerReady(roomId: string, playerId: string, isReady: boolean): void {
-        if (!rooms.has(roomId)) return;
+        // WICHTIG: Konsistenten Raum-ID-Format sicherstellen
+        const normalizedRoomId = roomId.toUpperCase().trim();
 
-        const room = rooms.get(roomId)!;
+        if (!rooms.has(normalizedRoomId)) return;
+
+        const room = rooms.get(normalizedRoomId)!;
         const player = room.players.find(p => p.id === playerId);
 
         if (!player) return;
@@ -370,14 +382,17 @@ wss.on('connection', (ws: WSSocket) => {
         logMessage('PLAYER', `Spieler ${player.name} (${playerId}) ist ${isReady ? 'bereit' : 'nicht bereit'}`);
 
         // Aktualisiere die Spielerliste
-        broadcastPlayerList(roomId);
+        broadcastPlayerList(normalizedRoomId);
     }
 
     // Nachricht an alle Spieler im Raum weiterleiten
     function forwardMessage(roomId: string, senderId: string, message: any): void {
-        if (!rooms.has(roomId)) return;
+        // WICHTIG: Konsistenten Raum-ID-Format sicherstellen
+        const normalizedRoomId = roomId.toUpperCase().trim();
 
-        const room = rooms.get(roomId)!;
+        if (!rooms.has(normalizedRoomId)) return;
+
+        const room = rooms.get(normalizedRoomId)!;
 
         // Sende die Nachricht an alle anderen Spieler im Raum
         room.players.forEach(player => {
@@ -389,9 +404,12 @@ wss.on('connection', (ws: WSSocket) => {
 
     // Aktualisiere die Spielerliste für alle Spieler im Raum
     function broadcastPlayerList(roomId: string): void {
-        if (!rooms.has(roomId)) return;
+        // WICHTIG: Konsistenten Raum-ID-Format sicherstellen
+        const normalizedRoomId = roomId.toUpperCase().trim();
 
-        const room = rooms.get(roomId)!;
+        if (!rooms.has(normalizedRoomId)) return;
+
+        const room = rooms.get(normalizedRoomId)!;
         const players = room.players.map(p => ({
             id: p.id,
             name: p.name,
@@ -400,17 +418,23 @@ wss.on('connection', (ws: WSSocket) => {
             score: p.score
         }));
 
-        broadcastToRoom(roomId, {
+        broadcastToRoom(normalizedRoomId, {
             type: 'player-list-updated',
-            content: {players}
+            content: {
+                roomId: normalizedRoomId, // Wichtig: Sendet die Raum-ID immer mit!
+                players
+            }
         });
     }
 
     // Sende eine Nachricht an alle Spieler im Raum
     function broadcastToRoom(roomId: string, message: any): void {
-        if (!rooms.has(roomId)) return;
+        // WICHTIG: Konsistenten Raum-ID-Format sicherstellen
+        const normalizedRoomId = roomId.toUpperCase().trim();
 
-        const room = rooms.get(roomId)!;
+        if (!rooms.has(normalizedRoomId)) return;
+
+        const room = rooms.get(normalizedRoomId)!;
 
         room.players.forEach(player => {
             sendTo(player.ws, message);

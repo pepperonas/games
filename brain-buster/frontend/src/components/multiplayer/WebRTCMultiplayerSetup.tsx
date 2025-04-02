@@ -89,6 +89,11 @@ const WebRTCMultiplayerSetup = ({onConnect}: WebRTCMultiplayerSetupProps) => {
         setRoomId('');
     };
 
+    // Normalisiere die Raum-ID
+    const normalizeRoomId = (id: string): string => {
+        return id.toUpperCase().trim();
+    };
+
     // Verbindung herstellen - mit verbesserter Fehlerbehandlung
     const handleConnect = useCallback(async () => {
         console.log("Verbindungsstatus beim Klick:", {
@@ -132,16 +137,19 @@ const WebRTCMultiplayerSetup = ({onConnect}: WebRTCMultiplayerSetupProps) => {
                 await handleSignalingConnection();
             }
 
+            // Normalisiere die Raum-ID
+            const normalizedRoomId = normalizeRoomId(roomId);
+
             if (setupMode === 'create') {
                 // Raum erstellen
-                const createdRoomId = await createRoom(playerName, roomId);
+                const createdRoomId = await createRoom(playerName, normalizedRoomId);
                 console.log(`Raum erstellt: ${createdRoomId}`);
                 onConnect(playerName, createdRoomId, true);
             } else {
                 // Raum beitreten
-                await joinRoom(playerName, roomId.toUpperCase());
-                console.log(`Raum beigetreten: ${roomId}`);
-                onConnect(playerName, roomId.toUpperCase(), false);
+                await joinRoom(playerName, normalizedRoomId);
+                console.log(`Raum beigetreten: ${normalizedRoomId}`);
+                onConnect(playerName, normalizedRoomId, false);
             }
 
             // Erfolg!

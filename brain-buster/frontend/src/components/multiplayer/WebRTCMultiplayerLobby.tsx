@@ -29,6 +29,9 @@ const WebRTCMultiplayerLobby = ({
     const {players, isConnected, setReady, startGame, leaveRoom, error: webRTCError} = useWebRTC();
     const {state} = useGame();
 
+    // Standardisiere die Raum-ID für konsistente Anzeige
+    const normalizedRoomId = roomId.toUpperCase().trim();
+
     // Überwache den eigenen Ready-Status
     useEffect(() => {
         // Finde den eigenen Spieler in der Spielerliste
@@ -86,7 +89,7 @@ const WebRTCMultiplayerLobby = ({
         console.log("Spiel wird gestartet, Spieler-Status:", {
             players,
             allPlayersReady,
-            roomId,
+            roomId: normalizedRoomId,
             isHost
         });
 
@@ -165,7 +168,7 @@ const WebRTCMultiplayerLobby = ({
             <Card>
                 <div className="flex justify-between items-center mb-6">
                     <div>
-                        <h2 className="text-xl font-bold">Lobby: {roomId}</h2>
+                        <h2 className="text-xl font-bold">Lobby: {normalizedRoomId}</h2>
                         <div
                             className={`text-sm ${isConnected ? 'text-green-400' : 'text-red-400'}`}>
                             {isConnected ? 'Verbunden' : 'Nicht verbunden'}
@@ -194,7 +197,7 @@ const WebRTCMultiplayerLobby = ({
                     <div className="mb-4 p-3 bg-gray-800 rounded-md text-xs font-mono">
                         <pre className="overflow-auto max-h-28">
                             {JSON.stringify({
-                                roomId,
+                                roomId: normalizedRoomId,
                                 playerId,
                                 isHost,
                                 isConnected,

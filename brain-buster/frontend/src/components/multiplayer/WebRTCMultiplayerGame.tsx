@@ -35,6 +35,7 @@ const WebRTCMultiplayerGame = ({
     const {
         webRTC,
         players,
+        connectionState,
         isConnected,
         answerQuestion: answerQuestionWebRTC,
         nextQuestion: nextQuestionWebRTC,
@@ -58,6 +59,10 @@ const WebRTCMultiplayerGame = ({
     const [questionStartTime, setQuestionStartTime] = useState<number | null>(null);
     const [countdownStarted, setCountdownStarted] = useState(false);
     const [syncAttempt, setSyncAttempt] = useState(0);
+    const [lastConnectionAttempt, _setLastConnectionAttempt] = useState(0);
+
+    // Normalisierte Raum-ID für Konsistenz
+    const normalizedRoomId = roomId.toUpperCase().trim();
 
     // Timer-Funktion für die verbleibende Zeit pro Frage
     const startQuestionTimer = useCallback((duration: number) => {
@@ -111,7 +116,8 @@ const WebRTCMultiplayerGame = ({
                         questions: parsedQuestions,
                         timePerQuestion: 20,
                         startTime: Date.now(),
-                        syncAttempt: syncAttempt + 1
+                        syncAttempt: syncAttempt + 1,
+                        roomId: normalizedRoomId // Wichtig: Sende die normalisierte Raum-ID mit
                     }
                 });
 
@@ -124,7 +130,40 @@ const WebRTCMultiplayerGame = ({
         } else {
             setErrorMsg("Keine Fragen zum Synchronisieren gefunden");
         }
-    }, [isHost, webRTC, syncAttempt]);
+    }, [isHost, webRTC, syncAttempt, normalizedRoomId]);
+
+    // Verbesserte Fehlerbehandlung und Neuverbindung
+    const attemptReconnection = useCallback(() => {
+        setErrorMsg("Versuche, die Verbindung wiederherzustellen...");
+
+        // Verzögerung, um bestehende Netzwerkverbindungen abzubauen
+        setTimeout(() => {
+            if (webRTC) {
+                try {
+                    // Explizit neu verbinden
+                    console.log("Versuche erneute Initialisierung der WebRTC-Verbindung...");
+
+                    // Wir können die Spielerliste nicht direkt setzen, stattdessen:
+                    // Sende aktualisierten Spielerstatus an den Server
+                    webRTC.setReady(false);
+                    setTimeout(() => {
+                        // Versuche, erneut bereit zu werden
+                        webRTC.setReady(true);
+
+                        // Aktualisiere UI-Status
+                        setErrorMsg("Verbindung neu hergestellt. Warte auf andere Spieler...");
+                        setTimeout(() => setErrorMsg(null), 3000);
+                    }, 1000);
+                } catch (err) {
+                    console.error("Fehler bei Wiederverbindungsversuch:", err);
+                    setErrorMsg(`Wiederverbindung fehlgeschlagen: ${err}`);
+                }
+            } else {
+                setErrorMsg("WebRTC-Dienst nicht verfügbar. Bitte Seite neu laden.");
+            }
+        }, 1000);
+    }, [webRTC]);
+
 
     // In WebRTCMultiplayerGame.tsx, ändere die startCountdown-Funktion:
     const startCountdown = useCallback(() => {
@@ -252,6 +291,53 @@ const WebRTCMultiplayerGame = ({
         }
     }, [questions.length, initComplete, startGameContext]);
 
+    // Verbesserte Komponenten-Initialisierung und Überwachung
+    useEffect(() => {
+        if (!webRTC) {
+            console.error("WebRTC Service ist nicht initialisiert");
+            setErrorMsg("WebRTC nicht initialisiert. Bitte Seite neu laden.");
+            return;
+        }
+
+        // Stelle sicher, dass die benötigten Parameter vorhanden sind
+        if (!roomId || !playerId) {
+            console.error("Erforderliche Parameter fehlen:", {roomId, playerId});
+            setErrorMsg("Fehlende Raum- oder Spieler-ID. Bitte zurück zur Lobby.");
+            return;
+        }
+
+        console.log("WebRTCMultiplayerGame wird mit folgenden Parametern initialisiert:", {
+            room: roomId,
+            player: playerId,
+            isHost,
+            playersCount: players.length
+        });
+
+        // Ping-Funktion zur Überwachung der Verbindung
+        const pingInterval = setInterval(() => {
+            if (webRTC && isConnected) {
+                try {
+                    // Sende ein Ping, um die Verbindung zu testen - mit besserer Fehlerprüfung
+                    if (typeof webRTC.sendSyncMessage === 'function') {
+                        webRTC.sendSyncMessage({
+                            type: 'ping',
+                            timestamp: Date.now(),
+                            isSyncMessage: true
+                        });
+                        console.log("Ping an Peer gesendet");
+                    }
+                } catch (err) {
+                    console.warn("Ping fehlgeschlagen:", err);
+                }
+            }
+        }, 10000); // Alle 10 Sekunden pingen
+
+        // Aufräumen
+        return () => {
+            clearInterval(pingInterval);
+        };
+    }, [webRTC, roomId, playerId, isHost, isConnected, players.length]);
+
     // Registriere Callbacks für WebRTC-Spielereignisse
     useEffect(() => {
         if (!webRTC) {
@@ -283,6 +369,16 @@ const WebRTCMultiplayerGame = ({
 
         // Registriere Callbacks
         webRTC.registerCallbacks({
+            onConnectionStateChange: (state) => {
+                console.log(`WebRTC Verbindungsstatus geändert: ${state}`);
+                if (state === 'failed' || state === 'disconnected') {
+                    setErrorMsg(`Verbindung unterbrochen: ${state}. Versuche Wiederverbindung...`);
+                    setTimeout(() => attemptReconnection(), 2000);
+                } else if (state === 'connected') {
+                    setErrorMsg(null);
+                }
+            },
+
             onGameStarted: (gameState) => {
                 console.log("Spiel gestartet Event empfangen:", gameState);
 
@@ -305,8 +401,12 @@ const WebRTCMultiplayerGame = ({
                 console.log(`✅ Erfolgreich ${gameState.questions.length} Fragen empfangen`);
 
                 // Sichere Fragen für mögliche Wiederherstellung
-                localStorage.setItem('lastGameQuestions', JSON.stringify(gameState.questions));
-                localStorage.setItem('lastGameTimestamp', Date.now().toString());
+                try {
+                    localStorage.setItem('lastGameQuestions', JSON.stringify(gameState.questions));
+                    localStorage.setItem('lastGameTimestamp', Date.now().toString());
+                } catch (e) {
+                    console.error("Fehler beim Speichern der Fragen im localStorage", e);
+                }
 
                 // Setze Spielstatus - Reihenfolge ist wichtig!
                 setQuestions(gameState.questions);
@@ -339,9 +439,18 @@ const WebRTCMultiplayerGame = ({
 
                     console.log(`📥 Sync: Empfange ${syncData.content.questions.length} Fragen (Versuch ${syncData.content.syncAttempt || 'unbekannt'})`);
 
+                    // Prüfe, ob die Raum-ID im syncData mit unserer übereinstimmt
+                    if (syncData.content.roomId && syncData.content.roomId !== normalizedRoomId) {
+                        console.warn(`Raum-ID-Diskrepanz in Sync: Empfangen ${syncData.content.roomId}, erwartet ${normalizedRoomId}`);
+                    }
+
                     // Sichere Fragen für mögliche Wiederherstellung
-                    localStorage.setItem('lastGameQuestions', JSON.stringify(syncData.content.questions));
-                    localStorage.setItem('lastGameTimestamp', Date.now().toString());
+                    try {
+                        localStorage.setItem('lastGameQuestions', JSON.stringify(syncData.content.questions));
+                        localStorage.setItem('lastGameTimestamp', Date.now().toString());
+                    } catch (e) {
+                        console.error("Fehler beim Speichern der Fragen im localStorage", e);
+                    }
 
                     // Setze Spielstatus
                     if (!initComplete || questions.length === 0) {
@@ -356,6 +465,29 @@ const WebRTCMultiplayerGame = ({
                         // Starte Timer für die erste Frage
                         startQuestionTimer(syncData.content.timePerQuestion || 20);
                     }
+                }
+
+                // Ping-Antwort
+                if (syncData.type === 'ping') {
+                    console.log("Ping-Nachricht empfangen, sende Pong zurück");
+                    if (webRTC) {
+                        try {
+                            webRTC.sendSyncMessage({
+                                type: 'pong',
+                                timestamp: Date.now(),
+                                originalTimestamp: syncData.timestamp,
+                                isSyncMessage: true
+                            });
+                        } catch (err) {
+                            console.warn("Fehler beim Senden des Pong:", err);
+                        }
+                    }
+                }
+
+                // Pong-Antwort
+                if (syncData.type === 'pong' && syncData.originalTimestamp) {
+                    const latency = Date.now() - syncData.originalTimestamp;
+                    console.log(`Pong empfangen. Latenz: ${latency}ms`);
                 }
             },
 
@@ -428,6 +560,11 @@ const WebRTCMultiplayerGame = ({
             onError: (message) => {
                 console.error("WebRTC Fehler:", message);
                 setErrorMsg(message || "Ein Fehler ist aufgetreten");
+
+                // Bei schwerwiegenden Fehlern Wiederverbindung versuchen
+                if (message && (message.includes("Verbindung") || message.includes("disconnected"))) {
+                    setTimeout(() => attemptReconnection(), 2000);
+                }
             }
         });
 
@@ -435,14 +572,14 @@ const WebRTCMultiplayerGame = ({
         return () => {
             // WebRTC-Service behält seine Callbacks intern bei
         };
-    }, [webRTC, players, isHost, questions.length, endGame, startGameContext, playerId, waitingForOthers, countdown, startCountdown, countdownStarted, startQuestionTimer]);
+    }, [webRTC, players, isHost, questions.length, endGame, startGameContext, playerId, waitingForOthers, countdown, startCountdown, countdownStarted, startQuestionTimer, normalizedRoomId, attemptReconnection]);
 
     // Frage beantworten
     const handleAnswerQuestion = useCallback((answer: number) => {
         if (!webRTC || !initComplete) return;
 
         console.log("Sende Antwort:", {
-            roomId,
+            roomId: normalizedRoomId,
             playerId,
             questionIndex: currentQuestionIndex,
             answer
@@ -450,7 +587,7 @@ const WebRTCMultiplayerGame = ({
         answerQuestionWebRTC(currentQuestionIndex, answer);
 
         setWaitingForOthers(true);
-    }, [webRTC, initComplete, roomId, playerId, currentQuestionIndex, answerQuestionWebRTC]);
+    }, [webRTC, initComplete, normalizedRoomId, playerId, currentQuestionIndex, answerQuestionWebRTC]);
 
     // Zur nächsten Frage (nur für Host)
     const handleNextQuestion = useCallback(() => {
@@ -507,7 +644,7 @@ const WebRTCMultiplayerGame = ({
                             <div className="flex justify-between items-center">
                                 <div>
                                     <span className="text-sm text-violet-300">Raum</span>
-                                    <h3 className="font-medium">{roomId}</h3>
+                                    <h3 className="font-medium">{normalizedRoomId}</h3>
                                 </div>
 
                                 <div className="flex items-center space-x-2">
@@ -534,6 +671,62 @@ const WebRTCMultiplayerGame = ({
                             </div>
                         </Card>
                     </div>
+
+                    {/* Verbindungsstatus */}
+                    {!isConnected && (
+                        <Card className="mb-4 p-4 bg-red-600/20 border border-red-600/40">
+                            <div className="flex items-center mb-2">
+                                <div className="text-lg mr-2">⚠️</div>
+                                <div>
+                                    <p className="font-medium text-red-300">
+                                        Verbindung zum Peer verloren
+                                    </p>
+                                    <p className="text-sm">
+                                        Die Verbindung zum anderen Spieler wurde unterbrochen. Bitte
+                                        warten Sie, während wir versuchen, die Verbindung
+                                        wiederherzustellen.
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex space-x-2">
+                                <Button variant="primary" size="sm" onClick={attemptReconnection}>
+                                    Neu verbinden
+                                </Button>
+                                <Button variant="outline" size="sm" onClick={handleLeaveGame}>
+                                    Spiel verlassen
+                                </Button>
+                            </div>
+
+                            {/* Verbindungsstatus-Details für bessere Diagnose */}
+                            {debugMode && (
+                                <div className="mt-3 text-xs font-mono">
+                                    <p>Status: {connectionState}</p>
+                                    <p>Mitspieler: {players.length}</p>
+                                    <p>Host: {isHost ? 'Ja' : 'Nein'}</p>
+                                    <p>Raum: {roomId}</p>
+                                </div>
+                            )}
+                        </Card>
+                    )}
+
+                    {/* Fehlermeldung */}
+                    {errorMsg && (
+                        <Card className="p-4 bg-red-600/20 border border-red-600/40">
+                            <div className="flex items-center mb-2">
+                                <div className="text-lg mr-2">⚠️</div>
+                                <p className="font-medium text-red-300">{errorMsg}</p>
+                            </div>
+                            <div className="flex space-x-2">
+                                <Button variant="primary" size="sm" onClick={attemptReconnection}>
+                                    Verbindung neu aufbauen
+                                </Button>
+                                <Button variant="secondary" size="sm"
+                                        onClick={() => setErrorMsg(null)}>
+                                    Schließen
+                                </Button>
+                            </div>
+                        </Card>
+                    )}
 
                     {/* Spielerscores anzeigen */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -588,6 +781,8 @@ const WebRTCMultiplayerGame = ({
                                     webRTCConnected: isConnected,
                                     timeLeft,
                                     countdownStarted,
+                                    lastConnectionAttempt,
+                                    connectionState,
                                     storageHasQuestions: Boolean(localStorage.getItem('lastGameQuestions')),
                                     firstQuestion: questions[0] ?
                                         {
@@ -596,43 +791,6 @@ const WebRTCMultiplayerGame = ({
                                         } :
                                         null
                                 }, null, 2)}</pre>
-                            </div>
-                        </Card>
-                    )}
-
-                    {/* Fehlermeldung */}
-                    {errorMsg && (
-                        <Card className="p-4 bg-red-600/20 border border-red-600/40">
-                            <div className="flex items-center mb-2">
-                                <div className="text-lg mr-2">⚠️</div>
-                                <p className="font-medium text-red-300">{errorMsg}</p>
-                            </div>
-                            <div className="flex space-x-2">
-                                <Button variant="primary" size="sm" onClick={handleForceRefresh}>
-                                    Spielstatus aktualisieren
-                                </Button>
-                                <Button variant="secondary" size="sm"
-                                        onClick={() => setErrorMsg(null)}>
-                                    Schließen
-                                </Button>
-                            </div>
-                        </Card>
-                    )}
-
-                    {/* Verbindungsstatus */}
-                    {!isConnected && (
-                        <Card className="p-4 bg-yellow-600/20 border border-yellow-600/40">
-                            <div className="flex items-center">
-                                <div className="text-lg mr-2">🔌</div>
-                                <p className="font-medium text-yellow-300">
-                                    Verbindung zum Server verloren. Versuche, die Verbindung
-                                    wiederherzustellen...
-                                </p>
-                            </div>
-                            <div className="mt-2">
-                                <Button variant="primary" size="sm" onClick={handleForceRefresh}>
-                                    Neu verbinden
-                                </Button>
                             </div>
                         </Card>
                     )}
@@ -684,7 +842,8 @@ const WebRTCMultiplayerGame = ({
                                         className="loader mx-auto w-12 h-12 border-4 border-t-4 border-gray-200 rounded-full border-t-violet-500 animate-spin"></div>
 
                                     {isHost && (
-                                        <Button className="mt-6 mr-2" variant="primary" onClick={forceGameSync}>
+                                        <Button className="mt-6 mr-2" variant="primary"
+                                                onClick={forceGameSync}>
                                             Spiel manuell synchronisieren
                                         </Button>
                                     )}

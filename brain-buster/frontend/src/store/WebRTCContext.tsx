@@ -2,6 +2,7 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState, useCallback } from 'react';
 import WebRTCService from '../services/webRTCService';
 import { Question } from '../types';
+import { useWebSocket } from './WebSocketContext';
 
 interface WebRTCContextProps {
   webRTC: WebRTCService | null;
@@ -36,16 +37,8 @@ interface WebRTCProviderProps {
 
 const WebRTCContext = createContext<WebRTCContextProps | undefined>(undefined);
 
-// Signaling-Server-URL basierend auf der aktuellen Domain
-const getSignalingServerUrl = () => {
-  // Protokoll basierend auf der aktuellen Seite wählen
-  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-
-  // Komplette URL mit korrektem Pfad erstellen - kritisch für die Verbindung!
-  return `${protocol}//${window.location.host}/games/brain-buster/api/socket.io/`;
-};
-
 export const WebRTCProvider: React.FC<WebRTCProviderProps> = ({ children }) => {
+  const { isConnected: isWebSocketConnected } = useWebSocket();
   const [webRTC, setWebRTC] = useState<WebRTCService | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isSignalingConnected, setIsSignalingConnected] = useState(false);
@@ -55,6 +48,11 @@ export const WebRTCProvider: React.FC<WebRTCProviderProps> = ({ children }) => {
   const [players, setPlayers] = useState<PlayerInfo[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+
+  // Verwende den Verbindungsstatus von WebSocketContext für den Signaling-Status
+  useEffect(() => {
+    setIsSignalingConnected(isWebSocketConnected);
+  }, [isWebSocketConnected]);
 
   // Initialisiere den WebRTC-Service - nur einmal
   useEffect(() => {
@@ -124,6 +122,12 @@ export const WebRTCProvider: React.FC<WebRTCProviderProps> = ({ children }) => {
       return Promise.reject(error);
     }
   }, [webRTC]);
+
+  // Hilfsfunktion, um die Signaling-Server-URL zu generieren
+  const getSignalingServerUrl = () => {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${protocol}//${window.location.host}/games/brain-buster/api/socket.io/`;
+  };
 
   // Erstelle einen neuen Raum
   const createRoom = useCallback(async (playerName: string, roomId: string) => {
