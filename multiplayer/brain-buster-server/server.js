@@ -1,8 +1,8 @@
 const express = require('express');
 const http = require('http');
-const { Server } = require('socket.io');
+const {Server} = require('socket.io');
 const cors = require('cors');
-const { v4: uuidv4 } = require('uuid');
+const {v4: uuidv4} = require('uuid');
 const path = require('path');
 require('dotenv').config();
 
@@ -36,7 +36,9 @@ io.on('connection', (socket) => {
     console.log(`User connected: ${socket.id}`);
 
     // Create a new game room
-    socket.on('create_room', ({ name }) => {
+    socket.on('create_room', ({name}) => {
+        console.log(`Raumerstellung angefordert von: ${name}, Socket ID: ${socket.id}`);
+
         const roomId = uuidv4().substring(0, 6).toUpperCase(); // Generate shorter room ID
 
         rooms[roomId] = {
@@ -57,7 +59,7 @@ io.on('connection', (socket) => {
         };
 
         socket.join(roomId);
-        socket.emit('room_created', { roomId });
+        socket.emit('room_created', {roomId});
 
         console.log(`Room created: ${roomId} by ${name}`);
 
@@ -66,21 +68,21 @@ io.on('connection', (socket) => {
     });
 
     // Join an existing room
-    socket.on('join_room', ({ roomId, name }) => {
+    socket.on('join_room', ({roomId, name}) => {
         const room = rooms[roomId];
 
         if (!room) {
-            socket.emit('error', { message: 'Dieser Raum existiert nicht.' });
+            socket.emit('error', {message: 'Dieser Raum existiert nicht.'});
             return;
         }
 
         if (room.status !== 'waiting') {
-            socket.emit('error', { message: 'Das Spiel hat bereits begonnen.' });
+            socket.emit('error', {message: 'Das Spiel hat bereits begonnen.'});
             return;
         }
 
         if (room.guest) {
-            socket.emit('error', { message: 'Dieser Raum ist bereits voll.' });
+            socket.emit('error', {message: 'Dieser Raum ist bereits voll.'});
             return;
         }
 
@@ -110,7 +112,7 @@ io.on('connection', (socket) => {
     });
 
     // Start the game
-    socket.on('start_game', ({ roomId }) => {
+    socket.on('start_game', ({roomId}) => {
         const room = rooms[roomId];
 
         if (!room) return;
@@ -141,7 +143,7 @@ io.on('connection', (socket) => {
     });
 
     // Submit an answer
-    socket.on('submit_answer', ({ roomId, answer, round }) => {
+    socket.on('submit_answer', ({roomId, answer, round}) => {
         const room = rooms[roomId];
         if (!room || room.status !== 'playing') return;
 
@@ -188,7 +190,7 @@ io.on('connection', (socket) => {
     });
 
     // Next round (host only)
-    socket.on('next_round', ({ roomId }) => {
+    socket.on('next_round', ({roomId}) => {
         const room = rooms[roomId];
         if (!room || room.status !== 'playing') return;
         if (socket.id !== room.host.id) return;
@@ -202,7 +204,7 @@ io.on('connection', (socket) => {
     });
 
     // Leave room
-    socket.on('leave_room', ({ roomId }) => {
+    socket.on('leave_room', ({roomId}) => {
         leaveRoom(socket, roomId);
     });
 

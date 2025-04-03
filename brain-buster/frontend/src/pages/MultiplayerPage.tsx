@@ -45,10 +45,14 @@ const MultiplayerPage = () => {
             // Pfad relativ zum Basis-URL der Anwendung
             const socketUrl = window.location.protocol + '//' + window.location.host
             const newSocket = io(socketUrl, {
-                path: '/socket.io',
+                path: '/socket-api/socket.io',
                 transports: ['websocket'],
                 reconnectionAttempts: 5
             })
+
+            newSocket.onAny((event, ...args) => {
+                console.log('Socket Event:', event, args);
+            });
 
             // Socket-Ereignisse behandeln
             newSocket.on('connect', () => {
@@ -207,6 +211,7 @@ const MultiplayerPage = () => {
     const createRoom = () => {
         if (!socket) return
 
+        console.log('Sende create_room Event mit Name:', playerName);
         socket.emit('create_room', {name: playerName})
     }
 
