@@ -143,8 +143,24 @@ const MultiplayerPage = () => {
             nextRound: number,
             timeToNextRound: number
         }) => {
-            console.log('Runde abgeschlossen, nächste Runde:', data.nextRound)
-            updateOpponentScore(data.opponentScore)
+            console.log('Runde abgeschlossen, Punkte:',
+                'Spieler:', data.playerScore,
+                'Gegner:', data.opponentScore);
+
+            // Wichtig: Bei Multiplayer setzen wir den Spielstand direkt aus den Server-Daten
+            // Dazu müssen wir die Punktzahl im aktuellen Session-Objekt überschreiben
+            if (state.currentSession) {
+                // Dies erfordert eine neue Funktion im GameContext, die den Score direkt setzt
+                // Falls diese nicht existiert, musst du sie implementieren
+                // setSessionScore(data.playerScore);
+
+                // Alternativ können wir den Zustand direkt manipulieren, was nicht ideal,
+                // aber in diesem Fall praktikabel ist
+                state.currentSession.score = data.playerScore;
+            }
+
+            // Gegnerpunkte aktualisieren
+            updateOpponentScore(data.opponentScore);
 
             // Kurze Pause vor der nächsten Runde
             setTimeout(() => {
@@ -164,11 +180,18 @@ const MultiplayerPage = () => {
             playerScore: number,
             opponentScore: number
         }) => {
-            console.log('Spiel beendet', data)
+            console.log('Spiel beendet', data);
+
+            // Finale Punktzahlen setzen
+            if (state.currentSession) {
+                state.currentSession.score = data.playerScore;
+            }
+            updateOpponentScore(data.opponentScore);
+
             setResults({
                 playerScore: data.playerScore,
                 opponentScore: data.opponentScore
-            })
+            });
 
             // Spielergebnis für UI-Darstellung wird direkt anhand der Punktzahlen angezeigt
             // Kein explizites result-Objekt hier nötig

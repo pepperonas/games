@@ -143,7 +143,7 @@ io.on('connection', (socket) => {
     });
 
     // Submit an answer
-    socket.on('submit_answer', ({roomId, answer, round}) => {
+    socket.on('submit_answer', ({ roomId, answer, round }) => {
         const room = rooms[roomId];
         if (!room || room.status !== 'playing') return;
 
@@ -319,15 +319,24 @@ function completeRound(roomId) {
         room.timer = null;
     }
 
-    console.log(`Runde abgeschlossen in Raum ${roomId}. Punkte - Host: ${room.host.score}, Gast: ${room.guest.score}`);
-
-    // Notify players of round completion
-    io.to(roomId).emit('round_complete', {
+    // WICHTIG: Sende individuelle Punktestände an jeden Spieler
+    // Host erhält seine eigene Punktzahl als playerScore und die des Gastes als opponentScore
+    io.to(room.host.id).emit('round_complete', {
         playerScore: room.host.score,
         opponentScore: room.guest.score,
         nextRound: room.currentRound + 1,
         timeToNextRound: ROUND_TRANSITION_TIME
     });
+
+    // Gast erhält seine eigene Punktzahl als playerScore und die des Hosts als opponentScore
+    io.to(room.guest.id).emit('round_complete', {
+        playerScore: room.guest.score,
+        opponentScore: room.host.score,
+        nextRound: room.currentRound + 1,
+        timeToNextRound: ROUND_TRANSITION_TIME
+    });
+
+    console.log(`Runde abgeschlossen in Raum ${roomId}. Host: ${room.host.score}, Gast: ${room.guest.score}`);
 
     // Move to next round after delay
     setTimeout(() => {
@@ -350,13 +359,19 @@ function endGame(roomId) {
         room.timer = null;
     }
 
-    // Notify players of game completion
-    io.to(roomId).emit('game_over', {
+    // Host erhält seine eigene Punktzahl als playerScore und die des Gastes als opponentScore
+    io.to(room.host.id).emit('game_over', {
         playerScore: room.host.score,
         opponentScore: room.guest.score
     });
 
-    console.log(`Game ended in room ${roomId}`);
+    // Gast erhält seine eigene Punktzahl als playerScore und die des Hosts als opponentScore
+    io.to(room.guest.id).emit('game_over', {
+        playerScore: room.guest.score,
+        opponentScore: room.host.score
+    });
+
+    console.log(`Spiel beendet in Raum ${roomId}. Host: ${room.host.score}, Gast: ${room.guest.score}`);
 }
 
 function leaveRoom(socket, roomId) {

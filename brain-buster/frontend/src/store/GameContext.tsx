@@ -42,7 +42,7 @@ const initialState: GameState = {
 type GameAction =
     | { type: 'INIT_GAME_STATE'; payload: Partial<GameState> }
     | { type: 'START_GAME'; payload: { mode: 'solo' | 'multiplayer'; questions: Question[] } }
-    | { type: 'ANSWER_QUESTION'; payload: { answer: number } } // questionId Parameter entfernt
+    | { type: 'ANSWER_QUESTION'; payload: { answer: number } }
     | { type: 'NEXT_QUESTION' }
     | { type: 'END_GAME'; payload: { result: 'win' | 'loss' | 'draw' } }
     | { type: 'RESET_GAME' }
@@ -52,6 +52,7 @@ type GameAction =
 }
     | { type: 'UPDATE_OPPONENT_SCORE'; payload: number }
     | { type: 'IMPORT_GAME_STATS'; payload: GameStats }
+    | { type: 'SET_SESSION_SCORE'; payload: number }
 
 // Reducer-Funktion
 function gameReducer(state: GameState, action: GameAction): GameState {
@@ -215,6 +216,20 @@ function gameReducer(state: GameState, action: GameAction): GameState {
                 stats: action.payload,
             }
 
+        case 'SET_SESSION_SCORE': {
+            if (!state.currentSession) {
+                return state;
+            }
+
+            return {
+                ...state,
+                currentSession: {
+                    ...state.currentSession,
+                    score: action.payload
+                }
+            };
+        }
+
         default:
             return state
     }
@@ -225,7 +240,7 @@ interface GameContextType {
     state: GameState
     initGameState: () => Promise<void>
     startGame: (mode: 'solo' | 'multiplayer', questions?: Question[]) => void
-    answerQuestion: (answer: number) => void // questionId Parameter entfernt
+    answerQuestion: (answer: number) => void
     nextQuestion: () => void
     endGame: (result: 'win' | 'loss' | 'draw') => void
     resetGame: () => void
@@ -237,7 +252,9 @@ interface GameContextType {
     updateOpponentScore: (score: number) => void
     exportGameStats: () => Promise<string>
     importGameStats: (data: string) => Promise<boolean>
+    setSessionScore: (score: number) => void // Neue Funktion hinzufügen
 }
+
 
 const GameContext = createContext<GameContextType | undefined>(undefined)
 
@@ -357,6 +374,13 @@ export const GameProvider = ({children}: { children: ReactNode }) => {
         })
     }, [])
 
+    const setSessionScore = useCallback((score: number) => {
+        dispatch({
+            type: 'SET_SESSION_SCORE',
+            payload: score
+        })
+    }, [])
+
     // Spielstatistiken exportieren
     const exportGameStats = useCallback(async (): Promise<string> => {
         return JSON.stringify(state.stats)
@@ -405,6 +429,7 @@ export const GameProvider = ({children}: { children: ReactNode }) => {
         updateOpponentScore,
         exportGameStats,
         importGameStats,
+        setSessionScore, // Neue Funktion hinzufügen
     }
 
     return <GameContext.Provider value={value}>{children}</GameContext.Provider>
