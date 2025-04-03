@@ -90,18 +90,27 @@ document.addEventListener('DOMContentLoaded', function () {
         request.onupgradeneeded = function (event) {
             db = event.target.result;
             if (!db.objectStoreNames.contains('throws')) {
-                const throwsStore = db.createObjectStore('throws', { keyPath: 'id', autoIncrement: true });
-                throwsStore.createIndex('gameId', 'gameId', { unique: false });
-                throwsStore.createIndex('playerId', 'playerId', { unique: false });
-                throwsStore.createIndex('timestamp', 'timestamp', { unique: false });
+                const throwsStore = db.createObjectStore('throws', {
+                    keyPath: 'id',
+                    autoIncrement: true
+                });
+                throwsStore.createIndex('gameId', 'gameId', {unique: false});
+                throwsStore.createIndex('playerId', 'playerId', {unique: false});
+                throwsStore.createIndex('timestamp', 'timestamp', {unique: false});
             }
             if (!db.objectStoreNames.contains('games')) {
-                const gamesStore = db.createObjectStore('games', { keyPath: 'id', autoIncrement: true });
-                gamesStore.createIndex('timestamp', 'timestamp', { unique: false });
+                const gamesStore = db.createObjectStore('games', {
+                    keyPath: 'id',
+                    autoIncrement: true
+                });
+                gamesStore.createIndex('timestamp', 'timestamp', {unique: false});
             }
             if (!db.objectStoreNames.contains('players')) {
-                const playersStore = db.createObjectStore('players', { keyPath: 'id', autoIncrement: true });
-                playersStore.createIndex('name', 'name', { unique: false });
+                const playersStore = db.createObjectStore('players', {
+                    keyPath: 'id',
+                    autoIncrement: true
+                });
+                playersStore.createIndex('name', 'name', {unique: false});
             }
         };
 
@@ -176,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (existingPlayer) {
                     player.id = existingPlayer.id;
                 } else {
-                    const playerData = { name: player.name, firstSeen: new Date() };
+                    const playerData = {name: player.name, firstSeen: new Date()};
                     const addRequest = playersStore.add(playerData);
                     addRequest.onsuccess = function (event) {
                         player.id = event.target.result;
@@ -269,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Alle Spieler laden
         const playersRequest = playersStore.getAll();
 
-        playersRequest.onsuccess = function(event) {
+        playersRequest.onsuccess = function (event) {
             const players = event.target.result;
             if (players.length === 0) {
                 alert('Keine Spielerdaten vorhanden.');
@@ -278,12 +287,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Alle Spiele laden
             const gamesRequest = gamesStore.getAll();
-            gamesRequest.onsuccess = function(event) {
+            gamesRequest.onsuccess = function (event) {
                 const games = event.target.result;
 
                 // Alle Würfe laden
                 const throwsRequest = throwsStore.getAll();
-                throwsRequest.onsuccess = function(event) {
+                throwsRequest.onsuccess = function (event) {
                     const throws = event.target.result;
 
                     // Spieler mit ihren Würfen und Spielen verknüpfen
@@ -337,7 +346,7 @@ document.addEventListener('DOMContentLoaded', function () {
             };
         };
 
-        playersRequest.onerror = function(event) {
+        playersRequest.onerror = function (event) {
             console.error('Fehler beim Laden der Spielerdaten:', event.target.error);
             alert('Fehler beim Laden der Spielerdaten.');
         };
@@ -358,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Alle Spiele laden
         const gamesRequest = gamesStore.getAll();
 
-        gamesRequest.onsuccess = function(event) {
+        gamesRequest.onsuccess = function (event) {
             const games = event.target.result;
             if (games.length === 0) {
                 alert('Keine Spieldaten vorhanden.');
@@ -367,12 +376,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Alle Würfe laden
             const throwsRequest = throwsStore.getAll();
-            throwsRequest.onsuccess = function(event) {
+            throwsRequest.onsuccess = function (event) {
                 const allThrows = event.target.result;
 
                 // Spieler zum Referenzieren laden
                 const playersRequest = playersStore.getAll();
-                playersRequest.onsuccess = function(event) {
+                playersRequest.onsuccess = function (event) {
                     const allPlayers = event.target.result;
 
                     // Spieler-Lookup erstellen
@@ -431,7 +440,7 @@ document.addEventListener('DOMContentLoaded', function () {
             };
         };
 
-        gamesRequest.onerror = function(event) {
+        gamesRequest.onerror = function (event) {
             console.error('Fehler beim Laden der Spieldaten:', event.target.error);
             alert('Fehler beim Laden der Spieldaten.');
         };
@@ -465,6 +474,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 reject(new Error('Beim Löschen der Daten ist ein Fehler aufgetreten.'));
             };
         });
+    }
+
+    function openStatisticsPage() {
+        saveGameStateBeforeNavigation();
+        window.location.href = 'statistics.html';
+    }
+
+    // Toggle between game and statistics pages
+    function togglePage() {
+        const currentPage = window.location.pathname;
+        if (currentPage.includes('index.html') || currentPage.endsWith('/')) {
+            openStatisticsPage();
+        } else if (currentPage.includes('statistics.html')) {
+            window.location.href = 'index.html';
+        }
+    }
+
+    // Add event listener for page toggle button
+    const pageToggleButton = document.getElementById('page-toggle');
+    if (pageToggleButton) {
+        pageToggleButton.addEventListener('click', togglePage);
     }
 
     // Verbesserte Import-Funktion mit Option zum vorherigen Löschen der Daten
@@ -513,7 +543,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         const gameRequest = gamesStore.add(gameData);
 
-                        gameRequest.onsuccess = function(event) {
+                        gameRequest.onsuccess = function (event) {
                             const gameId = event.target.result;
                             importStats.games++;
                             console.log('Spiel importiert mit ID:', gameId);
@@ -524,7 +554,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         const nameIndex = playersStore.index('name');
                                         const nameRequest = nameIndex.get(player.name);
 
-                                        nameRequest.onsuccess = function(event) {
+                                        nameRequest.onsuccess = function (event) {
                                             const existingPlayer = event.target.result;
                                             if (existingPlayer) {
                                                 playerIds[player.name] = existingPlayer.id;
@@ -535,15 +565,19 @@ document.addEventListener('DOMContentLoaded', function () {
                                                     firstSeen: player.firstSeen || new Date()
                                                 };
                                                 const addRequest = playersStore.add(playerData);
-                                                addRequest.onsuccess = function(event) {
+                                                addRequest.onsuccess = function (event) {
                                                     importStats.players++;
                                                     playerIds[player.name] = event.target.result;
                                                     resolve();
                                                 };
-                                                addRequest.onerror = function() { resolve(); };
+                                                addRequest.onerror = function () {
+                                                    resolve();
+                                                };
                                             }
                                         };
-                                        nameRequest.onerror = function() { resolve(); };
+                                        nameRequest.onerror = function () {
+                                            resolve();
+                                        };
                                     }));
                                 });
                             }
@@ -571,14 +605,14 @@ document.addEventListener('DOMContentLoaded', function () {
                                     }
 
                                     const throwRequest = throwsStore.add(throwCopy);
-                                    throwRequest.onsuccess = function() {
+                                    throwRequest.onsuccess = function () {
                                         importedThrows++;
                                         importStats.throws++;
                                         if (importedThrows === throws.length) {
                                             resolveGame();
                                         }
                                     };
-                                    throwRequest.onerror = function(e) {
+                                    throwRequest.onerror = function (e) {
                                         console.error('Fehler beim Importieren eines Wurfs:', e);
                                         importedThrows++;
                                         if (importedThrows === throws.length) {
@@ -589,7 +623,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             });
                         };
 
-                        gameRequest.onerror = function(event) {
+                        gameRequest.onerror = function (event) {
                             console.error('Fehler beim Importieren des Spiels:', event.target.error);
                             resolveGame();
                         };
@@ -643,7 +677,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 const nameIndex = playersStore.index('name');
                                 const nameRequest = nameIndex.get(player.name);
 
-                                nameRequest.onsuccess = function(event) {
+                                nameRequest.onsuccess = function (event) {
                                     const existingPlayer = event.target.result;
                                     let playerId = null;
 
@@ -654,12 +688,12 @@ document.addEventListener('DOMContentLoaded', function () {
                                     } else {
                                         // Neuen Spieler anlegen
                                         const addRequest = playersStore.add(playerCopy);
-                                        addRequest.onsuccess = function(event) {
+                                        addRequest.onsuccess = function (event) {
                                             importStats.players++;
                                             playerId = event.target.result;
                                             resolvePlayer(playerId);
                                         };
-                                        addRequest.onerror = function() {
+                                        addRequest.onerror = function () {
                                             resolvePlayer(null);
                                         };
                                     }
@@ -1038,7 +1072,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Add history entry
     function addHistoryEntry(text) {
-        gameState.history.push({ text: text, timestamp: new Date() });
+        gameState.history.push({text: text, timestamp: new Date()});
     }
 
     // Render history
@@ -1048,7 +1082,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const entry = gameState.history[i];
             const historyEntry = document.createElement('div');
             historyEntry.className = 'history-entry';
-            const time = entry.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const time = entry.timestamp.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
             historyEntry.textContent = `${time} - ${entry.text}`;
             historyContainer.appendChild(historyEntry);
             if (historyContainer.children.length >= 20) break;
@@ -1268,6 +1305,92 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!loadGameStateAfterNavigation()) initPlayerNameInputs();
     }
 
+    // Save game state before navigation
+    function saveGameStateBeforeNavigation() {
+        if (gameState.players.length > 0) {
+            const timerInterval = gameState.timerInterval;
+            gameState.timerInterval = null;
+            sessionStorage.setItem('dartGameState', JSON.stringify(gameState));
+            gameState.timerInterval = timerInterval;
+        }
+    }
+
+    // Load game state after navigation
+    function loadGameStateAfterNavigation() {
+        const savedState = sessionStorage.getItem('dartGameState');
+        if (savedState) {
+            try {
+                const parsedState = JSON.parse(savedState);
+                gameState = parsedState;
+                gameState.turnStartTime = new Date(gameState.turnStartTime);
+                gameState.gameStartTime = new Date(gameState.gameStartTime);
+                gameState.history.forEach(entry => entry.timestamp = new Date(entry.timestamp));
+                startTurnTimer();
+                renderPlayerCards();
+                renderHistory();
+                renderPlayerStatistics();
+                setupContainer.classList.add('hidden');
+                gameContainer.classList.remove('hidden');
+                restartGameButton.classList.remove('hidden');
+                console.log('Spielstand wiederhergestellt');
+
+                // Setze den Fokus auf das Eingabefeld
+                if (currentInputField) {
+                    currentInputField.focus();
+                }
+
+                return true;
+            } catch (error) {
+                console.error('Fehler beim Wiederherstellen des Spielstands:', error);
+                sessionStorage.removeItem('dartGameState');
+            }
+        }
+        return false;
+    }
+
+    function loadGameStateAfterNavigation() {
+        const savedState = sessionStorage.getItem('dartGameState');
+        if (savedState) {
+            try {
+                const parsedState = JSON.parse(savedState);
+                gameState = parsedState;
+                gameState.turnStartTime = new Date(gameState.turnStartTime);
+                gameState.gameStartTime = new Date(gameState.gameStartTime);
+                gameState.history.forEach(entry => entry.timestamp = new Date(entry.timestamp));
+                startTurnTimer();
+                renderPlayerCards();
+                renderHistory();
+                renderPlayerStatistics();
+
+                //  **WICHTIG:** Stelle sicher, dass gameContainer angezeigt und setupContainer ausgeblendet ist
+                setupContainer.classList.add('hidden');
+                gameContainer.classList.remove('hidden');
+                restartGameButton.classList.remove('hidden');
+
+                console.log('Spielstand wiederhergestellt');
+
+                // Setze den Fokus auf das Eingabefeld
+                if (currentInputField) {
+                    currentInputField.focus();
+                }
+
+                return true;
+            } catch (error) {
+                console.error('Fehler beim Wiederherstellen des Spielstands:', error);
+                sessionStorage.removeItem('dartGameState');
+            }
+        }
+        return false;
+    }
+
+    // Check for saved game state
+    function checkForSavedGameState() {
+        if (!loadGameStateAfterNavigation()) initPlayerNameInputs();
+    }
+
+    window.addEventListener('beforeunload', saveGameStateBeforeNavigation);
+    window.addEventListener('load', checkForSavedGameState);
+
     // Event listeners
     numPlayersSelect.addEventListener('change', initPlayerNameInputs);
     startGameButton.addEventListener('click', initGame);
@@ -1307,7 +1430,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     if (fileDropArea) {
         const fileSelectButton = fileDropArea.querySelector('.file-select-button');
-        if (fileSelectButton) fileSelectButton.addEventListener('click', function () { fileInput.click(); });
+        if (fileSelectButton) fileSelectButton.addEventListener('click', function () {
+            fileInput.click();
+        });
 
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             fileDropArea.addEventListener(eventName, function (e) {
