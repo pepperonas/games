@@ -233,6 +233,7 @@ const MultiplayerPage = () => {
     const handleAnswer = (answerIndex: number) => {
         if (!socket || playerAnswered) return
 
+        console.log('Sende Antwort:', answerIndex);
         socket.emit('submit_answer', {
             roomId,
             answer: answerIndex,

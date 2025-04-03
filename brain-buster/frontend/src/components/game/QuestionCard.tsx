@@ -28,6 +28,18 @@ const QuestionCard = ({
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
     const [showResult, setShowResult] = useState(false)
     const [timeLeft, setTimeLeft] = useState(state.timePerQuestion)
+    const [previousQuestionId, setPreviousQuestionId] = useState<string | null>(null)
+
+    // Zurücksetzen der Zustände bei Fragenwechsel
+    useEffect(() => {
+        // Wenn sich die Frage geändert hat
+        if (question.id !== previousQuestionId) {
+            console.log('Neue Frage erkannt, setze Zustände zurück');
+            setSelectedAnswer(null);
+            setShowResult(false);
+            setPreviousQuestionId(question.id);
+        }
+    }, [question.id, previousQuestionId]);
 
     // Timer für die Frage - im Multiplayer-Modus verwenden wir timeRemaining
     useEffect(() => {
@@ -71,6 +83,14 @@ const QuestionCard = ({
 
         // For multiplayer mode, emit the answer to the server
         if (isMultiplayer && onAnswer) {
+            // Bei Multiplayer zeigen wir das Ergebnis sofort an
+            setShowResult(true)
+
+            // Wir müssen auch answerQuestion aufrufen, um die Punkte lokal zu zählen
+            // Dies garantiert konsistente UI-Updates
+            answerQuestion(selectedAnswer !== null ? selectedAnswer : -1)
+
+            // Antwort an den Server senden
             onAnswer(selectedAnswer !== null ? selectedAnswer : -1);
             return;
         }

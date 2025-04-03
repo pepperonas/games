@@ -147,6 +147,8 @@ io.on('connection', (socket) => {
         const room = rooms[roomId];
         if (!room || room.status !== 'playing') return;
 
+        console.log(`Spieler ${socket.id} hat Antwort ${answer} für Runde ${round} abgegeben`);
+
         const isHost = socket.id === room.host.id;
         const player = isHost ? room.host : room.guest;
 
@@ -172,6 +174,8 @@ io.on('connection', (socket) => {
             if (room.guest.answers[round] === question.correctAnswer) {
                 room.guest.score += 1;
             }
+
+            console.log(`Punktestand aktualisiert - Host: ${room.host.score}, Gast: ${room.guest.score}`);
 
             // Clear timer
             if (room.timer) {
@@ -314,6 +318,8 @@ function completeRound(roomId) {
         clearInterval(room.timer);
         room.timer = null;
     }
+
+    console.log(`Runde abgeschlossen in Raum ${roomId}. Punkte - Host: ${room.host.score}, Gast: ${room.guest.score}`);
 
     // Notify players of round completion
     io.to(roomId).emit('round_complete', {
