@@ -10,7 +10,14 @@ import QuestionCard from '../components/game/QuestionCard'
 
 const MultiplayerPage = () => {
     const navigate = useNavigate()
-    const {state, startGame, resetGame, setMultiplayerStatus, updateOpponentScore} = useGame()
+    const {
+        state,
+        startGame,
+        resetGame,
+        setMultiplayerStatus,
+        updateOpponentScore,
+        setSessionScore // Neue Funktion hinzufügen
+    } = useGame()
 
     // Socket und Raum-Status
     const [socket, setSocket] = useState<Socket | null>(null)
@@ -81,6 +88,18 @@ const MultiplayerPage = () => {
         }
     }, [setMultiplayerStatus])
 
+    useEffect(() => {
+        // Wenn kein Spiel läuft, nichts tun
+        if (!gameStarted || !state.currentSession) return;
+
+        console.log("Aktueller Spielstand:", {
+            playerScore: state.currentSession.score,
+            opponentScore: state.multiplayer.opponentScore,
+            currentRound
+        });
+
+    }, [gameStarted, state.currentSession?.score, state.multiplayer.opponentScore, currentRound]);
+
     // Raumbenachrichtigungen und Spielereignisse
     useEffect(() => {
         if (!socket) return
@@ -143,32 +162,27 @@ const MultiplayerPage = () => {
             nextRound: number,
             timeToNextRound: number
         }) => {
-            console.log('Runde abgeschlossen, Punkte:',
-                'Spieler:', data.playerScore,
-                'Gegner:', data.opponentScore);
+            console.log('Runde abgeschlossen, Punktestand vom Server:', {
+                playerScore: data.playerScore,
+                opponentScore: data.opponentScore,
+                nextRound: data.nextRound
+            });
 
-            // Wichtig: Bei Multiplayer setzen wir den Spielstand direkt aus den Server-Daten
-            // Dazu müssen wir die Punktzahl im aktuellen Session-Objekt überschreiben
-            if (state.currentSession) {
-                // Dies erfordert eine neue Funktion im GameContext, die den Score direkt setzt
-                // Falls diese nicht existiert, musst du sie implementieren
-                // setSessionScore(data.playerScore);
-
-                // Alternativ können wir den Zustand direkt manipulieren, was nicht ideal,
-                // aber in diesem Fall praktikabel ist
-                state.currentSession.score = data.playerScore;
-            }
-
-            // Gegnerpunkte aktualisieren
+            // Wichtig: Die vom Server empfangenen Punktestände DIREKT setzen
+            // Wir verwenden die neue setSessionScore-Funktion statt direkter Manipulation
+            setSessionScore(data.playerScore);
             updateOpponentScore(data.opponentScore);
 
-            // Kurze Pause vor der nächsten Runde
+            // Warte auf die nächste Runde
             setTimeout(() => {
-                setCurrentRound(data.nextRound)
-                setPlayerAnswered(false)
-                setOpponentAnswered(false)
-            }, data.timeToNextRound)
-        })
+                setCurrentRound(data.nextRound);
+                setPlayerAnswered(false);
+                setOpponentAnswered(false);
+
+                // Protokolliere den Zustandswechsel
+                console.log(`Wechsel zu Runde ${data.nextRound}, Punktestand: ${data.playerScore}:${data.opponentScore}`);
+            }, data.timeToNextRound);
+        });
 
         // Timer-Update vom Server
         socket.on('timer_update', (data: { timeRemaining: number }) => {

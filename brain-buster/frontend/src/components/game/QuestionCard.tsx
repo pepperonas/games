@@ -86,9 +86,9 @@ const QuestionCard = ({
             // Bei Multiplayer zeigen wir das Ergebnis sofort an
             setShowResult(true)
 
-            // Wir müssen auch answerQuestion aufrufen, um die Punkte lokal zu zählen
-            // Dies garantiert konsistente UI-Updates
-            answerQuestion(selectedAnswer !== null ? selectedAnswer : -1)
+            // WICHTIG: Bei Multiplayer KEINE lokale Punkteberechnung durchführen
+            // Statt answerQuestion aufzurufen, senden wir nur die Antwort an den Server
+            // und lassen den Server die Punkte berechnen
 
             // Antwort an den Server senden
             onAnswer(selectedAnswer !== null ? selectedAnswer : -1);

@@ -319,33 +319,46 @@ function completeRound(roomId) {
         room.timer = null;
     }
 
-    // WICHTIG: Sende individuelle Punktestände an jeden Spieler
-    // Host erhält seine eigene Punktzahl als playerScore und die des Gastes als opponentScore
+    console.log(`=== RUNDE ABGESCHLOSSEN ===`);
+    console.log(`Raum: ${roomId}`);
+    console.log(`Host (${room.host.id}): ${room.host.score} Punkte`);
+    console.log(`Gast (${room.guest.id}): ${room.guest.score} Punkte`);
+    console.log(`Aktuelle Runde: ${room.currentRound}`);
+    console.log(`Nächste Runde: ${room.currentRound + 1}`);
+
+    // SEHR WICHTIG: Individuelle Nachrichten an jeden Spieler senden
+
+    // Nachricht an den Host
     io.to(room.host.id).emit('round_complete', {
         playerScore: room.host.score,
         opponentScore: room.guest.score,
         nextRound: room.currentRound + 1,
         timeToNextRound: ROUND_TRANSITION_TIME
     });
+    console.log(`Nachricht an Host gesendet - Spieler: ${room.host.score}, Gegner: ${room.guest.score}`);
 
-    // Gast erhält seine eigene Punktzahl als playerScore und die des Hosts als opponentScore
+    // Nachricht an den Gast
     io.to(room.guest.id).emit('round_complete', {
         playerScore: room.guest.score,
         opponentScore: room.host.score,
         nextRound: room.currentRound + 1,
         timeToNextRound: ROUND_TRANSITION_TIME
     });
-
-    console.log(`Runde abgeschlossen in Raum ${roomId}. Host: ${room.host.score}, Gast: ${room.guest.score}`);
+    console.log(`Nachricht an Gast gesendet - Spieler: ${room.guest.score}, Gegner: ${room.host.score}`);
 
     // Move to next round after delay
     setTimeout(() => {
-        if (!rooms[roomId]) return; // Room may have been deleted
+        if (!rooms[roomId]) {
+            console.log(`Raum ${roomId} nicht mehr vorhanden, nächste Runde wird übersprungen`);
+            return;
+        }
 
         room.currentRound += 1;
+        console.log(`Starte Runde ${room.currentRound} in Raum ${roomId}`);
         startRoundTimer(roomId);
     }, ROUND_TRANSITION_TIME);
 }
+
 
 function endGame(roomId) {
     const room = rooms[roomId];
@@ -359,19 +372,33 @@ function endGame(roomId) {
         room.timer = null;
     }
 
-    // Host erhält seine eigene Punktzahl als playerScore und die des Gastes als opponentScore
+    console.log(`=== SPIEL BEENDET ===`);
+    console.log(`Raum: ${roomId}`);
+    console.log(`Endergebnis - Host: ${room.host.score}, Gast: ${room.guest.score}`);
+
+    // Individuelle Nachrichten an jeden Spieler senden
+
+    // Nachricht an den Host
     io.to(room.host.id).emit('game_over', {
         playerScore: room.host.score,
         opponentScore: room.guest.score
     });
+    console.log(`Spiel-Ende-Nachricht an Host (${room.host.id}) gesendet`);
 
-    // Gast erhält seine eigene Punktzahl als playerScore und die des Hosts als opponentScore
+    // Nachricht an den Gast
     io.to(room.guest.id).emit('game_over', {
         playerScore: room.guest.score,
         opponentScore: room.host.score
     });
+    console.log(`Spiel-Ende-Nachricht an Gast (${room.guest.id}) gesendet`);
 
-    console.log(`Spiel beendet in Raum ${roomId}. Host: ${room.host.score}, Gast: ${room.guest.score}`);
+    // Behalte den Raum für eine gewisse Zeit, um spätere Aktionen zu ermöglichen
+    setTimeout(() => {
+        if (rooms[roomId]) {
+            console.log(`Lösche Raum ${roomId} nach Spielende`);
+            deleteRoom(roomId);
+        }
+    }, 5 * 60 * 1000); // 5 Minuten
 }
 
 function leaveRoom(socket, roomId) {
