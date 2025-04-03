@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import {useEffect, useState} from 'react'
+import {AnimatePresence, motion} from 'framer-motion'
 import Card from '../ui/Card'
 import Button from '../ui/Button'
-import { Question } from '../../types'
-import { useGame } from '../../store/GameContext'
+import {Question} from '../../types'
+import {useGame} from '../../store/GameContext'
 
 interface QuestionCardProps {
     question: Question
@@ -12,6 +12,7 @@ interface QuestionCardProps {
     isMultiplayer?: boolean
     isHost?: boolean
     waitingForOthers?: boolean
+    timeRemaining?: number // Neue Prop für Server-synchronisierten Timer
 }
 
 const QuestionCard = ({
@@ -20,15 +21,22 @@ const QuestionCard = ({
                           onAnswer,
                           isMultiplayer = false,
                           isHost = false,
-                          waitingForOthers = false
+                          waitingForOthers = false,
+                          timeRemaining
                       }: QuestionCardProps) => {
-    const { state, answerQuestion, nextQuestion, endGame } = useGame()
+    const {state, answerQuestion, nextQuestion, endGame} = useGame()
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
     const [showResult, setShowResult] = useState(false)
     const [timeLeft, setTimeLeft] = useState(state.timePerQuestion)
 
-    // Timer für die Frage
+    // Timer für die Frage - im Multiplayer-Modus verwenden wir timeRemaining
     useEffect(() => {
+        // Wenn Multiplayer und timeRemaining gesetzt ist, verwenden wir diesen Wert
+        if (isMultiplayer && timeRemaining !== undefined) {
+            setTimeLeft(timeRemaining);
+            return;
+        }
+
         if (showResult || waitingForOthers) return
 
         const timer = setInterval(() => {
@@ -44,7 +52,7 @@ const QuestionCard = ({
         }, 1000)
 
         return () => clearInterval(timer)
-    }, [showResult, waitingForOthers])
+    }, [showResult, waitingForOthers, timeRemaining, isMultiplayer])
 
     // Antwort auswählen
     const handleSelectAnswer = (index: number) => {
@@ -97,11 +105,11 @@ const QuestionCard = ({
 
     // Animation für die Optionen
     const optionVariants = {
-        initial: { opacity: 0, y: 10 },
+        initial: {opacity: 0, y: 10},
         animate: (i: number) => ({
             opacity: 1,
             y: 0,
-            transition: { delay: 0.1 * i },
+            transition: {delay: 0.1 * i},
         }),
         selected: {
             scale: 1.02,
@@ -148,9 +156,9 @@ const QuestionCard = ({
                 <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
                     <motion.div
                         className="h-full bg-gradient-to-r from-blue-500 to-violet-500"
-                        initial={{ width: '100%' }}
-                        animate={{ width: `${timerPercentage}%` }}
-                        transition={{ duration: 0.5 }}
+                        initial={{width: '100%'}}
+                        animate={{width: `${timerPercentage}%`}}
+                        transition={{duration: 0.5}}
                     />
                 </div>
             </div>
@@ -177,13 +185,14 @@ const QuestionCard = ({
                                 key={index}
                                 className="p-3 border border-white/10 rounded-lg cursor-pointer"
                                 initial={optionVariants.initial}
-                                animate={{ ...optionVariants.animate(index), ...optionState }}
+                                animate={{...optionVariants.animate(index), ...optionState}}
                                 variants={optionVariants}
-                                whileHover={!showResult && !waitingForOthers ? { scale: 1.01 } : {}}
+                                whileHover={!showResult && !waitingForOthers ? {scale: 1.01} : {}}
                                 onClick={() => handleSelectAnswer(index)}
                             >
                                 <div className="flex items-center space-x-3">
-                                    <div className="w-6 h-6 flex items-center justify-center rounded-full border border-white/20 text-sm font-medium">
+                                    <div
+                                        className="w-6 h-6 flex items-center justify-center rounded-full border border-white/20 text-sm font-medium">
                                         {String.fromCharCode(65 + index)}
                                     </div>
                                     <span>{option}</span>

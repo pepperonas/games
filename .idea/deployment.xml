@@ -8,6 +8,10 @@
           <mappings>
             <mapping deploy="/var/www/html/games" local="$PROJECT_DIR$" web="/" />
           </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/brain-buster/frontend/node_modules" />
+            <excludedPath local="true" path="$PROJECT_DIR$/brain-buster/server/node_modules" />
+          </excludedPaths>
         </serverdata>
       </paths>
     </serverData>
