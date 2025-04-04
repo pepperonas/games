@@ -3,30 +3,35 @@
 @tailwind utilities;
 
 :root {
-  font-family: 'Poppins', system-ui, sans-serif;
-  line-height: 1.5;
-  color-scheme: dark;
+    font-family: 'Poppins', system-ui, sans-serif;
+    line-height: 1.5;
+    color-scheme: dark;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  /* Fester Hintergrund statt Gradient, passend zum Screenshot */
-  @apply bg-background-dark min-h-screen text-gray-300;
+    @apply bg-background-dark min-h-screen text-gray-300;
+    margin: 0;
+    padding: 0;
 }
 
 .card-hover {
-  @apply hover:shadow-lg hover:shadow-secondary-700/20 transform transition-all duration-300 hover:-translate-y-1;
+    @apply hover:shadow-lg hover:shadow-accent-blue/10 transform transition-all duration-300 hover:-translate-y-2;
 }
 
 @keyframes bounce-once {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
 .bounce-animation {
-  animation: bounce-once 0.5s ease-in-out;
+    animation: bounce-once 0.5s ease-in-out;
 }

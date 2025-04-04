@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import {useState} from 'react'
+import {Link, useLocation} from 'react-router-dom'
+import {motion} from 'framer-motion'
 
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -9,11 +9,11 @@ const Navbar = () => {
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
 
     const navItems = [
-        { path: '/', label: 'Home' },
-        { path: '/game', label: 'Einzelspieler' },
-        { path: '/multiplayer', label: 'Multiplayer' },
-        { path: '/stats', label: 'Statistiken' },
-        { path: '/settings', label: 'Einstellungen' },
+        {path: '/', label: 'Home'},
+        {path: '/game', label: 'Einzelspieler'},
+        {path: '/multiplayer', label: 'Multiplayer'},
+        {path: '/stats', label: 'Statistiken'},
+        {path: '/settings', label: 'Einstellungen'},
     ]
 
     return (
@@ -21,7 +21,7 @@ const Navbar = () => {
             <div className="container mx-auto px-4 flex justify-between items-center">
                 <Link to="/" className="flex items-center space-x-2">
                     <motion.div
-                        whileHover={{ rotate: 10 }}
+                        whileHover={{rotate: 10}}
                         className="text-2xl font-bold text-white"
                     >
                         🧠
@@ -48,7 +48,7 @@ const Navbar = () => {
                                     layoutId="navbar-indicator"
                                     className="absolute inset-0 bg-secondary-700/30 rounded-md -z-10"
                                     initial={false}
-                                    transition={{ type: 'spring', duration: 0.5 }}
+                                    transition={{type: 'spring', duration: 0.5}}
                                 />
                             )}
                             {item.label}
@@ -91,10 +91,10 @@ const Navbar = () => {
             {/* Mobile Navigation */}
             {isMenuOpen && (
                 <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
+                    initial={{opacity: 0, height: 0}}
+                    animate={{opacity: 1, height: 'auto'}}
+                    exit={{opacity: 0, height: 0}}
+                    transition={{duration: 0.3}}
                     className="md:hidden bg-background-darker"
                 >
                     <div className="container mx-auto px-4 py-2 flex flex-col space-y-2">
