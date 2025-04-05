@@ -915,6 +915,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // Render player cards
     function renderPlayerCards() {
         playerCardsContainer.innerHTML = '';
+
+        // Führenden Spieler bestimmen
+        const leadingPlayer = getLeadingPlayer(gameState.players);
+
         gameState.players.forEach((player, index) => {
             const playerCard = document.createElement('div');
             playerCard.className = `player-card ${index === gameState.currentPlayerIndex ? 'active' : ''}`;
@@ -928,7 +932,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const playerName = document.createElement('div');
             playerName.className = 'player-name';
-            playerName.textContent = player.name;
+
+            // Krone für den führenden Spieler hinzufügen (wenn Spiel gestartet)
+            if (leadingPlayer && player === leadingPlayer && (player.setsWon > 0 || player.legsWon > 0 || player.averageScore > 0)) {
+                playerName.innerHTML = `
+                <span class="crown-icon">👑</span> ${player.name}
+            `;
+            } else {
+                playerName.textContent = player.name;
+            }
 
             const playerScore = document.createElement('div');
             playerScore.className = 'player-score';
@@ -1462,3 +1474,11 @@ document.addEventListener('DOMContentLoaded', function () {
     initDatabase();
     checkForSavedGameState();
 });
+
+function getLeadingPlayer(players) {
+    if (!players || players.length === 0) return null;
+
+    // Spieler mit der geringsten Punktzahl ist führend (am nächsten am Ziel)
+    return players.reduce((leader, player) =>
+        player.score < leader.score ? player : leader, players[0]);
+}
