@@ -413,12 +413,13 @@
                 const avgScore = totalPoints / totalThrows;
                 const highestScore = Math.max(...throws.map(t => t.score));
 
-                // Group by player
+                // Group by player name only (ignoriere playerId)
                 const playerStats = {};
                 throws.forEach(t => {
-                    if (!playerStats[t.playerName]) {
-                        playerStats[t.playerName] = {
-                            playerId: t.playerId,
+                    const playerName = t.playerName;
+
+                    if (!playerStats[playerName]) {
+                        playerStats[playerName] = {
                             scores: [],
                             totalScore: 0,
                             throwCount: 0,
@@ -426,10 +427,10 @@
                         };
                     }
 
-                    playerStats[t.playerName].scores.push(t.score);
-                    playerStats[t.playerName].totalScore += t.score;
-                    playerStats[t.playerName].throwCount++;
-                    playerStats[t.playerName].highest = Math.max(playerStats[t.playerName].highest, t.score);
+                    playerStats[playerName].scores.push(t.score);
+                    playerStats[playerName].totalScore += t.score;
+                    playerStats[playerName].throwCount++;
+                    playerStats[playerName].highest = Math.max(playerStats[playerName].highest, t.score);
                 });
 
                 // Render player stats
@@ -440,11 +441,11 @@
                     const overallStatsCard = document.createElement('div');
                     overallStatsCard.className = 'stat-card';
                     overallStatsCard.innerHTML = `
-                    <div class="stat-title">Gesamtstatistik</div>
-                    <div class="stat-value">${avgScore.toFixed(1)}</div>
-                    <div>Durchschnitt über ${totalThrows} Würfe</div>
-                    <div>Höchste Aufnahme: ${highestScore}</div>
-                `;
+                      <div class="stat-title">Gesamtstatistik</div>
+                      <div class="stat-value">${avgScore.toFixed(1)}</div>
+                      <div>Durchschnitt über ${totalThrows} Würfe</div>
+                      <div>Höchste Aufnahme: ${highestScore}</div>
+                    `;
                     playerStatsContainer.appendChild(overallStatsCard);
                 }
 
@@ -456,23 +457,24 @@
                     const statCard = document.createElement('div');
                     statCard.className = 'stat-card';
 
-                    // Füge Lösch-Icon hinzu, aber nur wenn wir alle Spieler anzeigen
+                    // Lösch-Icon nur anzeigen, wenn wir alle Spieler anzeigen
                     let deleteIconHtml = '';
                     if (playerId === 'all') {
+                        // Hier keine playerId mehr verwenden - Namen direkt übergeben
                         deleteIconHtml = `
-                        <svg class="delete-icon" data-player-id="${stats.playerId}" data-player-name="${playerName}" viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                        </svg>
-                    `;
+                          <svg class="delete-icon" data-player-name="${playerName}" viewBox="0 0 24 24">
+                              <path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                          </svg>
+                        `;
                     }
 
                     statCard.innerHTML = `
-                    ${deleteIconHtml}
-                    <div class="stat-title">${playerName}</div>
-                    <div class="stat-value">${playerAvg.toFixed(1)}</div>
-                    <div>Durchschnitt über ${stats.throwCount} Würfe</div>
-                    <div>Höchste Aufnahme: ${stats.highest}</div>
-                `;
+                      ${deleteIconHtml}
+                      <div class="stat-title">${playerName}</div>
+                      <div class="stat-value">${playerAvg.toFixed(1)}</div>
+                      <div>Durchschnitt über ${stats.throwCount} Würfe</div>
+                      <div>Höchste Aufnahme: ${stats.highest}</div>
+                    `;
                     playerStatsContainer.appendChild(statCard);
                 });
 
@@ -480,9 +482,8 @@
                 const deleteIcons = document.querySelectorAll('.delete-icon');
                 deleteIcons.forEach(icon => {
                     icon.addEventListener('click', function () {
-                        const playerId = this.getAttribute('data-player-id');
                         const playerName = this.getAttribute('data-player-name');
-                        showDeletePlayerConfirmation(playerId, playerName);
+                        showDeletePlayerConfirmation(null, playerName);
                     });
                 });
 
@@ -498,36 +499,95 @@
             // Clear previous chart
             chartContainer.innerHTML = '<canvas id="scoreChart"></canvas>';
 
-            // Group data by player and prepare for chart
-            const playerData = {};
+            if (throws.length === 0) {
+                chartContainer.innerHTML = '<div style="text-align: center; padding: 20px;">Keine Daten vorhanden</div>';
+                return;
+            }
 
+            // Sortiere alle Würfe chronologisch
+            throws.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+            // Gruppiere Würfe nach gameId
+            const gameThrows = {};
             throws.forEach(t => {
-                if (!playerData[t.playerName]) {
-                    playerData[t.playerName] = {
-                        scores: [],
-                        labels: []
-                    };
+                if (!gameThrows[t.gameId]) {
+                    gameThrows[t.gameId] = [];
                 }
-
-                playerData[t.playerName].scores.push(t.score);
-                const throwDate = new Date(t.timestamp);
-                playerData[t.playerName].labels.push(
-                    throwDate.toLocaleDateString() + ' ' +
-                    throwDate.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
-                );
+                gameThrows[t.gameId].push(t);
             });
 
-            // Create datasets for chart
+            // Erstelle einen gemeinsamen Zeitstrahl für alle Würfe
+            const allTimeLabels = [];
+            const timeData = {};
+
+            // Extrahiere alle Zeitstempel und erstelle einen gemeinsamen Zeitstrahl
+            throws.forEach(t => {
+                const throwDate = new Date(t.timestamp);
+                const timeLabel = throwDate.toLocaleDateString() + ' ' +
+                    throwDate.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+
+                if (!allTimeLabels.includes(timeLabel)) {
+                    allTimeLabels.push(timeLabel);
+                }
+
+                // Speichere den Zeitstempel und den zugehörigen Score
+                if (!timeData[timeLabel]) {
+                    timeData[timeLabel] = {};
+                }
+
+                if (!timeData[timeLabel][t.playerName]) {
+                    timeData[timeLabel][t.playerName] = t.score;
+                }
+            });
+
+            // Erstelle die Datasets für jeden Spieler
             const datasets = [];
             const colors = ['#2980b9', '#e74c3c', '#27ae60', '#f39c12', '#8e44ad', '#16a085'];
 
-            Object.keys(playerData).forEach((playerName, index) => {
-                datasets.push({
-                    label: playerName,
-                    data: playerData[playerName].scores,
-                    borderColor: colors[index % colors.length],
-                    backgroundColor: colors[index % colors.length] + '33',
-                    tension: 0.1
+            // Sammle alle eindeutigen Spielernamen
+            const allPlayers = [...new Set(throws.map(t => t.playerName))];
+
+            allPlayers.forEach((playerName, index) => {
+                // Gruppiere die Daten nach Spiel-ID, um Sessions zu identifizieren
+                const playerGames = {};
+
+                throws.forEach(t => {
+                    if (t.playerName === playerName) {
+                        if (!playerGames[t.gameId]) {
+                            playerGames[t.gameId] = [];
+                        }
+                        playerGames[t.gameId].push({
+                            x: new Date(t.timestamp),
+                            y: t.score,
+                            timeLabel: new Date(t.timestamp).toLocaleDateString() + ' ' +
+                                new Date(t.timestamp).toLocaleTimeString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })
+                        });
+                    }
+                });
+
+                // Sortiere die Datenpunkte jedes Spiels chronologisch
+                Object.values(playerGames).forEach(game => {
+                    game.sort((a, b) => a.x - b.x);
+                });
+
+                // Erstelle separate Datasets für jede Spielsession des Spielers
+                Object.entries(playerGames).forEach(([gameId, gameTurns], gameIndex) => {
+                    datasets.push({
+                        label: `${playerName} (Spiel ${gameIndex + 1})`,
+                        data: gameTurns.map(turn => ({
+                            x: turn.timeLabel,
+                            y: turn.y
+                        })),
+                        borderColor: colors[index % colors.length],
+                        backgroundColor: colors[index % colors.length] + '33',
+                        tension: 0.1,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        spanGaps: true // Verbinde alle Punkte innerhalb einer Session
+                    });
                 });
             });
 
@@ -541,7 +601,7 @@
             chart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: Object.keys(playerData).length > 0 ? playerData[Object.keys(playerData)[0]].labels : [],
+                    labels: allTimeLabels,
                     datasets: datasets
                 },
                 options: {
@@ -556,9 +616,40 @@
                             }
                         },
                         x: {
+                            type: 'category',
                             title: {
                                 display: true,
-                                text: 'Würfe'
+                                text: 'Zeitpunkt'
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45,
+                                callback: function (value, index, values) {
+                                    // Zeige nur das Datum für den ersten Eintrag des Tages
+                                    const label = allTimeLabels[index];
+                                    const datePart = label.split(' ')[0];
+
+                                    // Prüfen, ob dies der erste Eintrag für dieses Datum ist
+                                    if (index === 0 || !allTimeLabels[index - 1].startsWith(datePart)) {
+                                        return label;
+                                    }
+                                    // Für die weiteren Einträge des Tages nur die Uhrzeit anzeigen
+                                    return label.split(' ')[1];
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function (tooltipItems) {
+                                    return tooltipItems[0].label;
+                                },
+                                label: function (context) {
+                                    // Entferne "(Spiel X)" aus dem Label für die Anzeige
+                                    const playerName = context.dataset.label.split(' (Spiel')[0];
+                                    return `${playerName}: ${context.parsed.y} Punkte`;
+                                }
                             }
                         }
                     }
@@ -709,18 +800,31 @@
         }
 
         // Delete player data
-        function deletePlayerData(playerId) {
+        function deletePlayerData(playerName) {
             if (!db) return;
 
             const transaction = db.transaction(['throws', 'players'], 'readwrite');
             const throwsStore = transaction.objectStore('throws');
             const playersStore = transaction.objectStore('players');
 
-            // First, delete all throws from this player
-            const playerIndex = throwsStore.index('playerId');
-            const throwsRequest = playerIndex.openCursor(IDBKeyRange.only(parseInt(playerId)));
+            // Alle Würfe mit diesem Spielernamen löschen
+            const throwsRequest = throwsStore.openCursor();
 
             throwsRequest.onsuccess = function (event) {
+                const cursor = event.target.result;
+                if (cursor) {
+                    if (cursor.value.playerName === playerName) {
+                        cursor.delete();
+                    }
+                    cursor.continue();
+                }
+            };
+
+            // Alle Spieler mit diesem Namen löschen
+            const nameIndex = playersStore.index('name');
+            const nameCursorRequest = nameIndex.openCursor(IDBKeyRange.only(playerName));
+
+            nameCursorRequest.onsuccess = function (event) {
                 const cursor = event.target.result;
                 if (cursor) {
                     cursor.delete();
@@ -728,11 +832,7 @@
                 }
             };
 
-            // Then delete the player
-            const deletePlayerRequest = playersStore.delete(parseInt(playerId));
-
             transaction.oncomplete = function () {
-                // alert('Spielerdaten erfolgreich gelöscht');
                 loadStatistics();
                 loadPlayersForManagement();
             };
@@ -807,7 +907,7 @@
         function showDeletePlayerConfirmation(playerId, playerName) {
             confirmationMessage.textContent = `Möchtest du die Statistiken für ${playerName} wirklich löschen?`;
 
-            pendingAction = () => deletePlayerData(playerId);
+            pendingAction = () => deletePlayerData(playerName);
 
             confirmationModal.style.display = 'block';
         }
