@@ -804,39 +804,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Load game state after navigation
-    function loadGameStateAfterNavigation() {
-        const savedState = sessionStorage.getItem('dartGameState');
-        if (savedState) {
-            try {
-                const parsedState = JSON.parse(savedState);
-                gameState = parsedState;
-                gameState.turnStartTime = new Date(gameState.turnStartTime);
-                gameState.gameStartTime = new Date(gameState.gameStartTime);
-                gameState.history.forEach(entry => entry.timestamp = new Date(entry.timestamp));
-                startTurnTimer();
-                renderPlayerCards();
-                renderHistory();
-                renderPlayerStatistics();
-                setupContainer.classList.add('hidden');
-                gameContainer.classList.remove('hidden');
-                restartGameButton.classList.remove('hidden');
-                console.log('Spielstand wiederhergestellt');
-
-                // Setze den Fokus auf das Eingabefeld
-                if (currentInputField) {
-                    currentInputField.focus();
-                }
-
-                return true;
-            } catch (error) {
-                console.error('Fehler beim Wiederherstellen des Spielstands:', error);
-                sessionStorage.removeItem('dartGameState');
-            }
-        }
-        return false;
-    }
-
     // Initialize player name inputs
     function initPlayerNameInputs() {
         const numPlayers = parseInt(numPlayersSelect.value);
@@ -1333,7 +1300,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Load game state after navigation
     function loadGameStateAfterNavigation() {
         const savedState = sessionStorage.getItem('dartGameState');
         if (savedState) {
@@ -1343,44 +1309,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 gameState.turnStartTime = new Date(gameState.turnStartTime);
                 gameState.gameStartTime = new Date(gameState.gameStartTime);
                 gameState.history.forEach(entry => entry.timestamp = new Date(entry.timestamp));
-                startTurnTimer();
-                renderPlayerCards();
-                renderHistory();
-                renderPlayerStatistics();
-                setupContainer.classList.add('hidden');
-                gameContainer.classList.remove('hidden');
-                restartGameButton.classList.remove('hidden');
-                console.log('Spielstand wiederhergestellt');
 
-                // Setze den Fokus auf das Eingabefeld
-                if (currentInputField) {
-                    currentInputField.focus();
+                // Theme prüfen und anwenden
+                const savedTheme = localStorage.getItem('dartTheme');
+                if (savedTheme === 'light') {
+                    lightIcon.style.display = 'none';
+                    darkIcon.style.display = 'block';
+                } else {
+                    lightIcon.style.display = 'block';
+                    darkIcon.style.display = 'none';
                 }
 
-                return true;
-            } catch (error) {
-                console.error('Fehler beim Wiederherstellen des Spielstands:', error);
-                sessionStorage.removeItem('dartGameState');
-            }
-        }
-        return false;
-    }
-
-    function loadGameStateAfterNavigation() {
-        const savedState = sessionStorage.getItem('dartGameState');
-        if (savedState) {
-            try {
-                const parsedState = JSON.parse(savedState);
-                gameState = parsedState;
-                gameState.turnStartTime = new Date(gameState.turnStartTime);
-                gameState.gameStartTime = new Date(gameState.gameStartTime);
-                gameState.history.forEach(entry => entry.timestamp = new Date(entry.timestamp));
                 startTurnTimer();
                 renderPlayerCards();
                 renderHistory();
                 renderPlayerStatistics();
 
-                //  **WICHTIG:** Stelle sicher, dass gameContainer angezeigt und setupContainer ausgeblendet ist
+                // Diese Zeilen sind wichtig für die korrekte Anzeige
                 setupContainer.classList.add('hidden');
                 gameContainer.classList.remove('hidden');
                 restartGameButton.classList.remove('hidden');
@@ -1399,11 +1344,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
         return false;
-    }
-
-    // Check for saved game state
-    function checkForSavedGameState() {
-        if (!loadGameStateAfterNavigation()) initPlayerNameInputs();
     }
 
     window.addEventListener('beforeunload', saveGameStateBeforeNavigation);

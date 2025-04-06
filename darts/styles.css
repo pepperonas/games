@@ -1349,3 +1349,59 @@ input:checked + .slider:before {
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 10px;
 }
+
+/* Füge diesen CSS-Code zu deiner styles.css hinzu */
+
+/* Datumsfilter-Bereich im dunklen Theme anpassen */
+:root.dark-theme .chart-zoom-controls,
+:root.dark-theme .date-filter-container {
+    background-color: #2C2C2C !important;
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+/* Verbesserte Sichtbarkeit für die Datumsauswahl im dunklen Theme */
+:root.dark-theme .date-filter input[type="date"] {
+    background-color: #3a3d4f;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+/* Stellen Sie sicher, dass alle Filter-Schaltflächen dunkles Theme haben */
+:root.dark-theme .filter-btn,
+:root.dark-theme .zoom-btn {
+    background-color: #2C2E3B;
+    color: white;
+    border: 1px solid var(--border-color);
+}
+
+:root.dark-theme .filter-btn:hover,
+:root.dark-theme .zoom-btn:hover {
+    background-color: #2C2C2C;
+}
+
+/* Spezifischen Selektor für den Datumsfilter-Bereich verwenden */
+.chart-zoom-controls,
+.date-filter,
+.date-filter-container,
+.chart-container > div:first-child {
+    background-color: #ffffff !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Der graue Bereich selbst */
+.chart-container > div:first-child,
+.date-filter-area,
+.chart-zoom-controls {
+    background-color: #ffffff !important;
+}
+
+/* Alle Filter-Controls im dunklen Theme anpassen */
+:root.dark-theme input[type="date"],
+:root.dark-theme .filter-btn,
+:root.dark-theme .zoom-btn {
+    background-color: #2C2C2C !important;
+    color: white !important;
+    border: 1px solid var(--border-color) !important;
+}

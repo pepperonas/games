@@ -11,12 +11,26 @@ document.addEventListener('DOMContentLoaded', function () {
         // Wenn explizit Light-Theme gespeichert ist
         lightIcon.style.display = 'none';
         darkIcon.style.display = 'block';
+        document.documentElement.classList.remove('dark-theme');
+
+        // Spezifisch für die Statistikseite - Datumsfilter auf helles Theme setzen
+        const dateFilterContainer = document.querySelector('.date-filter').closest('div');
+        if (dateFilterContainer) {
+            dateFilterContainer.style.backgroundColor = 'var(--container-background)';
+        }
     } else {
         // Für 'dark' oder wenn noch kein Theme gespeichert wurde -> Dark-Theme als Default
         document.documentElement.classList.add('dark-theme');
         themeToggleCheckbox.checked = true;
         lightIcon.style.display = 'block';
         darkIcon.style.display = 'none';
+
+        // Spezifisch für die Statistikseite - Datumsfilter auf dunkles Theme setzen
+        const dateFilterContainer = document.querySelector('.date-filter').closest('div');
+        if (dateFilterContainer) {
+            dateFilterContainer.style.backgroundColor = '#2C2E3B';
+        }
+
         if (!savedTheme) {
             localStorage.setItem('dartTheme', 'dark');
         }
@@ -29,14 +43,27 @@ document.addEventListener('DOMContentLoaded', function () {
             localStorage.setItem('dartTheme', 'dark');
             lightIcon.style.display = 'block';
             darkIcon.style.display = 'none';
+
+            // Datumsfilter auf dunkles Theme setzen
+            const dateFilterContainer = document.querySelector('.date-filter').closest('div');
+            if (dateFilterContainer) {
+                dateFilterContainer.style.backgroundColor = '#2C2E3B';
+            }
         } else {
             document.documentElement.classList.remove('dark-theme');
             localStorage.setItem('dartTheme', 'light');
             lightIcon.style.display = 'none';
             darkIcon.style.display = 'block';
+
+            // Datumsfilter auf helles Theme setzen
+            const dateFilterContainer = document.querySelector('.date-filter').closest('div');
+            if (dateFilterContainer) {
+                dateFilterContainer.style.backgroundColor = 'var(--container-background)';
+            }
         }
     });
 
+    // Rest des vorhandenen Codes...
     function togglePage() {
         const currentPage = window.location.pathname;
         if (currentPage.includes('index.html') || currentPage.endsWith('/')) {
