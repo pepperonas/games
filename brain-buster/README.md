@@ -1,4 +1,4 @@
-# brain-buster Quiz App
+# Brain Buster
 
 Eine moderne Quiz-App mit Multiplayer-Unterstützung via WebRTC.
 
