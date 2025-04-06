@@ -1095,13 +1095,22 @@ input:checked + .slider:before {
 
 /* Zoom-Controls Styling */
 .chart-zoom-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    padding: 10px;
-    background-color: rgba(44, 46, 59, 0.8);
+    background-color: #2C2E3B;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 15px;
+    color: white;
+}
+
+.chart-zoom-controls input[type="date"] {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.chart-zoom-controls label {
+    color: white;
 }
 
 .date-filter {
@@ -1152,7 +1161,7 @@ input:checked + .slider:before {
     border: none;
     cursor: pointer;
     transition: background-color 0.2s;
-    margin-left:5px;
+    margin-left: 5px;
 }
 
 .zoom-btn:hover {
@@ -1205,8 +1214,7 @@ input:checked + .slider:before {
 /* Responsive Anpassungen */
 @media (max-width: 768px) {
     .chart-zoom-controls {
-        flex-direction: column;
-        gap: 10px;
+        background-color: #2C2E3B;
     }
 
     .date-filter {
