@@ -6,14 +6,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Check if user already has a theme preference stored
     const savedTheme = localStorage.getItem('dartTheme');
-    if (savedTheme === 'dark') {
+
+    if (savedTheme === 'light') {
+        // Wenn explizit Light-Theme gespeichert ist
+        lightIcon.style.display = 'none';
+        darkIcon.style.display = 'block';
+    } else {
+        // Für 'dark' oder wenn noch kein Theme gespeichert wurde -> Dark-Theme als Default
         document.documentElement.classList.add('dark-theme');
         themeToggleCheckbox.checked = true;
         lightIcon.style.display = 'block';
         darkIcon.style.display = 'none';
-    } else {
-        lightIcon.style.display = 'none';
-        darkIcon.style.display = 'block';
+        if (!savedTheme) {
+            localStorage.setItem('dartTheme', 'dark');
+        }
     }
 
     // Theme toggle event listener
