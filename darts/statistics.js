@@ -134,10 +134,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (throws.length > 0) {
             const firstDate = new Date(throws[0].timestamp);
             const lastDate = new Date(throws[throws.length - 1].timestamp);
-            
+
             const startDateInput = document.getElementById('start-date');
             const endDateInput = document.getElementById('end-date');
-            
+
             if (!startDateInput.value) {
                 startDateInput.valueAsDate = firstDate;
             }
@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 // Zeige nur das Datum für den ersten Eintrag des Tages
                                 const label = allTimeLabels[index];
                                 if (!label) return '';
-                                
+
                                 const datePart = label.split(' ')[0];
                                 // Prüfen, ob dies der erste Eintrag für dieses Datum ist
                                 if (index === 0 || !allTimeLabels[index - 1]?.startsWith(datePart)) {
@@ -345,23 +345,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
         });
-        
+
         // Event-Listener für Datumsfilter
         document.getElementById('apply-filter')?.addEventListener('click', function() {
             const startDate = document.getElementById('start-date')?.valueAsDate;
             const endDate = document.getElementById('end-date')?.valueAsDate;
-            
+
             if (startDate && endDate) {
                 // Setze Endzeit auf Ende des Tages
                 const endDateWithTime = new Date(endDate);
                 endDateWithTime.setHours(23, 59, 59, 999);
-                
+
                 // Filtere Würfe nach Datumsbereich
                 const filteredThrows = throws.filter(t => {
                     const throwDate = new Date(t.timestamp);
                     return throwDate >= startDate && throwDate <= endDateWithTime;
                 });
-                
+
                 // Aktualisiere Chart mit gefilterten Daten
                 if (filteredThrows.length === 0) {
                     alert('Keine Daten im ausgewählten Zeitraum gefunden.');
@@ -372,7 +372,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 alert('Bitte wähle sowohl ein Start- als auch ein Enddatum.');
             }
         });
-        
+
         // Stelle sicher, dass keine Überlappung stattfindet
         fixLayoutOverlap();
     }
@@ -439,8 +439,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 overallStatsCard.innerHTML = `
                   <div class="stat-title">Gesamtstatistik</div>
                   <div class="stat-value">${avgScore.toFixed(1)}</div>
-                  <div>Durchschnitt über ${totalThrows} Würfe</div>
-                  <div>Höchste Aufnahme: ${highestScore}</div>
+                  <div class="stat-detail">Durchschnitt über ${totalThrows} Würfe</div>
+                  <div class="stat-detail">Höchste Aufnahme: ${highestScore}</div>
                 `;
                 playerStatsContainer.appendChild(overallStatsCard);
             }
@@ -468,8 +468,8 @@ document.addEventListener('DOMContentLoaded', function () {
                   ${deleteIconHtml}
                   <div class="stat-title">${playerName}</div>
                   <div class="stat-value">${playerAvg.toFixed(1)}</div>
-                  <div>Durchschnitt über ${stats.throwCount} Würfe</div>
-                  <div>Höchste Aufnahme: ${stats.highest}</div>
+                  <div class="stat-detail">Durchschnitt über ${stats.throwCount} Würfe</div>
+                  <div class="stat-detail">Höchste Aufnahme: ${stats.highest}</div>
                 `;
                 playerStatsContainer.appendChild(statCard);
             });
@@ -485,7 +485,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Create score history chart
             createScoreHistoryChart(throws);
-            
+
             // Fix layout overlap
             fixLayoutOverlap();
         };
@@ -498,7 +498,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (statsGrid) {
                 statsGrid.style.marginTop = '70px';
             }
-            
+
             const chartContainer = document.getElementById('score-history-chart');
             if (chartContainer) {
                 chartContainer.style.minHeight = '400px';
