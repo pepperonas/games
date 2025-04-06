@@ -1360,6 +1360,11 @@ input:checked + .slider:before {
     border-color: var(--border-color);
 }
 
+:root.dark-theme .chart-zoom-controls,
+:root.dark-theme .chart-zoom-controls * {
+    background-color: #2C2C2C !important;
+}
+
 /* Verbesserte Sichtbarkeit für die Datumsauswahl im dunklen Theme */
 :root.dark-theme .date-filter input[type="date"] {
     background-color: #3a3d4f;
@@ -1405,3 +1410,4 @@ input:checked + .slider:before {
     color: white !important;
     border: 1px solid var(--border-color) !important;
 }
+
