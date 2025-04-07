@@ -51,7 +51,7 @@
     }
 }
 
-/* Landscape-Modus */
+/* Landscape-Modus - Buttons weiter auseinander und außerhalb des Spielfelds */
 @media (max-width: 915px) and (orientation: landscape) {
     .touch-controls {
         display: block;
@@ -59,23 +59,32 @@
         height: 100%;
         position: absolute;
         pointer-events: none; /* Erlaubt Interaktionen mit Elementen dahinter */
+        left: 0;
+        top: 0;
     }
 
     .touch-button {
         pointer-events: auto; /* Überschreibt parent property */
         width: 60px;
         height: 60px;
-        position: absolute;
+        position: fixed; /* Fixed statt absolute für konstante Position */
     }
 
     .up-button {
-        left: 10px;
-        bottom: 20px;
+        left: 4%;
+        bottom: 30%;
+        transform: translateY(50%);
     }
 
     .down-button {
-        right: 10px;
-        bottom: 20px;
+        right: 4%;
+        bottom: 30%;
+        transform: translateY(50%);
+    }
+
+    /* Canvas-Container-Anpassung um Platz für Buttons zu schaffen */
+    .game-container canvas {
+        margin: 0 auto;
     }
 }
 
@@ -88,12 +97,14 @@
     }
 
     .up-button {
-        left: 20px;
-        bottom: 20px;
+        left: 4%; /* Prozent des Viewport statt fester Pixelwert */
+        bottom: 30%;
+        transform: translateY(50%);
     }
 
     .down-button {
-        right: 20px;
-        bottom: 20px;
+        right: 4%; /* Prozent des Viewport statt fester Pixelwert */
+        bottom: 30%;
+        transform: translateY(50%);
     }
 }
