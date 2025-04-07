@@ -1,8 +1,17 @@
-// components/GameOverScreen.jsx
+// components/GameOverScreen.jsx - Mit Spielstatistik-Anzeige
 import React from 'react';
 import './GameOverScreen.css';
 
-const GameOverScreen = ({ winner, isLocalPlayerWinner, onRestart, onMainMenu, gameMode, isHost }) => {
+const GameOverScreen = ({
+                            winner,
+                            isLocalPlayerWinner,
+                            onRestart,
+                            onMainMenu,
+                            gameMode,
+                            isHost,
+                            ballExchanges,
+                            gameStartTime
+                        }) => {
     let winnerText = '';
 
     if (winner === 'left') {
@@ -23,11 +32,40 @@ const GameOverScreen = ({ winner, isLocalPlayerWinner, onRestart, onMainMenu, ga
         }
     }
 
+    // Spielzeit berechnen
+    const calculateGameTime = () => {
+        if (!gameStartTime) return '0s';
+
+        const endTime = new Date();
+        const durationInSeconds = Math.floor((endTime - gameStartTime) / 1000);
+
+        const minutes = Math.floor(durationInSeconds / 60);
+        const seconds = durationInSeconds % 60;
+
+        if (minutes > 0) {
+            return `${minutes}m ${seconds}s`;
+        } else {
+            return `${seconds}s`;
+        }
+    };
+
     return (
         <div className="game-over">
             <h2>{winnerText}</h2>
-            <button onClick={onRestart} className="button">Neu starten</button>
-            <button onClick={onMainMenu} className="button">Hauptmenü</button>
+
+            <div className="game-stats">
+                <div className="stat-item">
+                    <span className="stat-label">Spielzeit:</span>
+                    <span className="stat-value">{calculateGameTime()}</span>
+                </div>
+                <div className="stat-item">
+                    <span className="stat-label">Ballwechsel:</span>
+                    <span className="stat-value">{ballExchanges}</span>
+                </div>
+            </div>
+
+            <button onClick={onRestart} className="button restart-btn">Neu starten</button>
+            <button onClick={onMainMenu} className="button menu-btn">Hauptmenü</button>
         </div>
     );
 };

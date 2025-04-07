@@ -1,8 +1,16 @@
-// components/StartScreen.jsx
+// components/StartScreen.jsx - Mit Statistik-Button
 import React, { useEffect, useState } from 'react';
 import './StartScreen.css';
 
-const StartScreen = ({ onStartSinglePlayer, onStartLocalMultiplayer, onSetupOnlineMultiplayer, isMobile, isLandscape }) => {
+const StartScreen = ({
+                         onStartSinglePlayer,
+                         onStartLocalMultiplayer,
+                         onSetupOnlineMultiplayer,
+                         onShowStats,
+                         playerName,
+                         isMobile,
+                         isLandscape
+                     }) => {
     const [isWideDevice, setIsWideDevice] = useState(false);
 
     // Prüft, ob das Gerät sehr breit ist (wie S24 Ultra)
@@ -30,6 +38,11 @@ const StartScreen = ({ onStartSinglePlayer, onStartLocalMultiplayer, onSetupOnli
     return (
         <div className={screenClasses}>
             <h1>PONG</h1>
+
+            <div className="player-welcome">
+                Willkommen, <span className="player-name">{playerName}</span>!
+            </div>
+
             <div className="button-group">
                 {/* Die drei Schwierigkeits-Buttons immer in einer horizontalen Reihe */}
                 <div className="difficulty-buttons">
@@ -42,6 +55,11 @@ const StartScreen = ({ onStartSinglePlayer, onStartLocalMultiplayer, onSetupOnli
                 <div className="multiplayer-buttons">
                     <button onClick={onStartLocalMultiplayer} className="button multiplayer-local-btn">Multiplayer (Lokal)</button>
                     <button onClick={onSetupOnlineMultiplayer} className="button multiplayer-online-btn">Multiplayer (Online)</button>
+                </div>
+
+                {/* Statistik-Button */}
+                <div className="stats-button-container">
+                    <button onClick={onShowStats} className="button stats-btn">Statistiken</button>
                 </div>
             </div>
 

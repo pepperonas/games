@@ -1,213 +1,104 @@
-/* StartScreen.css - Für Portrait und Landscape */
-.start-screen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(44, 46, 59, 0.9);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+/* Ergänzungen für StartScreen.css */
+
+.player-welcome {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #ccc;
+    text-align: center;
+}
+
+.player-name {
+    font-weight: bold;
     color: white;
 }
 
-.start-screen h1 {
-    font-size: 48px;
-    margin-bottom: 20px;
-}
-
-.button-group {
-    margin-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.stats-button-container {
     width: 100%;
-    max-width: 600px;
-}
-
-/* Die Gruppe der Schwierigkeitsauswahl-Buttons */
-.difficulty-buttons {
     display: flex;
-    flex-direction: row; /* Default: horizontal */
     justify-content: center;
-    width: 100%;
-    margin-bottom: 10px;
+    margin-top: 15px;
 }
 
-/* Die Gruppe der Multiplayer-Buttons */
-.multiplayer-buttons {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.stats-btn {
+    background-color: #673AB7;
+    max-width: 250px;
     width: 100%;
 }
 
-.button {
-    background-color: #4CAF50;
-    border: none;
-    color: white;
-    padding: 15px 32px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 5px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s;
+.stats-btn:hover {
+    background-color: #5E35B1;
 }
 
-/* Farben für die verschiedenen Buttons */
-.easy-btn {
-    background-color: #4CAF50;
-}
-.easy-btn:hover {
-    background-color: #45a049;
-}
-
-.medium-btn {
-    background-color: #ff9800;
-}
-.medium-btn:hover {
-    background-color: #e68a00;
-}
-
-.hard-btn {
-    background-color: #f44336;
-}
-.hard-btn:hover {
-    background-color: #d32f2f;
-}
-
-.multiplayer-local-btn {
-    background-color: #2196F3;
-}
-.multiplayer-local-btn:hover {
-    background-color: #0b7dda;
-}
-
-.multiplayer-online-btn {
-    background-color: #9C27B0;
-}
-.multiplayer-online-btn:hover {
-    background-color: #7B1FA2;
-}
-
-.controls-info {
-    margin-top: 20px;
-    font-size: 16px;
-    text-align: center;
-    color: #ddd;
-}
-
-/* Portrait-Modus für mobile Geräte */
-@media (max-width: 768px) and (orientation: portrait) {
-    .start-screen h1 {
-        font-size: 42px;
-        margin-bottom: 15px;
-    }
-
-    .button-group {
-        width: 90%;
-    }
-
-    /* Buttons untereinander anordnen im Portrait-Modus */
-    .difficulty-buttons {
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-    }
-
-    .difficulty-buttons .button {
-        width: 80%;
-        max-width: 300px;
-        margin: 5px 0;
-    }
-
-    .multiplayer-buttons .button {
-        width: 80%;
-        max-width: 300px;
-        margin: 5px 0;
-    }
-
-    .controls-info {
-        font-size: 14px;
-        margin: 10px 15px;
-    }
-}
-
-/* Landscape-Modus */
+/* Anpassungen für Landscape-Modus */
 @media (orientation: landscape) {
-    .start-screen {
-        padding: 10px;
+    .stats-button-container {
+        margin-top: 10px;
     }
 
-    .button-group {
+    .stats-btn {
+        padding: 8px 16px;
+    }
+}
+
+/* Anpassungen für schmale Bildschirme */
+@media (max-width: 480px) {
+    .player-welcome {
+        font-size: 16px;
         margin-bottom: 10px;
     }
-
-    /* Schwierigkeitsbuttons in einer Reihe und mittig */
-    .difficulty-buttons {
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        gap: 5px;
-        width: 100%;
-    }
-
-    .difficulty-buttons .button {
-        flex: 0 1 auto;
-        min-width: 100px;
-        margin: 0 5px;
-    }
-
-    /* Multiplayer-Buttons in Landscape */
-    .multiplayer-buttons {
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        margin-top: 5px;
-    }
-
-    .multiplayer-buttons .button {
-        flex: 0 1 auto;
-        width: auto;
-        min-width: 100px;
-        margin: 0 35px !important;
-    }
-
-    /* Spezifisch für Samsung S24 und ähnliche hochauflösende Geräte */
-    @media screen and (min-width: 1000px) and (max-height: 600px) and (orientation: landscape) {
-        .multiplayer-buttons .button {
-            margin: 0 12px !important;
-        }
-    }
-
-    .controls-info {
-        font-size: 12px;
-        margin-top: 5px;
-    }
 }
 
-/* Speziell für kleine Landscape-Geräte */
-@media (max-height: 450px) and (orientation: landscape) {
-    .start-screen h1 {
-        font-size: 28px;
-        margin-bottom: 5px;
+/* Zusatz für StatsScreen.css - Chart-Unterstützung */
+
+.chart-container {
+    height: 200px;
+    width: 100%;
+    position: relative;
+}
+
+.chart-card {
+    padding-bottom: 15px;
+}
+
+.no-data {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #888;
+    font-style: italic;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+
+/* Spezifische Chart-Anpassungen */
+.winrate-chart .chart-container {
+    height: 200px;
+}
+
+.ball-exchanges-chart .chart-container {
+    height: 200px;
+}
+
+.charts-container {
+    grid-template-columns: 1fr 1fr;
+}
+
+.chart-card {
+    min-height: 280px;
+}
+
+@media (max-width: 768px) {
+    .charts-container {
+        grid-template-columns: 1fr;
     }
 
-    .difficulty-buttons .button {
-        padding: 8px 12px;
-        font-size: 12px;
-        margin: 0 3px;
+    .chart-container {
+        height: 180px;
     }
 
-    .multiplayer-buttons .button {
-        padding: 8px 12px;
-        font-size: 12px;
-        margin: 3px 0;
+    .chart-card {
+        min-height: 250px;
     }
 }

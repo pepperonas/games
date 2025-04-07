@@ -1,14 +1,17 @@
-// App.jsx - Mit verbesserter Landscape-Unterstützung
+// App.jsx - Mit Spieler-Profil und Statistiken
 import React, {useEffect, useState} from 'react';
 import './App.css';
 import PongGame from './components/PongGame';
 import StartScreen from './components/StartScreen';
 import GameOverScreen from './components/GameOverScreen';
 import OnlineConnectionScreen from './components/OnlineConnectionScreen';
+import PlayerProfile from './components/PlayerProfile';
+import StatsScreen from './components/StatsScreen';
+import StatsService from './services/StatsService';
 
 const App = () => {
     const [gameState, setGameState] = useState({
-        screen: 'start', // 'start', 'game', 'gameOver', 'onlineConnection'
+        screen: 'profile', // 'profile', 'start', 'game', 'gameOver', 'onlineConnection', 'stats'
         gameMode: 'singleplayer', // 'singleplayer', 'local-multiplayer', 'online-multiplayer'
         difficulty: 3, // 2=easy, 3=medium, 5=hard
         winner: '',
@@ -17,8 +20,12 @@ const App = () => {
         scores: {left: 0, right: 0}
     });
 
+    const [playerName, setPlayerName] = useState('');
+    const [statsService, setStatsService] = useState(null);
     const [isMobile, setIsMobile] = useState(false);
     const [isLandscape, setIsLandscape] = useState(false);
+    const [gameStartTime, setGameStartTime] = useState(null);
+    const [ballExchanges, setBallExchanges] = useState(0);
 
     // Erkennen, ob es sich um ein mobiles Gerät handelt und Orientation prüfen
     useEffect(() => {
@@ -71,6 +78,15 @@ const App = () => {
         };
     }, [isMobile, isLandscape]);
 
+    const handleProfileSubmit = (name) => {
+        setPlayerName(name);
+        setStatsService(new StatsService(name));
+        setGameState({
+            ...gameState,
+            screen: 'start'
+        });
+    };
+
     const startSinglePlayerGame = (difficulty) => {
         setGameState({
             ...gameState,
@@ -78,6 +94,13 @@ const App = () => {
             gameMode: 'singleplayer',
             difficulty: difficulty
         });
+
+        // Starte das Statistik-Tracking für dieses Spiel
+        if (statsService) {
+            statsService.startNewGame('singleplayer', difficulty);
+            setGameStartTime(new Date());
+            setBallExchanges(0);
+        }
     };
 
     const startLocalMultiplayerGame = () => {
@@ -86,6 +109,13 @@ const App = () => {
             screen: 'game',
             gameMode: 'local-multiplayer'
         });
+
+        // Starte das Statistik-Tracking für dieses Spiel
+        if (statsService) {
+            statsService.startNewGame('local-multiplayer');
+            setGameStartTime(new Date());
+            setBallExchanges(0);
+        }
     };
 
     const setupOnlineMultiplayer = () => {
@@ -102,6 +132,13 @@ const App = () => {
             gameMode: 'online-multiplayer',
             isHost: isHost
         });
+
+        // Starte das Statistik-Tracking für dieses Spiel
+        if (statsService) {
+            statsService.startNewGame('online-multiplayer', null, 'Gegner');
+            setGameStartTime(new Date());
+            setBallExchanges(0);
+        }
     };
 
     const handleGameOver = (winner, isLocalPlayerWinner) => {
@@ -111,6 +148,11 @@ const App = () => {
             winner: winner,
             isLocalPlayerWinner: isLocalPlayerWinner
         });
+
+        // Beende das Statistik-Tracking für dieses Spiel
+        if (statsService) {
+            statsService.endGame(isLocalPlayerWinner);
+        }
     };
 
     const returnToMainMenu = () => {
@@ -126,16 +168,51 @@ const App = () => {
             screen: 'game',
             scores: {left: 0, right: 0}
         });
+
+        // Starte ein neues Spiel für das Statistik-Tracking
+        if (statsService) {
+            statsService.startNewGame(
+                gameState.gameMode,
+                gameState.gameMode === 'singleplayer' ? gameState.difficulty : null,
+                gameState.gameMode === 'online-multiplayer' ? 'Gegner' : null
+            );
+            setGameStartTime(new Date());
+            setBallExchanges(0);
+        }
+    };
+
+    const showStatsScreen = () => {
+        setGameState({
+            ...gameState,
+            screen: 'stats'
+        });
+    };
+
+    const handleBallExchange = () => {
+        setBallExchanges(prevCount => {
+            const newCount = prevCount + 1;
+            // Aktualisiere die Ballwechselzahl im StatsService
+            if (statsService) {
+                statsService.incrementBallExchanges();
+            }
+            return newCount;
+        });
     };
 
     return (
         <div
             className={`app-container ${isMobile ? 'mobile-view' : ''} ${isLandscape ? 'landscape-view' : 'portrait-view'}`}>
+            {gameState.screen === 'profile' && (
+                <PlayerProfile onProfileSubmit={handleProfileSubmit} />
+            )}
+
             {gameState.screen === 'start' && (
                 <StartScreen
                     onStartSinglePlayer={startSinglePlayerGame}
                     onStartLocalMultiplayer={startLocalMultiplayerGame}
                     onSetupOnlineMultiplayer={setupOnlineMultiplayer}
+                    onShowStats={showStatsScreen}
+                    playerName={playerName}
                     isMobile={isMobile}
                     isLandscape={isLandscape}
                 />
@@ -147,6 +224,7 @@ const App = () => {
                     difficulty={gameState.difficulty}
                     isHost={gameState.isHost}
                     onGameOver={handleGameOver}
+                    onBallExchange={handleBallExchange}
                     isMobile={isMobile}
                     isLandscape={isLandscape}
                 />
@@ -162,6 +240,8 @@ const App = () => {
                     isHost={gameState.isHost}
                     isMobile={isMobile}
                     isLandscape={isLandscape}
+                    ballExchanges={ballExchanges}
+                    gameStartTime={gameStartTime}
                 />
             )}
 
@@ -171,6 +251,13 @@ const App = () => {
                     onBack={returnToMainMenu}
                     isMobile={isMobile}
                     isLandscape={isLandscape}
+                />
+            )}
+
+            {gameState.screen === 'stats' && (
+                <StatsScreen
+                    playerName={playerName}
+                    onBack={returnToMainMenu}
                 />
             )}
 

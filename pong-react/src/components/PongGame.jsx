@@ -11,7 +11,7 @@ const BALL_RADIUS = 10;
 const WINNING_SCORE = 5;
 const SIGNALING_SERVER = 'https://mrx3k1.de';
 
-const PongGame = ({gameMode, difficulty, isHost, onGameOver}) => {
+const PongGame = ({gameMode, difficulty, isHost, onGameOver, onBallExchange, isMobile, isLandscape}) => {
     const canvasRef = useRef(null);
     const requestRef = useRef(null);
     const socketRef = useRef(null);
@@ -22,8 +22,7 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver}) => {
     const [connectionStatus, setConnectionStatus] = useState('-');
     const [ping, setPing] = useState('-');
     const [gameRunning, setGameRunning] = useState(true);
-    const [isMobile, setIsMobile] = useState(false);
-
+    const [isMobileDevice, setIsMobileDevice] = useState(false);
     // Spielstatus
     const gameStateRef = useRef({
         ballX: 400,
@@ -53,7 +52,9 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver}) => {
         winAnimationDuration: 3000,
         winningPlayer: '',
         isLocalPlayerWinner: false,
-        raindrops: []
+        raindrops: [],
+        lastBallX: 400, // Für Ballwechsel-Tracking
+        lastBallSpeedX: 5 // Für Ballwechsel-Tracking
     });
 
     // Audio Element
@@ -62,7 +63,7 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver}) => {
     // Erkennen, ob es sich um ein mobiles Gerät handelt
     useEffect(() => {
         const checkMobile = () => {
-            setIsMobile(window.innerWidth <= 768 ||
+            setIsMobileDevice(window.innerWidth <= 768 ||
                 ('ontouchstart' in window) ||
                 (navigator.maxTouchPoints > 0));
         };
@@ -572,6 +573,9 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver}) => {
                 gameState.ballInResetState = false;
                 gameState.ballSpeedX = Math.random() > 0.5 ? 5 : -5;
                 gameState.ballSpeedY = Math.random() * 4 - 2;
+
+                // Speichere aktuelle Richtung für Ballwechsel-Tracking
+                gameState.lastBallSpeedX = gameState.ballSpeedX;
             }
         }
     };
@@ -644,6 +648,9 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver}) => {
     const updateBall = () => {
         const gameState = gameStateRef.current;
 
+        // Speichern der vorherigen Position für Ballwechsel-Tracking
+        gameState.lastBallX = gameState.ballX;
+
         // Im Online-Modus aktualisiert nur der Host den Ball
         if (gameMode === 'online-multiplayer' && !isHost) {
             return;
@@ -676,6 +683,9 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver}) => {
         if (gameState.ballX < PADDLE_WIDTH + BALL_RADIUS) {
             if (gameState.ballY > gameState.leftPaddleY &&
                 gameState.ballY < gameState.leftPaddleY + PADDLE_HEIGHT) {
+                // Prüfe, ob sich die Richtung des Balls ändert (für Ballwechsel-Zählung)
+                const directionChanged = gameState.ballSpeedX < 0;
+
                 gameState.ballSpeedX = -gameState.ballSpeedX;
 
                 // Abprallwinkel basierend auf Trefferpunkt
@@ -687,6 +697,11 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver}) => {
                 if (Math.abs(gameState.ballSpeedX) > 12) {
                     gameState.ballSpeedX = gameState.ballSpeedX > 0 ? 12 : -12;
                 }
+
+                // Wenn die Richtung geändert wurde, zähle einen Ballwechsel
+                if (directionChanged && onBallExchange) {
+                    onBallExchange();
+                }
             }
         }
 
@@ -694,6 +709,9 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver}) => {
         if (gameState.ballX > 800 - PADDLE_WIDTH - BALL_RADIUS) {
             if (gameState.ballY > gameState.rightPaddleY &&
                 gameState.ballY < gameState.rightPaddleY + PADDLE_HEIGHT) {
+                // Prüfe, ob sich die Richtung des Balls ändert (für Ballwechsel-Zählung)
+                const directionChanged = gameState.ballSpeedX > 0;
+
                 gameState.ballSpeedX = -gameState.ballSpeedX;
 
                 // Abprallwinkel basierend auf Trefferpunkt
@@ -704,6 +722,11 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver}) => {
                 gameState.ballSpeedX *= 1.05;
                 if (Math.abs(gameState.ballSpeedX) > 12) {
                     gameState.ballSpeedX = gameState.ballSpeedX > 0 ? 12 : -12;
+                }
+
+                // Wenn die Richtung geändert wurde, zähle einen Ballwechsel
+                if (directionChanged && onBallExchange) {
+                    onBallExchange();
                 }
             }
         }
@@ -1116,7 +1139,7 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver}) => {
             )}
 
             {/* Vereinfachte Touch-Steuerung für alle Modi */}
-            {isMobile && (
+            {isMobileDevice && (
                 <TouchControls
                     onMoveUp={() => {
                         if (gameMode === 'singleplayer' ||
