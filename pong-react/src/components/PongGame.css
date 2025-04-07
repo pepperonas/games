@@ -1,0 +1,40 @@
+/* PongGame.css */
+.game-container {
+    position: relative;
+    width: 800px;
+    height: 500px;
+    background-color: #2C2E3B;
+}
+
+canvas {
+    background-color: #1a1b23;
+    display: block;
+}
+
+.score-display {
+    position: absolute;
+    top: 10px;
+    left: 0;
+    width: 100%;
+    color: white;
+    font-size: 24px;
+    text-align: center;
+}
+
+.connection-info {
+    position: absolute;
+    top: 40px;
+    right: 20px;
+    color: white;
+    font-size: 14px;
+    text-align: right;
+}
+
+.ping-display {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    color: white;
+    font-size: 14px;
+    text-align: right;
+}

@@ -1413,3 +1413,485 @@ window.addEventListener('beforeunload', () => {
         cleanupWebRTC();
     }
 });
+
+// Touch-Steuerung und Mobile-Optimierung für Pong
+// Füge diesen Code am Ende der Datei pong.js ein
+
+// Initialisation beim Laden der Seite
+document.addEventListener('DOMContentLoaded', initMobileSupport);
+
+// ===============================================
+// MOBILE & TOUCH UNTERSTÜTZUNG
+// ===============================================
+
+// Touch-Variablen
+let touchStartY = 0;
+let touchCurrentY = 0;
+let isTouching = false;
+let activePaddle = null; // Welches Paddel wird durch Touch gesteuert
+
+// Viewport-Optimierung für Mobilgeräte
+function setupMobileViewport() {
+    // Meta-Tag für Landscape-Modus überprüfen und aktualisieren
+    let viewportMeta = document.querySelector('meta[name="viewport"]');
+    if (viewportMeta) {
+        viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape';
+    }
+
+    // Versuch, die Bildschirmausrichtung zu sperren, falls unterstützt
+    if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(err => {
+            console.log('Bildschirmausrichtung konnte nicht gesperrt werden:', err);
+        });
+    }
+}
+
+// Fügt Touch-Steuerung zum Spiel hinzu
+function setupTouchControls() {
+    // Bereits vorhandene Touch-Event-Listener entfernen (falls vorhanden)
+    canvas.removeEventListener('touchstart', touchStartHandler);
+    canvas.removeEventListener('touchmove', touchMoveHandler);
+    canvas.removeEventListener('touchend', touchEndHandler);
+    canvas.removeEventListener('touchcancel', touchCancelHandler);
+
+    // Touch-Event-Listener hinzufügen
+    canvas.addEventListener('touchstart', touchStartHandler, {passive: false});
+    canvas.addEventListener('touchmove', touchMoveHandler, {passive: false});
+    canvas.addEventListener('touchend', touchEndHandler, {passive: false});
+    canvas.addEventListener('touchcancel', touchCancelHandler, {passive: false});
+
+    console.log('Touch-Steuerung aktiviert');
+}
+
+// Touch-Event-Handler
+function touchStartHandler(e) {
+    e.preventDefault(); // Verhindern von Browser-Standardverhalten (Scrollen)
+
+    const touch = e.touches[0];
+    const canvasRect = canvas.getBoundingClientRect();
+    const touchX = touch.clientX - canvasRect.left;
+    touchStartY = touch.clientY - canvasRect.top;
+    touchCurrentY = touchStartY;
+    isTouching = true;
+
+    // Bestimme, welches Paddel gesteuert werden soll
+    if (gameMode === 'local-multiplayer') {
+        // Im lokalen Multiplayer steuert die linke Bildschirmhälfte das linke Paddel,
+        // und die rechte Bildschirmhälfte das rechte Paddel
+        activePaddle = touchX < canvas.width / 2 ? 'left' : 'right';
+    } else if (gameMode === 'online-multiplayer') {
+        // Im Online-Modus steuert der Spieler je nach Rolle (Host oder Gast)
+        activePaddle = isHost ? 'left' : 'right';
+    } else {
+        // Im Einzelspieler-Modus steuert man immer das linke Paddel
+        activePaddle = 'left';
+    }
+
+    console.log(`Touch-Start: x=${touchX}, y=${touchStartY}, Paddel=${activePaddle}`);
+}
+
+function touchMoveHandler(e) {
+    e.preventDefault();
+    if (!isTouching) return;
+
+    const touch = e.touches[0];
+    const canvasRect = canvas.getBoundingClientRect();
+    touchCurrentY = touch.clientY - canvasRect.top;
+
+    // Berechne Bewegungsdistanz
+    const deltaY = touchCurrentY - touchStartY;
+
+    // Bewege das aktive Paddel
+    if (activePaddle === 'left') {
+        // Multiplikator für sensitivere Bewegung
+        leftPaddleY += deltaY * 1.5;
+        // Begrenze das Paddel auf Canvas-Größe
+        leftPaddleY = Math.max(0, Math.min(canvas.height - PADDLE_HEIGHT, leftPaddleY));
+    } else if (activePaddle === 'right') {
+        rightPaddleY += deltaY * 1.5;
+        rightPaddleY = Math.max(0, Math.min(canvas.height - PADDLE_HEIGHT, rightPaddleY));
+    }
+
+    // Setze neuen Startpunkt für die nächste Bewegung
+    touchStartY = touchCurrentY;
+}
+
+function touchEndHandler(e) {
+    e.preventDefault();
+    isTouching = false;
+    activePaddle = null;
+}
+
+function touchCancelHandler(e) {
+    e.preventDefault();
+    isTouching = false;
+    activePaddle = null;
+}
+
+// Aktualisiert die Spielinformationen für mobile Geräte
+function updateControlsInfo() {
+    const controlsInfo = document.getElementById('controls-info');
+    if (!controlsInfo) return;
+
+    // Steuerungshinweise für Touch-Geräte aktualisieren
+    controlsInfo.innerHTML = `
+        <p>Smartphone: Wische über den Bildschirm, um das Paddel zu bewegen</p>
+        <p>Einzelspieler: Steuere das linke Paddel durch Wischen</p>
+        <p>Multiplayer (Lokal): Linke/rechte Bildschirmhälfte für jeweiliges Paddel</p>
+        <p>Multiplayer (Online): Steuere dein Paddel durch Wischen</p>
+    `;
+}
+
+// Vollbildmodus aktivieren (für besseres mobiles Erlebnis)
+function setupFullscreenButton() {
+    // Prüfe, ob bereits ein Vollbild-Button existiert
+    if (document.getElementById('fullscreen-btn')) return;
+
+    // Erstelle Vollbild-Button
+    const fullscreenBtn = document.createElement('button');
+    fullscreenBtn.id = 'fullscreen-btn';
+    fullscreenBtn.textContent = 'Vollbild';
+    fullscreenBtn.className = 'fullscreen-btn';
+    fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+    // Füge Button zum Startbildschirm hinzu
+    const buttonGroup = document.querySelector('.button-group');
+    if (buttonGroup) {
+        buttonGroup.appendChild(fullscreenBtn);
+    } else {
+        startScreen.appendChild(fullscreenBtn);
+    }
+}
+
+// Vollbildmodus umschalten
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+            console.error(`Fehler beim Aktivieren des Vollbildmodus: ${err.message}`);
+        });
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+}
+
+// Mobile-optimierte CSS-Stile hinzufügen
+function addMobileStyles() {
+    // Prüfe, ob bereits ein Style-Element für mobile Optimierung existiert
+    if (document.getElementById('mobile-styles')) return;
+
+    const styleElement = document.createElement('style');
+    styleElement.id = 'mobile-styles';
+    styleElement.textContent = `
+        @media (max-width: 1024px) {
+            body {
+                overflow: hidden;
+                touch-action: none;
+                background-color: #2C2E3B;
+            }
+            
+            #game-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            #game-canvas {
+                max-width: 100%;
+                max-height: 100%;
+                touch-action: none;
+            }
+            
+            #score-display {
+                font-size: 18px;
+                padding-top: 5px;
+            }
+            
+            .fullscreen-btn {
+                background-color: #2C2E3B;
+                color: white;
+                border: 2px solid white;
+                padding: 12px 20px;
+                font-size: 16px;
+                border-radius: 5px;
+                margin: 10px;
+                cursor: pointer;
+            }
+            
+            .button-group {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .button-group > div {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            #start-screen button, 
+            #game-over button,
+            #online-connection button {
+                padding: 15px 25px;
+                font-size: 18px;
+                margin: 8px;
+                min-width: 200px;
+            }
+            
+            #connection-input {
+                padding: 12px;
+                font-size: 16px;
+                width: 80%;
+                max-width: 250px;
+            }
+            
+            /* Portrait-Modus-Hinweis */
+            @media (orientation: portrait) {
+                body::after {
+                    content: "Bitte Gerät drehen";
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(44, 46, 59, 0.9);
+                    color: white;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    font-size: 24px;
+                    z-index: 9999;
+                }
+            }
+        }
+    `;
+
+    document.head.appendChild(styleElement);
+}
+
+// Canvas-Größe an Bildschirmgröße anpassen
+function resizeCanvas() {
+    // Verfügbare Bildschirmgröße ermitteln
+    const availableWidth = window.innerWidth;
+    const availableHeight = window.innerHeight;
+
+    // Deutlich größere Sicherheitsränder für S24 Ultra
+    const safeMargin = Math.min(availableWidth, availableHeight) * 0.1; // 10% Rand
+
+    // Berechne maximale nutzbare Fläche
+    const maxUsableWidth = availableWidth - (safeMargin * 2);
+    const maxUsableHeight = availableHeight - (safeMargin * 2);
+
+    // Original-Seitenverhältnis
+    const originalAspectRatio = 800 / 500;
+
+    // Neue Größe unter Beibehaltung des Seitenverhältnisses berechnen
+    let newWidth, newHeight;
+
+    if (maxUsableWidth / maxUsableHeight > originalAspectRatio) {
+        // Wenn Bildschirm breiter ist als nötig, beschränke durch Höhe
+        newHeight = maxUsableHeight;
+        newWidth = newHeight * originalAspectRatio;
+    } else {
+        // Wenn Bildschirm schmaler ist, beschränke durch Breite
+        newWidth = maxUsableWidth;
+        newHeight = newWidth / originalAspectRatio;
+    }
+
+    // Zusätzliche starke Skalierung für sehr große Bildschirme wie S24 Ultra
+    const screenSize = Math.sqrt(availableWidth * availableWidth + availableHeight * availableHeight);
+
+    // Spezielle Anpassung für S24 Ultra (größere Pixel-Dichte und Bildschirmgröße)
+    if (screenSize > 2200 || window.devicePixelRatio > 2.5) {
+        // Stärkere Skalierung für sehr große/hochauflösende Bildschirme
+        const scaleFactor = 0.65; // Nur 65% der berechneten Größe
+        newWidth *= scaleFactor;
+        newHeight *= scaleFactor;
+        console.log("S24 Ultra oder ähnliches Gerät erkannt - starke Skalierung angewendet");
+    } else if (screenSize > 1800) {
+        // Mittelgroße Bildschirme
+        const scaleFactor = 0.75;
+        newWidth *= scaleFactor;
+        newHeight *= scaleFactor;
+    }
+
+    // Größen auf ganze Zahlen runden
+    newWidth = Math.floor(newWidth);
+    newHeight = Math.floor(newHeight);
+
+    // Canvas-Größe anpassen
+    canvas.width = newWidth;
+    canvas.height = newHeight;
+
+    // Container-Größe anpassen
+    const container = document.getElementById('game-container');
+    if (container) {
+        container.style.width = `${newWidth}px`;
+        container.style.height = `${newHeight}px`;
+
+        // Zentriere den Container horizontal und vertikal
+        container.style.position = 'fixed';
+        container.style.top = '50%';
+        container.style.left = '50%';
+        container.style.transform = 'translate(-50%, -50%)';
+    }
+
+    // Spielelemente an neue Größe anpassen
+    adjustGameElements(newWidth, newHeight);
+
+    // CSS-Anpassungen für extrem große Bildschirme
+    if (screenSize > 2200 || window.devicePixelRatio > 2.5) {
+        document.body.classList.add('ultra-large-screen');
+    }
+
+    console.log(`Canvas resized to ${newWidth}x${newHeight} (Screen size: ${screenSize})`);
+}
+
+function adjustGameElements(newWidth, newHeight) {
+    // Berechne Skalierungsfaktoren
+    const widthRatio = newWidth / 800;
+    const heightRatio = newHeight / 500;
+
+    // Globale Spielvariablen anpassen
+    window.PADDLE_HEIGHT = Math.round(100 * heightRatio);
+    window.PADDLE_WIDTH = Math.round(15 * widthRatio);
+    window.BALL_RADIUS = Math.round(10 * Math.min(widthRatio, heightRatio));
+
+    // Paddel-Positionen zurücksetzen
+    if (typeof leftPaddleY !== 'undefined' && typeof rightPaddleY !== 'undefined') {
+        leftPaddleY = (newHeight / 2) - (PADDLE_HEIGHT / 2);
+        rightPaddleY = (newHeight / 2) - (PADDLE_HEIGHT / 2);
+    }
+
+    // Ball-Position zurücksetzen
+    if (typeof ballX !== 'undefined' && typeof ballY !== 'undefined') {
+        ballX = newWidth / 2;
+        ballY = newHeight / 2;
+    }
+
+    // Schriftgrößen anpassen
+    const scoreDisplay = document.getElementById('score-display');
+    if (scoreDisplay) {
+        scoreDisplay.style.fontSize = `${Math.max(16, Math.round(24 * widthRatio))}px`;
+    }
+
+    // Geschwindigkeiten anpassen
+    if (typeof ballSpeedX !== 'undefined' && typeof ballSpeedY !== 'undefined') {
+        if (ballSpeedX !== 0 || ballSpeedY !== 0) {
+            const speedFactor = Math.min(widthRatio, heightRatio);
+            ballSpeedX = ballSpeedX * speedFactor;
+            ballSpeedY = ballSpeedY * speedFactor;
+        }
+    }
+}
+
+function addLargeScreenStyles() {
+    const styleElement = document.createElement('style');
+    styleElement.id = 'ultra-large-screen-styles';
+    styleElement.textContent = `
+        .ultra-large-screen #game-container {
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .ultra-large-screen #start-screen, 
+        .ultra-large-screen #game-over, 
+        .ultra-large-screen #online-connection {
+            transform: scale(0.75);
+        }
+        
+        .ultra-large-screen #score-display {
+            font-size: 16px !important;
+            top: 5px;
+        }
+        
+        .ultra-large-screen #start-screen h1 {
+            font-size: 36px;
+        }
+        
+        .ultra-large-screen #controls-info {
+            font-size: 14px;
+            margin-top: -10px;
+        }
+        
+        .ultra-large-screen #start-screen button, 
+        .ultra-large-screen #game-over button, 
+        .ultra-large-screen #online-connection button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 8px;
+        }
+        
+        .ultra-large-screen .button-group {
+            margin-top: -20px;
+        }
+        
+        /* Sicherstellen, dass die Canvas-Ränder gut sichtbar sind */
+        #game-canvas {
+            background-color: #000;
+            border: 1px solid #333;
+        }
+    `;
+    document.head.appendChild(styleElement);
+}
+
+function showDebugInfo() {
+    const debugDiv = document.createElement('div');
+    debugDiv.id = 'debug-overlay';
+    debugDiv.style.cssText = `
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        padding: 5px;
+        font-size: 10px;
+        z-index: 9999;
+        pointer-events: none;
+    `;
+
+    const screenW = window.innerWidth;
+    const screenH = window.innerHeight;
+    const ratio = window.devicePixelRatio || 1;
+
+    debugDiv.textContent = `Screen: ${screenW}x${screenH}, Pixel Ratio: ${ratio}`;
+    document.body.appendChild(debugDiv);
+}
+
+// Initialisierung mit verbesserter Fehlerbehandlung
+function initMobileSupport() {
+    try {
+        setupMobileViewport();
+        setupTouchControls();
+        updateControlsInfo();
+        setupFullscreenButton();
+        addMobileStyles();
+        addLargeScreenStyles();
+
+        // Debug-Info für Fehlerbehebung anzeigen
+        showDebugInfo();
+
+        // Verzögerte Größenanpassung für zuverlässigere Initialisierung
+        setTimeout(resizeCanvas, 100);
+
+        // Event-Listener für Orientierungs- und Größenänderungen
+        window.addEventListener('resize', () => {
+            setTimeout(resizeCanvas, 100);
+        });
+
+        window.addEventListener('orientationchange', () => {
+            setTimeout(resizeCanvas, 300);
+        });
+
+        console.log('Mobile Unterstützung initialisiert');
+    } catch (error) {
+        console.error('Fehler bei Mobile-Initialisierung:', error);
+    }
+}
