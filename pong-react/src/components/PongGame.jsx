@@ -98,17 +98,27 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver}) => {
                 const originalRatio = 800 / 500; // Original canvas ratio
 
                 // Setze die Größe des Canvas für CSS-Darstellung
-                if (window.innerWidth <= 915) {
+                if (window.innerWidth <= 915 || window.innerHeight <= 450) {
                     if (window.matchMedia("(orientation: landscape)").matches) {
-                        // Landscape-Modus: Anpassen an die Höhe
-                        const maxHeight = containerHeight;
+                        // Landscape-Modus: Anpassen an die Höhe mit Berücksichtigung der Seitenverhältnisse
+                        const maxHeight = Math.min(containerHeight, window.innerHeight * 0.85);
                         canvas.style.height = `${maxHeight}px`;
                         canvas.style.width = `${maxHeight * originalRatio}px`;
+
+                        // Sicherstellen, dass die Breite nicht größer als die verfügbare Breite ist
+                        if (parseFloat(canvas.style.width) > containerWidth) {
+                            canvas.style.width = `${containerWidth}px`;
+                            canvas.style.height = `${containerWidth / originalRatio}px`;
+                        }
                     } else {
                         // Portrait-Modus: Anpassen an die Breite
                         canvas.style.width = `${containerWidth}px`;
                         canvas.style.height = `${containerWidth / originalRatio}px`;
                     }
+
+                    // Sicherstellen, dass das Canvas im sichtbaren Bereich bleibt
+                    canvas.style.maxHeight = `${window.innerHeight * 0.85}px`;
+                    canvas.style.maxWidth = `${window.innerWidth * 0.95}px`;
                 } else {
                     canvas.style.width = '';
                     canvas.style.height = '';

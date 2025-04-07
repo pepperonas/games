@@ -297,7 +297,7 @@ body {
 
   .game-container {
     width: auto !important;
-    height: 95vh !important;
+    height: auto !important;
     max-height: 95vh;
     display: flex;
     align-items: center;
@@ -305,10 +305,12 @@ body {
   }
 
   canvas {
-    height: 95vh !important;
+    max-height: 85vh !important;
+    max-width: 95vw !important;
     width: auto !important;
-    max-height: 95vh;
+    height: auto !important;
     aspect-ratio: 1.6 / 1; /* Behält das 800x500 Verhältnis bei */
+    object-fit: contain;
   }
 
   /* Touch-Controls für Landscape */
@@ -326,11 +328,6 @@ body {
     right: 10px;
     bottom: 50%;
     transform: translateY(50%);
-  }
-
-  .touch-button {
-    width: 60px;
-    height: 60px;
   }
 
   /* Startbildschirm für Landscape */
@@ -396,5 +393,30 @@ body {
 
   .controls-info {
     display: none; /* Verstecke Steuerungsinformationen auf sehr kleinen Bildschirmen */
+  }
+}
+
+/* Spezielle Anpassungen für sehr breite Displays im Landscape-Modus */
+@media (min-width: 1080px) and (orientation: landscape) {
+  canvas {
+    max-height: 90vh !important;
+    aspect-ratio: 1.6 / 1; /* Behält das 800x500 Verhältnis bei */
+  }
+}
+
+/* Zusätzliche Styles für Samsung S24 Ultra und ähnliche Geräte */
+@media (min-width: 1080px) and (max-height: 540px) and (orientation: landscape) {
+  canvas {
+    max-height: 80vh !important;
+    max-width: 90vw !important;
+  }
+
+  .footer {
+    bottom: 5px;
+    font-size: 10px;
+  }
+
+  .touch-controls {
+    opacity: 0.8;
   }
 }
