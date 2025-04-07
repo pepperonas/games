@@ -29,6 +29,7 @@ const PongGame = ({ gameMode, difficulty, isHost, onGameOver }) => {
         ballSpeedY: 2,
         leftPaddleY: 200,
         rightPaddleY: 200,
+        scores: { left: 0, right: 0 },
         keys: {
             wPressed: false,
             sPressed: false,
@@ -315,9 +316,14 @@ const PongGame = ({ gameMode, difficulty, isHost, onGameOver }) => {
                             gameStateRef.current.ballSpeedX = data.ballSpeedX;
                             gameStateRef.current.ballSpeedY = data.ballSpeedY;
 
-                            // Aktualisiere Punktestand
+                            // Aktualisiere Punktestand im gameStateRef und im React-State
                             if (data.leftScore !== undefined && data.rightScore !== undefined) {
-                                setScores({left: data.leftScore, right: data.rightScore});
+                                gameStateRef.current.scores.left = data.leftScore;
+                                gameStateRef.current.scores.right = data.rightScore;
+                                setScores({
+                                    left: data.leftScore,
+                                    right: data.rightScore
+                                });
                             }
 
                             // Reset-Status synchronisieren
@@ -630,15 +636,19 @@ const PongGame = ({ gameMode, difficulty, isHost, onGameOver }) => {
         }
 
         if (gameState.ballX < 0) {
-            const newScores = { ...scores, right: scores.right + 1 };
-            setScores(newScores);
+            // Aktualisiere den Score im gameStateRef
+            gameState.scores.right += 1;
+            // Aktualisiere den React-State für die Anzeige
+            setScores({...gameState.scores});
             resetBall();
-            checkWinner(newScores);
+            checkWinner(gameState.scores);
         } else if (gameState.ballX > 800) {
-            const newScores = { ...scores, left: scores.left + 1 };
-            setScores(newScores);
+            // Aktualisiere den Score im gameStateRef
+            gameState.scores.left += 1;
+            // Aktualisiere den React-State für die Anzeige
+            setScores({...gameState.scores});
             resetBall();
-            checkWinner(newScores);
+            checkWinner(gameState.scores);
         }
     };
 
@@ -979,8 +989,8 @@ const PongGame = ({ gameMode, difficulty, isHost, onGameOver }) => {
             state.ballY = gameState.ballY;
             state.ballSpeedX = gameState.ballSpeedX;
             state.ballSpeedY = gameState.ballSpeedY;
-            state.leftScore = scores.left;
-            state.rightScore = scores.right;
+            state.leftScore = gameState.scores.left;
+            state.rightScore = gameState.scores.right;
             state.ballInResetState = gameState.ballInResetState;
             state.ballResetStartTime = gameState.ballResetStartTime;
         }
