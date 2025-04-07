@@ -12,6 +12,7 @@
             <excludedPath local="true" path="$PROJECT_DIR$/brain-buster/frontend/node_modules" />
             <excludedPath local="true" path="$PROJECT_DIR$/brain-buster/server/node_modules" />
             <excludedPath local="true" path="$PROJECT_DIR$/pong-react/node_modules" />
+            <excludedPath local="true" path="$PROJECT_DIR$/darts-react/node_modules" />
           </excludedPaths>
         </serverdata>
       </paths>
