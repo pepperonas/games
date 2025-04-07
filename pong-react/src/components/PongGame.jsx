@@ -3,6 +3,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import io from 'socket.io-client';
 import './PongGame.css';
 import './TouchControls.css';
+import TouchControls from './TouchControls';
 
 const PADDLE_HEIGHT = 100;
 const PADDLE_WIDTH = 15;
@@ -70,16 +71,25 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver}) => {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    // Touch-Control-Handler
-    const handleTouchStart = (control, value) => {
-        const gameState = gameStateRef.current;
-        gameState.touchControls[control] = value;
-    };
+    // Touch-End-Event-Handler
+    useEffect(() => {
+        // Touch-End-Event-Handler
+        const handleTouchEnd = () => {
+            // Alle Touch-Controls zurücksetzen
+            const gameState = gameStateRef.current;
+            gameState.touchControls.leftUp = false;
+            gameState.touchControls.leftDown = false;
+            gameState.touchControls.rightUp = false;
+            gameState.touchControls.rightDown = false;
+        };
 
-    const handleTouchEnd = (control) => {
-        const gameState = gameStateRef.current;
-        gameState.touchControls[control] = false;
-    };
+        // Event-Listener für das Ende des Touchs hinzufügen
+        document.addEventListener('touchend', handleTouchEnd);
+
+        return () => {
+            document.removeEventListener('touchend', handleTouchEnd);
+        };
+    }, []);
 
     useEffect(() => {
         // Audio initialisieren
@@ -134,43 +144,6 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver}) => {
         window.addEventListener('orientationchange', () => {
             setTimeout(resizeCanvas, 100); // Verzögerung für verlässlicheres Neuskalieren
         });
-
-        const adjustTouchControls = () => {
-            const touchControls = document.querySelectorAll('.touch-controls');
-            const isLandscape = window.matchMedia("(orientation: landscape)").matches;
-
-            touchControls.forEach(control => {
-                if (isLandscape) {
-                    if (control.classList.contains('left-controls')) {
-                        control.style.left = '10px';
-                        control.style.bottom = '50%';
-                        control.style.transform = 'translateY(50%)';
-                    } else if (control.classList.contains('right-controls')) {
-                        control.style.right = '10px';
-                        control.style.bottom = '50%';
-                        control.style.transform = 'translateY(50%)';
-                    }
-                } else {
-                    if (control.classList.contains('left-controls')) {
-                        control.style.left = '20px';
-                        control.style.bottom = '20px';
-                        control.style.transform = '';
-                    } else if (control.classList.contains('right-controls')) {
-                        control.style.right = '20px';
-                        control.style.bottom = '20px';
-                        control.style.transform = '';
-                    }
-                }
-            });
-        };
-
-        // Orientierungsänderung überwachen für Touch-Kontrollen
-        window.addEventListener('orientationchange', () => {
-            setTimeout(adjustTouchControls, 100);
-        });
-
-        // Initialen Zustand setzen
-        adjustTouchControls();
 
         // Tastatur-Event-Listener
         const handleKeyDown = (e) => {
@@ -604,6 +577,7 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver}) => {
         let newLeftPaddleY = gameState.leftPaddleY;
         let newRightPaddleY = gameState.rightPaddleY;
 
+        // Touch-Steuerung wird jetzt gleichwertig zur Tastatur behandelt
         if (gameMode === 'singleplayer') {
             // Spieler: Linker Schläger (Tasten oder Touch)
             if ((keys.upPressed || keys.wPressed || touchControls.leftUp) && newLeftPaddleY > 0) {
@@ -1097,27 +1071,6 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver}) => {
         sendData(state);
     };
 
-    // Touch-Control Handler
-    const handleLeftMoveUp = () => {
-        gameStateRef.current.touchControls.leftUp = true;
-        gameStateRef.current.touchControls.leftDown = false;
-    };
-
-    const handleLeftMoveDown = () => {
-        gameStateRef.current.touchControls.leftDown = true;
-        gameStateRef.current.touchControls.leftUp = false;
-    };
-
-    const handleRightMoveUp = () => {
-        gameStateRef.current.touchControls.rightUp = true;
-        gameStateRef.current.touchControls.rightDown = false;
-    };
-
-    const handleRightMoveDown = () => {
-        gameStateRef.current.touchControls.rightDown = true;
-        gameStateRef.current.touchControls.rightUp = false;
-    };
-
     // Punktestand-Anzeige
     let scoreText = '';
     if (gameMode === 'singleplayer') {
@@ -1131,18 +1084,6 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver}) => {
             scoreText = `Gegner: ${scores.left} | Du (rechts): ${scores.right}`;
         }
     }
-
-    // Berechne, welche Touch-Controls angezeigt werden sollen
-    const showLeftTouchControls = isMobile && (
-        gameMode === 'singleplayer' ||
-        gameMode === 'local-multiplayer' ||
-        (gameMode === 'online-multiplayer' && isHost)
-    );
-
-    const showRightTouchControls = isMobile && (
-        gameMode === 'local-multiplayer' ||
-        (gameMode === 'online-multiplayer' && !isHost)
-    );
 
     return (
         <div className="game-container">
@@ -1164,43 +1105,38 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver}) => {
                 </>
             )}
 
-            {/* Touch-Steuerung für Mobilgeräte */}
-            {showLeftTouchControls && (
-                <div className="touch-controls left-controls">
-                    <button
-                        className="touch-button up-button"
-                        onTouchStart={handleLeftMoveUp}
-                        onTouchEnd={() => gameStateRef.current.touchControls.leftUp = false}
-                    >
-                        ▲
-                    </button>
-                    <button
-                        className="touch-button down-button"
-                        onTouchStart={handleLeftMoveDown}
-                        onTouchEnd={() => gameStateRef.current.touchControls.leftDown = false}
-                    >
-                        ▼
-                    </button>
-                </div>
-            )}
+            {/* Vereinfachte Touch-Steuerung für alle Modi */}
+            {isMobile && (
+                <TouchControls
+                    onMoveUp={() => {
+                        if (gameMode === 'singleplayer' ||
+                            (gameMode === 'online-multiplayer' && isHost) ||
+                            gameMode === 'local-multiplayer') {
+                            gameStateRef.current.touchControls.leftUp = true;
+                            gameStateRef.current.touchControls.leftDown = false;
+                        }
 
-            {showRightTouchControls && (
-                <div className="touch-controls right-controls">
-                    <button
-                        className="touch-button up-button"
-                        onTouchStart={handleRightMoveUp}
-                        onTouchEnd={() => gameStateRef.current.touchControls.rightUp = false}
-                    >
-                        ▲
-                    </button>
-                    <button
-                        className="touch-button down-button"
-                        onTouchStart={handleRightMoveDown}
-                        onTouchEnd={() => gameStateRef.current.touchControls.rightDown = false}
-                    >
-                        ▼
-                    </button>
-                </div>
+                        if (gameMode === 'local-multiplayer' ||
+                            (gameMode === 'online-multiplayer' && !isHost)) {
+                            gameStateRef.current.touchControls.rightUp = true;
+                            gameStateRef.current.touchControls.rightDown = false;
+                        }
+                    }}
+                    onMoveDown={() => {
+                        if (gameMode === 'singleplayer' ||
+                            (gameMode === 'online-multiplayer' && isHost) ||
+                            gameMode === 'local-multiplayer') {
+                            gameStateRef.current.touchControls.leftDown = true;
+                            gameStateRef.current.touchControls.leftUp = false;
+                        }
+
+                        if (gameMode === 'local-multiplayer' ||
+                            (gameMode === 'online-multiplayer' && !isHost)) {
+                            gameStateRef.current.touchControls.rightDown = true;
+                            gameStateRef.current.touchControls.rightUp = false;
+                        }
+                    }}
+                />
             )}
         </div>
     );
