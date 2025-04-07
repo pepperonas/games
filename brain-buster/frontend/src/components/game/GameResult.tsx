@@ -60,10 +60,10 @@ const GameResult = ({score, totalQuestions, onRestart, onBackToHome}: GameResult
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button onClick={onRestart} variant="primary">
+                <Button onClick={onRestart} variant="primary" fullWidth>
                     Neues Spiel
                 </Button>
-                <Button onClick={onBackToHome} variant="outline">
+                <Button onClick={onBackToHome} variant="outline" fullWidth>
                     Zurück zur Startseite
                 </Button>
             </div>

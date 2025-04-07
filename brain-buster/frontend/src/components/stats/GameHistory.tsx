@@ -29,12 +29,12 @@ const GameHistory = ({ history }: GameHistoryProps) => {
 
     return (
         <Card>
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
                 <h2 className="text-xl font-bold">Spielverlauf</h2>
 
-                <div className="flex space-x-2">
+                <div className="flex flex-wrap gap-2 justify-center sm:justify-end">
                     <button
-                        className={`px-3 py-1 rounded-full text-sm ${
+                        className={`px-3 py-2 rounded-full text-sm min-w-[80px] ${
                             filter === 'all'
                                 ? 'bg-violet-600 text-white'
                                 : 'bg-white/10 hover:bg-white/20'
@@ -44,7 +44,7 @@ const GameHistory = ({ history }: GameHistoryProps) => {
                         Alle
                     </button>
                     <button
-                        className={`px-3 py-1 rounded-full text-sm ${
+                        className={`px-3 py-2 rounded-full text-sm min-w-[120px] ${
                             filter === 'solo'
                                 ? 'bg-violet-600 text-white'
                                 : 'bg-white/10 hover:bg-white/20'
@@ -54,7 +54,7 @@ const GameHistory = ({ history }: GameHistoryProps) => {
                         Einzelspieler
                     </button>
                     <button
-                        className={`px-3 py-1 rounded-full text-sm ${
+                        className={`px-3 py-2 rounded-full text-sm min-w-[120px] ${
                             filter === 'multiplayer'
                                 ? 'bg-violet-600 text-white'
                                 : 'bg-white/10 hover:bg-white/20'

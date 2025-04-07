@@ -39,7 +39,11 @@ io.on('connection', (socket) => {
     socket.on('create_room', ({name}) => {
         console.log(`Raumerstellung angefordert von: ${name}, Socket ID: ${socket.id}`);
 
-        const roomId = uuidv4().substring(0, 6).toUpperCase(); // Generate shorter room ID
+        const roomId = uuidv4().substring(0, 6).toUpperCase().replace(/[^A-Z0-9]/g, () => {
+            // Ersetze alle nicht-alphanumerischen Zeichen durch zufällige Großbuchstaben
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            return chars.charAt(Math.floor(Math.random() * chars.length));
+        });
 
         rooms[roomId] = {
             id: roomId,
@@ -143,7 +147,7 @@ io.on('connection', (socket) => {
     });
 
     // Submit an answer
-    socket.on('submit_answer', ({ roomId, answer, round }) => {
+    socket.on('submit_answer', ({roomId, answer, round}) => {
         const room = rooms[roomId];
         if (!room || room.status !== 'playing') return;
 

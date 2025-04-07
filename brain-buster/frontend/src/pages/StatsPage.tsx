@@ -85,8 +85,8 @@ const StatsPage = () => {
 
             <div className="mb-6">
                 <Card className="p-4">
-                    <div className="flex flex-wrap justify-between items-center">
-                        <div className="flex space-x-4 mb-4 sm:mb-0">
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div className="flex flex-wrap gap-2 justify-center w-full sm:w-auto">
                             <Button
                                 variant={activeTab === 'overview' ? 'primary' : 'outline'}
                                 onClick={() => setActiveTab('overview')}
@@ -107,7 +107,7 @@ const StatsPage = () => {
                             </Button>
                         </div>
 
-                        <div className="flex space-x-2">
+                        <div className="flex space-x-2 w-full sm:w-auto justify-center">
                             <Button variant="outline" size="sm" onClick={handleExportStats}>
                                 Exportieren
                             </Button>

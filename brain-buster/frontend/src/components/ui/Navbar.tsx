@@ -102,7 +102,7 @@ const Navbar = () => {
                             <Link
                                 key={item.path}
                                 to={item.path}
-                                className={`px-4 py-2 rounded-md ${
+                                className={`px-4 py-3 rounded-md ${
                                     location.pathname === item.path
                                         ? 'bg-secondary-700 text-white'
                                         : 'text-gray-300 hover:bg-secondary-700/30'

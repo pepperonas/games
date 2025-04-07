@@ -256,7 +256,9 @@ const MultiplayerPage = () => {
     const joinRoom = () => {
         if (!socket || !roomToJoin) return
 
-        socket.emit('join_room', {roomId: roomToJoin, name: playerName})
+        // Immer in Großbuchstaben umwandeln
+        const formattedRoomId = roomToJoin.toUpperCase()
+        socket.emit('join_room', {roomId: formattedRoomId, name: playerName})
     }
 
     // Spiel starten (nur Host)
@@ -354,16 +356,17 @@ const MultiplayerPage = () => {
 
                         <div>
                             <h2 className="text-lg font-medium mb-3">Einem Spiel beitreten</h2>
-                            <div className="flex space-x-2">
+                            <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
                                 <input
                                     type="text"
                                     placeholder="Raum-ID eingeben"
                                     value={roomToJoin}
-                                    onChange={(e) => setRoomToJoin(e.target.value)}
-                                    className="flex-1 px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                    onChange={(e) => setRoomToJoin(e.target.value.toUpperCase())}
+                                    className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
                                 />
                                 <Button
                                     onClick={joinRoom}
+                                    className="w-full sm:w-auto"
                                     disabled={!socket || isConnecting || roomToJoin.trim() === '' || playerName.trim() === ''}
                                 >
                                     Beitreten
@@ -382,8 +385,29 @@ const MultiplayerPage = () => {
 
                     <div className="mb-6">
                         <div className="text-violet-300 mb-2">Raum-ID</div>
-                        <div className="text-xl font-mono bg-white/5 p-2 rounded">
-                            {roomId}
+                        <div className="flex items-center justify-center space-x-2">
+                            <div className="text-xl font-mono bg-white/5 p-2 rounded flex-1 text-center overflow-x-auto">
+                                {roomId}
+                            </div>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                    navigator.clipboard.writeText(roomId);
+                                    // Feedback anzeigen mit temporärer Nachricht
+                                    const feedbackElement = document.createElement('div');
+                                    feedbackElement.textContent = 'Kopiert!';
+                                    feedbackElement.className = 'text-xs text-green-400 absolute top-0 right-0 px-2 py-1 bg-black/50 rounded';
+                                    const buttonParent = document.activeElement?.parentElement;
+                                    if (buttonParent) {
+                                        buttonParent.style.position = 'relative';
+                                        buttonParent.appendChild(feedbackElement);
+                                        setTimeout(() => feedbackElement.remove(), 1500);
+                                    }
+                                }}
+                            >
+                                Kopieren
+                            </Button>
                         </div>
                         <p className="text-sm mt-2">
                             Teile diese ID mit deinem Freund, damit er beitreten kann
@@ -495,10 +519,10 @@ const MultiplayerPage = () => {
                         </div>
 
                         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                            <Button onClick={createRoom} variant="primary">
+                            <Button onClick={createRoom} variant="primary" fullWidth>
                                 Neues Spiel
                             </Button>
-                            <Button onClick={handleBackToHome} variant="outline">
+                            <Button onClick={handleBackToHome} variant="outline" fullWidth>
                                 Zurück zur Startseite
                             </Button>
                         </div>
