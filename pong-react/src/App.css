@@ -1,3 +1,4 @@
+/* App.css mit Mobilgeräteunterstützung */
 .App {
   text-align: center;
 }
@@ -46,16 +47,33 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
+  width: 100vw;
   background-color: #2C2E3B;
   font-family: Arial, sans-serif;
   overflow: hidden;
   color: white;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+  touch-action: manipulation;
+}
+
+/* Verhindern von unerwünschten Touch-Aktionen */
+* {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .app-container {
   position: relative;
   width: 800px;
   height: 500px;
+  transition: all 0.3s ease;
+}
+
+.mobile-view {
+  width: 100vw;
+  height: auto;
+  max-width: 100%;
 }
 
 .footer {
@@ -91,6 +109,9 @@ body {
 
 .button-group {
   margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .button {
@@ -177,4 +198,203 @@ body {
 .game-over h2 {
   font-size: 36px;
   margin-bottom: 20px;
+}
+
+/* Mobile-spezifische Stile */
+@media (max-width: 768px) {
+  .start-screen h1 {
+    font-size: 42px;
+    margin-bottom: 15px;
+  }
+
+  .button-group {
+    width: 90%;
+  }
+
+  .button-group > div {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .button {
+    width: 100%;
+    margin: 5px 0;
+    padding: 12px;
+    font-size: 16px;
+  }
+
+  .controls-info {
+    font-size: 14px;
+    margin: 10px 15px;
+  }
+
+  .game-over h2 {
+    font-size: 32px;
+  }
+
+  .footer {
+    bottom: 10px;
+    font-size: 12px;
+  }
+
+  /* GameContainer für mobile Geräte */
+  .game-container {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  canvas {
+    width: 100% !important;
+    height: auto !important;
+    touch-action: none;
+  }
+
+  /* Touch-Controls optimieren */
+  .touch-controls {
+    position: absolute;
+    z-index: 100;
+  }
+
+  .touch-button {
+    width: 60px;
+    height: 60px;
+    opacity: 0.7;
+    font-size: 20px;
+  }
+}
+
+/* Verhindern von Browser-Zoom bei doppelten Tippen auf Mobilgeräten */
+@media (max-width: 768px) {
+  input,
+  button,
+  select,
+  textarea {
+    font-size: 16px; /* Verhindert iOS Auto-Zoom */
+  }
+
+  .online-connection input {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 915px) and (orientation: landscape) {
+  body {
+    height: 100%;
+    position: fixed;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .app-container {
+    width: auto;
+    height: 95vh;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .game-container {
+    width: auto !important;
+    height: 95vh !important;
+    max-height: 95vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  canvas {
+    height: 95vh !important;
+    width: auto !important;
+    max-height: 95vh;
+    aspect-ratio: 1.6 / 1; /* Behält das 800x500 Verhältnis bei */
+  }
+
+  /* Touch-Controls für Landscape */
+  .touch-controls {
+    height: 150px;
+  }
+
+  .left-controls {
+    left: 10px;
+    bottom: 50%;
+    transform: translateY(50%);
+  }
+
+  .right-controls {
+    right: 10px;
+    bottom: 50%;
+    transform: translateY(50%);
+  }
+
+  .touch-button {
+    width: 60px;
+    height: 60px;
+  }
+
+  /* Startbildschirm für Landscape */
+  .start-screen {
+    padding: 10px;
+  }
+
+  .start-screen h1 {
+    font-size: 36px;
+    margin-bottom: 10px;
+  }
+
+  .button-group {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .button-group > div {
+    display: flex;
+    flex-direction: row;
+    margin: 5px;
+  }
+
+  .button {
+    padding: 10px 15px;
+    margin: 5px;
+    font-size: 14px;
+  }
+
+  .controls-info {
+    font-size: 12px;
+    margin-top: 10px;
+  }
+
+  .controls-info p {
+    margin: 4px 0;
+  }
+
+  /* Footer im Landscape */
+  .footer {
+    bottom: 5px;
+    font-size: 10px;
+  }
+}
+
+/* Speziell für kleine Landscape-Geräte */
+@media (max-height: 450px) and (orientation: landscape) {
+  .start-screen h1 {
+    font-size: 28px;
+    margin-bottom: 5px;
+  }
+
+  .button {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .touch-button {
+    width: 50px;
+    height: 50px;
+  }
+
+  .controls-info {
+    display: none; /* Verstecke Steuerungsinformationen auf sehr kleinen Bildschirmen */
+  }
 }

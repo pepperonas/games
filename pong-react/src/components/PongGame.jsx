@@ -1,7 +1,8 @@
 // components/PongGame.jsx
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import io from 'socket.io-client';
 import './PongGame.css';
+import './TouchControls.css';
 
 const PADDLE_HEIGHT = 100;
 const PADDLE_WIDTH = 15;
@@ -9,17 +10,18 @@ const BALL_RADIUS = 10;
 const WINNING_SCORE = 5;
 const SIGNALING_SERVER = 'https://mrx3k1.de';
 
-const PongGame = ({ gameMode, difficulty, isHost, onGameOver }) => {
+const PongGame = ({gameMode, difficulty, isHost, onGameOver}) => {
     const canvasRef = useRef(null);
     const requestRef = useRef(null);
     const socketRef = useRef(null);
     const peerConnectionRef = useRef(null);
     const dataChannelRef = useRef(null);
 
-    const [scores, setScores] = useState({ left: 0, right: 0 });
+    const [scores, setScores] = useState({left: 0, right: 0});
     const [connectionStatus, setConnectionStatus] = useState('-');
     const [ping, setPing] = useState('-');
     const [gameRunning, setGameRunning] = useState(true);
+    const [isMobile, setIsMobile] = useState(false);
 
     // Spielstatus
     const gameStateRef = useRef({
@@ -29,12 +31,17 @@ const PongGame = ({ gameMode, difficulty, isHost, onGameOver }) => {
         ballSpeedY: 2,
         leftPaddleY: 200,
         rightPaddleY: 200,
-        scores: { left: 0, right: 0 },
         keys: {
             wPressed: false,
             sPressed: false,
             upPressed: false,
             downPressed: false
+        },
+        touchControls: {
+            leftUp: false,
+            leftDown: false,
+            rightUp: false,
+            rightDown: false
         },
         ballInResetState: false,
         ballResetStartTime: 0,
@@ -50,6 +57,30 @@ const PongGame = ({ gameMode, difficulty, isHost, onGameOver }) => {
     // Audio Element
     const audioRef = useRef(null);
 
+    // Erkennen, ob es sich um ein mobiles Gerät handelt
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768 ||
+                ('ontouchstart' in window) ||
+                (navigator.maxTouchPoints > 0));
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    // Touch-Control-Handler
+    const handleTouchStart = (control, value) => {
+        const gameState = gameStateRef.current;
+        gameState.touchControls[control] = value;
+    };
+
+    const handleTouchEnd = (control) => {
+        const gameState = gameStateRef.current;
+        gameState.touchControls[control] = false;
+    };
+
     useEffect(() => {
         // Audio initialisieren
         audioRef.current = new Audio('relight.m4a');
@@ -57,6 +88,79 @@ const PongGame = ({ gameMode, difficulty, isHost, onGameOver }) => {
         // Canvas Context holen
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
+
+        // Canvas für Touch Events responsive machen
+        const resizeCanvas = () => {
+            if (canvas) {
+                const container = canvas.parentElement;
+                const containerWidth = container.clientWidth;
+                const containerHeight = container.clientHeight;
+                const originalRatio = 800 / 500; // Original canvas ratio
+
+                // Setze die Größe des Canvas für CSS-Darstellung
+                if (window.innerWidth <= 915) {
+                    if (window.matchMedia("(orientation: landscape)").matches) {
+                        // Landscape-Modus: Anpassen an die Höhe
+                        const maxHeight = containerHeight;
+                        canvas.style.height = `${maxHeight}px`;
+                        canvas.style.width = `${maxHeight * originalRatio}px`;
+                    } else {
+                        // Portrait-Modus: Anpassen an die Breite
+                        canvas.style.width = `${containerWidth}px`;
+                        canvas.style.height = `${containerWidth / originalRatio}px`;
+                    }
+                } else {
+                    canvas.style.width = '';
+                    canvas.style.height = '';
+                }
+            }
+        };
+
+        // Initialisiere Canvas-Größe
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Orientierungsänderung überwachen
+        window.addEventListener('orientationchange', () => {
+            setTimeout(resizeCanvas, 100); // Verzögerung für verlässlicheres Neuskalieren
+        });
+
+        const adjustTouchControls = () => {
+            const touchControls = document.querySelectorAll('.touch-controls');
+            const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+
+            touchControls.forEach(control => {
+                if (isLandscape) {
+                    if (control.classList.contains('left-controls')) {
+                        control.style.left = '10px';
+                        control.style.bottom = '50%';
+                        control.style.transform = 'translateY(50%)';
+                    } else if (control.classList.contains('right-controls')) {
+                        control.style.right = '10px';
+                        control.style.bottom = '50%';
+                        control.style.transform = 'translateY(50%)';
+                    }
+                } else {
+                    if (control.classList.contains('left-controls')) {
+                        control.style.left = '20px';
+                        control.style.bottom = '20px';
+                        control.style.transform = '';
+                    } else if (control.classList.contains('right-controls')) {
+                        control.style.right = '20px';
+                        control.style.bottom = '20px';
+                        control.style.transform = '';
+                    }
+                }
+            });
+        };
+
+        // Orientierungsänderung überwachen für Touch-Kontrollen
+        window.addEventListener('orientationchange', () => {
+            setTimeout(adjustTouchControls, 100);
+        });
+
+        // Initialen Zustand setzen
+        adjustTouchControls();
 
         // Tastatur-Event-Listener
         const handleKeyDown = (e) => {
@@ -188,11 +292,6 @@ const PongGame = ({ gameMode, difficulty, isHost, onGameOver }) => {
             socketRef.current.emit('createRoom');
         }
 
-        function connectToRoom(roomId) {
-            console.log('🏠 Versuche Raum beizutreten:', roomId);
-            socketRef.current.emit('joinRoom', { roomId });
-        }
-
         function initializePeerConnection() {
             // ICE-Server-Konfiguration
             const configuration = {
@@ -316,14 +415,9 @@ const PongGame = ({ gameMode, difficulty, isHost, onGameOver }) => {
                             gameStateRef.current.ballSpeedX = data.ballSpeedX;
                             gameStateRef.current.ballSpeedY = data.ballSpeedY;
 
-                            // Aktualisiere Punktestand im gameStateRef und im React-State
+                            // Aktualisiere Punktestand
                             if (data.leftScore !== undefined && data.rightScore !== undefined) {
-                                gameStateRef.current.scores.left = data.leftScore;
-                                gameStateRef.current.scores.right = data.rightScore;
-                                setScores({
-                                    left: data.leftScore,
-                                    right: data.rightScore
-                                });
+                                setScores({left: data.leftScore, right: data.rightScore});
                             }
 
                             // Reset-Status synchronisieren
@@ -460,6 +554,7 @@ const PongGame = ({ gameMode, difficulty, isHost, onGameOver }) => {
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
             document.removeEventListener('keyup', handleKeyUp);
+            window.removeEventListener('resize', resizeCanvas);
             cancelAnimationFrame(requestRef.current);
 
             // WebRTC aufräumen
@@ -495,15 +590,15 @@ const PongGame = ({ gameMode, difficulty, isHost, onGameOver }) => {
     // Schläger aktualisieren
     const updatePaddles = () => {
         const gameState = gameStateRef.current;
-        const { keys, leftPaddleY, rightPaddleY } = gameState;
-        let newLeftPaddleY = leftPaddleY;
-        let newRightPaddleY = rightPaddleY;
+        const {keys, touchControls} = gameState;
+        let newLeftPaddleY = gameState.leftPaddleY;
+        let newRightPaddleY = gameState.rightPaddleY;
 
         if (gameMode === 'singleplayer') {
-            // Spieler: Linker Schläger
-            if (keys.upPressed && newLeftPaddleY > 0) {
+            // Spieler: Linker Schläger (Tasten oder Touch)
+            if ((keys.upPressed || keys.wPressed || touchControls.leftUp) && newLeftPaddleY > 0) {
                 newLeftPaddleY -= 8;
-            } else if (keys.downPressed && newLeftPaddleY < 500 - PADDLE_HEIGHT) {
+            } else if ((keys.downPressed || keys.sPressed || touchControls.leftDown) && newLeftPaddleY < 500 - PADDLE_HEIGHT) {
                 newLeftPaddleY += 8;
             }
 
@@ -519,42 +614,40 @@ const PongGame = ({ gameMode, difficulty, isHost, onGameOver }) => {
                 }
             }
         } else if (gameMode === 'local-multiplayer') {
-            // Spieler 1: Linker Schläger mit W/S
-            if (keys.wPressed && newLeftPaddleY > 0) {
+            // Spieler 1: Linker Schläger mit W/S oder Touch
+            if ((keys.wPressed || touchControls.leftUp) && newLeftPaddleY > 0) {
                 newLeftPaddleY -= 8;
-            } else if (keys.sPressed && newLeftPaddleY < 500 - PADDLE_HEIGHT) {
+            } else if ((keys.sPressed || touchControls.leftDown) && newLeftPaddleY < 500 - PADDLE_HEIGHT) {
                 newLeftPaddleY += 8;
             }
 
-            // Spieler 2: Rechter Schläger mit Pfeiltasten
-            if (keys.upPressed && newRightPaddleY > 0) {
+            // Spieler 2: Rechter Schläger mit Pfeiltasten oder Touch
+            if ((keys.upPressed || touchControls.rightUp) && newRightPaddleY > 0) {
                 newRightPaddleY -= 8;
-            } else if (keys.downPressed && newRightPaddleY < 500 - PADDLE_HEIGHT) {
+            } else if ((keys.downPressed || touchControls.rightDown) && newRightPaddleY < 500 - PADDLE_HEIGHT) {
                 newRightPaddleY += 8;
             }
         } else if (gameMode === 'online-multiplayer') {
             if (isHost) {
-                // Host steuert den linken Schläger
-                const useArrowKeys = !keys.wPressed && !keys.sPressed;
-                if ((keys.wPressed || (useArrowKeys && keys.upPressed)) && newLeftPaddleY > 0) {
+                // Host steuert den linken Schläger mit beliebigen Tasten oder Touch
+                if ((keys.wPressed || keys.upPressed || touchControls.leftUp) && newLeftPaddleY > 0) {
                     newLeftPaddleY -= 8;
-                } else if ((keys.sPressed || (useArrowKeys && keys.downPressed)) && newLeftPaddleY < 500 - PADDLE_HEIGHT) {
+                } else if ((keys.sPressed || keys.downPressed || touchControls.leftDown) && newLeftPaddleY < 500 - PADDLE_HEIGHT) {
                     newLeftPaddleY += 8;
                 }
             } else {
-                // Gast steuert den rechten Schläger
-                const useArrowKeys = !keys.wPressed && !keys.sPressed;
-                if ((keys.wPressed || (useArrowKeys && keys.upPressed)) && newRightPaddleY > 0) {
+                // Gast steuert den rechten Schläger mit beliebigen Tasten oder Touch
+                if ((keys.wPressed || keys.upPressed || touchControls.rightUp) && newRightPaddleY > 0) {
                     newRightPaddleY -= 8;
-                } else if ((keys.sPressed || (useArrowKeys && keys.downPressed)) && newRightPaddleY < 500 - PADDLE_HEIGHT) {
+                } else if ((keys.sPressed || keys.downPressed || touchControls.rightDown) && newRightPaddleY < 500 - PADDLE_HEIGHT) {
                     newRightPaddleY += 8;
                 }
             }
         }
 
         // Begrenzung der Schläger
-        gameState.leftPaddleY = Math.min(Math.max(newLeftPaddleY, 0), 500 - PADDLE_HEIGHT);
-        gameState.rightPaddleY = Math.min(Math.max(newRightPaddleY, 0), 500 - PADDLE_HEIGHT);
+        gameState.leftPaddleY = Math.max(0, Math.min(newLeftPaddleY, 500 - PADDLE_HEIGHT));
+        gameState.rightPaddleY = Math.max(0, Math.min(newRightPaddleY, 500 - PADDLE_HEIGHT));
     };
 
     // Ball aktualisieren
@@ -636,19 +729,15 @@ const PongGame = ({ gameMode, difficulty, isHost, onGameOver }) => {
         }
 
         if (gameState.ballX < 0) {
-            // Aktualisiere den Score im gameStateRef
-            gameState.scores.right += 1;
-            // Aktualisiere den React-State für die Anzeige
-            setScores({...gameState.scores});
+            const newScores = {...scores, right: scores.right + 1};
+            setScores(newScores);
             resetBall();
-            checkWinner(gameState.scores);
+            checkWinner(newScores);
         } else if (gameState.ballX > 800) {
-            // Aktualisiere den Score im gameStateRef
-            gameState.scores.left += 1;
-            // Aktualisiere den React-State für die Anzeige
-            setScores({...gameState.scores});
+            const newScores = {...scores, left: scores.left + 1};
+            setScores(newScores);
             resetBall();
-            checkWinner(gameState.scores);
+            checkWinner(newScores);
         }
     };
 
@@ -989,13 +1078,34 @@ const PongGame = ({ gameMode, difficulty, isHost, onGameOver }) => {
             state.ballY = gameState.ballY;
             state.ballSpeedX = gameState.ballSpeedX;
             state.ballSpeedY = gameState.ballSpeedY;
-            state.leftScore = gameState.scores.left;
-            state.rightScore = gameState.scores.right;
+            state.leftScore = scores.left;
+            state.rightScore = scores.right;
             state.ballInResetState = gameState.ballInResetState;
             state.ballResetStartTime = gameState.ballResetStartTime;
         }
 
         sendData(state);
+    };
+
+    // Touch-Control Handler
+    const handleLeftMoveUp = () => {
+        gameStateRef.current.touchControls.leftUp = true;
+        gameStateRef.current.touchControls.leftDown = false;
+    };
+
+    const handleLeftMoveDown = () => {
+        gameStateRef.current.touchControls.leftDown = true;
+        gameStateRef.current.touchControls.leftUp = false;
+    };
+
+    const handleRightMoveUp = () => {
+        gameStateRef.current.touchControls.rightUp = true;
+        gameStateRef.current.touchControls.rightDown = false;
+    };
+
+    const handleRightMoveDown = () => {
+        gameStateRef.current.touchControls.rightDown = true;
+        gameStateRef.current.touchControls.rightUp = false;
     };
 
     // Punktestand-Anzeige
@@ -1012,16 +1122,29 @@ const PongGame = ({ gameMode, difficulty, isHost, onGameOver }) => {
         }
     }
 
+    // Berechne, welche Touch-Controls angezeigt werden sollen
+    const showLeftTouchControls = isMobile && (
+        gameMode === 'singleplayer' ||
+        gameMode === 'local-multiplayer' ||
+        (gameMode === 'online-multiplayer' && isHost)
+    );
+
+    const showRightTouchControls = isMobile && (
+        gameMode === 'local-multiplayer' ||
+        (gameMode === 'online-multiplayer' && !isHost)
+    );
+
     return (
         <div className="game-container">
-            <canvas ref={canvasRef} width={800} height={500} />
+            <canvas ref={canvasRef} width={800} height={500}/>
 
             <div className="score-display">{scoreText}</div>
 
             {gameMode === 'online-multiplayer' && (
                 <>
                     <div className="connection-info">
-                        Verbindung: <span style={{ color: connectionStatus === 'connected' ? '#4CAF50' : '#f44336' }}>
+                        Verbindung: <span
+                        style={{color: connectionStatus === 'connected' ? '#4CAF50' : '#f44336'}}>
                         {connectionStatus}
                     </span>
                     </div>
@@ -1029,6 +1152,45 @@ const PongGame = ({ gameMode, difficulty, isHost, onGameOver }) => {
                         Ping: <span>{ping}</span> ms
                     </div>
                 </>
+            )}
+
+            {/* Touch-Steuerung für Mobilgeräte */}
+            {showLeftTouchControls && (
+                <div className="touch-controls left-controls">
+                    <button
+                        className="touch-button up-button"
+                        onTouchStart={handleLeftMoveUp}
+                        onTouchEnd={() => gameStateRef.current.touchControls.leftUp = false}
+                    >
+                        ▲
+                    </button>
+                    <button
+                        className="touch-button down-button"
+                        onTouchStart={handleLeftMoveDown}
+                        onTouchEnd={() => gameStateRef.current.touchControls.leftDown = false}
+                    >
+                        ▼
+                    </button>
+                </div>
+            )}
+
+            {showRightTouchControls && (
+                <div className="touch-controls right-controls">
+                    <button
+                        className="touch-button up-button"
+                        onTouchStart={handleRightMoveUp}
+                        onTouchEnd={() => gameStateRef.current.touchControls.rightUp = false}
+                    >
+                        ▲
+                    </button>
+                    <button
+                        className="touch-button down-button"
+                        onTouchStart={handleRightMoveDown}
+                        onTouchEnd={() => gameStateRef.current.touchControls.rightDown = false}
+                    >
+                        ▼
+                    </button>
+                </div>
             )}
         </div>
     );

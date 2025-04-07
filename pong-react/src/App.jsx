@@ -1,5 +1,5 @@
-// App.jsx - Hauptkomponente
-import React, { useState } from 'react';
+// App.jsx - Hauptkomponente mit Anpassungen für mobile Geräte und Landscape-Modus
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import PongGame from './components/PongGame';
 import StartScreen from './components/StartScreen';
@@ -16,6 +16,58 @@ const App = () => {
     isHost: false,
     scores: { left: 0, right: 0 }
   });
+
+  const [isMobile, setIsMobile] = useState(false);
+  const [isLandscape, setIsLandscape] = useState(false);
+
+  // Erkennen, ob es sich um ein mobiles Gerät handelt und Orientation prüfen
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768 ||
+          ('ontouchstart' in window) ||
+          (navigator.maxTouchPoints > 0));
+
+      setIsLandscape(window.matchMedia("(orientation: landscape)").matches);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(checkMobile, 100);
+    });
+
+    // Verhindere elastisches Scrollen auf iOS
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.height = '100%';
+
+    // Fullscreen API für optimale Landscape-Nutzung
+    const enableFullscreen = () => {
+      if (document.documentElement.requestFullscreen && isLandscape) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.log('Fullscreen request failed: ', err);
+        });
+      }
+    };
+
+    // Nur auf mobilen Geräten Fullscreen ermöglichen
+    if (isMobile) {
+      document.addEventListener('touchend', enableFullscreen, { once: true });
+    }
+
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+      window.removeEventListener('orientationchange', checkMobile);
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      if (isMobile) {
+        document.removeEventListener('touchend', enableFullscreen);
+      }
+    };
+  }, [isMobile, isLandscape]);
 
   const startSinglePlayerGame = (difficulty) => {
     setGameState({
@@ -75,12 +127,14 @@ const App = () => {
   };
 
   return (
-      <div className="app-container">
+      <div className={`app-container ${isMobile ? 'mobile-view' : ''} ${isLandscape ? 'landscape-view' : 'portrait-view'}`}>
         {gameState.screen === 'start' && (
             <StartScreen
                 onStartSinglePlayer={startSinglePlayerGame}
                 onStartLocalMultiplayer={startLocalMultiplayerGame}
                 onSetupOnlineMultiplayer={setupOnlineMultiplayer}
+                isMobile={isMobile}
+                isLandscape={isLandscape}
             />
         )}
 
@@ -90,6 +144,8 @@ const App = () => {
                 difficulty={gameState.difficulty}
                 isHost={gameState.isHost}
                 onGameOver={handleGameOver}
+                isMobile={isMobile}
+                isLandscape={isLandscape}
             />
         )}
 
@@ -101,6 +157,8 @@ const App = () => {
                 onMainMenu={returnToMainMenu}
                 gameMode={gameState.gameMode}
                 isHost={gameState.isHost}
+                isMobile={isMobile}
+                isLandscape={isLandscape}
             />
         )}
 
@@ -108,6 +166,8 @@ const App = () => {
             <OnlineConnectionScreen
                 onStartGame={startOnlineMultiplayerGame}
                 onBack={returnToMainMenu}
+                isMobile={isMobile}
+                isLandscape={isLandscape}
             />
         )}
 
