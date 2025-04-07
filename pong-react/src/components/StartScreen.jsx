@@ -1,36 +1,66 @@
 // components/StartScreen.jsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './StartScreen.css';
 
-const StartScreen = ({ onStartSinglePlayer, onStartLocalMultiplayer, onSetupOnlineMultiplayer, isMobile }) => {
+const StartScreen = ({ onStartSinglePlayer, onStartLocalMultiplayer, onSetupOnlineMultiplayer, isMobile, isLandscape }) => {
+    const [isWideDevice, setIsWideDevice] = useState(false);
+
+    // Prüft, ob das Gerät sehr breit ist (wie S24 Ultra)
+    useEffect(() => {
+        const checkWideDevice = () => {
+            const isWide = window.innerWidth >= 1200 && window.innerHeight <= 500;
+            setIsWideDevice(isWide);
+        };
+
+        checkWideDevice();
+        window.addEventListener('resize', checkWideDevice);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(checkWideDevice, 100);
+        });
+
+        return () => {
+            window.removeEventListener('resize', checkWideDevice);
+            window.removeEventListener('orientationchange', checkWideDevice);
+        };
+    }, []);
+
+    // CSS-Klassen basierend auf Gerätetyp und Orientierung
+    const screenClasses = `start-screen ${isLandscape ? 'landscape-mode' : ''} ${isWideDevice ? 'wide-device' : ''}`;
+
     return (
-        <div className="start-screen">
+        <div className={screenClasses}>
             <h1>PONG</h1>
             <div className="button-group">
-                <div>
+                {/* Die drei Schwierigkeits-Buttons immer in einer horizontalen Reihe */}
+                <div className="difficulty-buttons">
                     <button onClick={() => onStartSinglePlayer(2)} className="button easy-btn">Einfach</button>
                     <button onClick={() => onStartSinglePlayer(3)} className="button medium-btn">Mittel</button>
                     <button onClick={() => onStartSinglePlayer(5)} className="button hard-btn">Schwer</button>
                 </div>
-                <div>
+
+                {/* Die Multiplayer-Buttons darunter */}
+                <div className="multiplayer-buttons">
                     <button onClick={onStartLocalMultiplayer} className="button multiplayer-local-btn">Multiplayer (Lokal)</button>
                     <button onClick={onSetupOnlineMultiplayer} className="button multiplayer-online-btn">Multiplayer (Online)</button>
                 </div>
             </div>
-            <div className="controls-info">
-                {isMobile ? (
-                    <>
-                        <p>Bedienung über Touch-Steuerelemente auf dem Bildschirm</p>
-                        <p>Tippe auf die Pfeile ▲▼ am Bildschirmrand</p>
-                    </>
-                ) : (
-                    <>
-                        <p>Einzelspieler: Pfeiltasten (Hoch/Runter)</p>
-                        <p>Multiplayer (Lokal): Spieler 1 - W/S Tasten, Spieler 2 - Pfeiltasten (Hoch/Runter)</p>
-                        <p>Multiplayer (Online): W/S oder Pfeiltasten (Hoch/Runter)</p>
-                    </>
-                )}
-            </div>
+
+            {(!isLandscape || (isLandscape && !isWideDevice) || (isLandscape && window.innerHeight > 450)) && (
+                <div className="controls-info">
+                    {isMobile ? (
+                        <>
+                            <p>Bedienung über Touch-Steuerelemente am Bildschirmrand</p>
+                            <p>Tippe auf die Pfeile ▲▼</p>
+                        </>
+                    ) : (
+                        <>
+                            <p>Einzelspieler: Pfeiltasten (Hoch/Runter)</p>
+                            <p>Multiplayer (Lokal): Spieler 1 - W/S, Spieler 2 - Pfeiltasten (Hoch/Runter)</p>
+                            <p>Multiplayer (Online): W/S oder Pfeiltasten (Hoch/Runter)</p>
+                        </>
+                    )}
+                </div>
+            )}
         </div>
     );
 };
