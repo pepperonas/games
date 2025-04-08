@@ -530,7 +530,6 @@ const StatisticsPage = () => {
                     <nav className="app-navigation">
                         <Link to="/" className="nav-item">Home</Link>
                         <Link to="/statistics" className="nav-item active">Statistiken</Link>
-                        <a href="#" className="nav-item">Einstellungen</a>
                     </nav>
                 </header>
 
