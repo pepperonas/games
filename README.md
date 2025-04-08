@@ -24,7 +24,7 @@ server {
     add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
 
     # Generischer /games/ Block für andere Spiele (keine Überschneidung mit brain-buster)
-    location ~ ^/games/(?!brain-buster).+$ {
+    location ~ ^/games/(?!(brain-buster|darts|pong)).+$ {
         alias /var/www/html/games/;
         try_files $uri $uri.html $uri/ =404;
     }
@@ -33,6 +33,16 @@ server {
     location /games/brain-buster/ {
         alias /var/www/html/games/brain-buster/;
         try_files $uri $uri/ /games/brain-buster/index.html;
+    }
+
+    location /games/darts/ {
+        alias /var/www/html/games/darts/;
+        try_files $uri $uri/ /games/darts/index.html;
+    }
+
+    location /games/pong/ {
+        alias /var/www/html/games/pong/;
+        try_files $uri $uri/ /games/pong/index.html;
     }
     
     # WebSocket-Proxy für den BrainBuster-Multiplayer-Server
@@ -49,7 +59,44 @@ location /socket-api/ {
     proxy_connect_timeout 60s;
     proxy_send_timeout 60s;
     proxy_read_timeout 60s;
+
+    proxy_buffering off;
+    proxy_redirect off;
 }    
+
+location /blog/ {
+    proxy_pass http://localhost:4777/blog/;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_cache_bypass $http_upgrade;
+    
+    # Erhöhe Timeouts falls nötig
+    proxy_connect_timeout 60s;
+    proxy_send_timeout 60s;
+    proxy_read_timeout 60s;
+}
+
+location /techdocs/ {
+    proxy_pass http://localhost:5007/;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_cache_bypass $http_upgrade;
+    
+    # Erhöhe Timeouts falls nötig
+    proxy_connect_timeout 60s;
+    proxy_send_timeout 60s;
+    proxy_read_timeout 60s;
+}
  
     # Rest deiner bestehenden Konfiguration...
     location /gta/ {
@@ -70,28 +117,28 @@ location /socket-api/ {
         try_files $uri $uri/ /linux-terminal-simulator/index.html;
     }
 
-    location /sm-downloader/ {
-        proxy_pass http://localhost:3002/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-        proxy_read_timeout 120s;
-    }
-
     location /greystone/ {
         alias /var/www/html/greystone/;
         try_files $uri $uri.html $uri/ =404;
     }
 
-    location /weather/ {
-        alias /var/www/html/weather/build/;
-        try_files $uri $uri/ /weather/index.html;
-    }
+location /games/darts-react/ {
+    alias /var/www/html/games/darts-react/dist/;
+    try_files $uri $uri/ /games/darts-react/index.html;
+}
+
+location /games/pong-react/ {
+    alias /var/www/html/games/pong-react/build/;
+    try_files $uri $uri/ /games/pong-react/index.html;
+}
+
+location /weather/ {
+    alias /var/www/html/weather/build/;
+    index index.html;
+    autoindex off;
+    try_files $uri $uri/ /weather/index.html;
+}
+       
 
     # Generischer Fallback-Block
     location / {
