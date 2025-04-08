@@ -1242,8 +1242,14 @@ tr:hover td {
 }
 
 @keyframes fade-in {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* App Navigation */
@@ -1296,4 +1302,310 @@ tr:hover td {
 
 .app-logo-text span {
     color: var(--accent-color);
+}
+
+.winner-banner {
+    background-color: var(--card-background);
+    border: 2px solid var(--accent-color);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    margin-bottom: 25px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(97, 218, 251, 0.6);
+    animation: pulse-glow 2s infinite alternate;
+}
+
+.winner-banner h2 {
+    color: var(--accent-color);
+    margin: 0;
+    font-size: 1.8rem;
+    text-shadow: 0 0 8px rgba(97, 218, 251, 0.6);
+}
+
+@keyframes pulse-glow {
+    0% {
+        box-shadow: 0 0 10px rgba(97, 218, 251, 0.4);
+    }
+    100% {
+        box-shadow: 0 0 25px rgba(97, 218, 251, 0.8);
+    }
+}
+
+/* Gewinner-Karte */
+.player-card.winner {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 15px rgba(97, 218, 251, 0.6);
+    transform: scale(1.02);
+    animation: winner-card 3s infinite alternate;
+}
+
+@keyframes winner-card {
+    0% {
+        box-shadow: 0 0 10px rgba(97, 218, 251, 0.4);
+        border-color: var(--accent-color);
+    }
+    100% {
+        box-shadow: 0 0 25px rgba(97, 218, 251, 0.8);
+        border-color: gold;
+    }
+}
+
+.winner-indicator {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: gold;
+    color: var(--primary-color);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    animation: winner-badge 1.5s infinite alternate;
+}
+
+@keyframes winner-badge {
+    0% {
+        transform: translateX(-50%) scale(1);
+        background-color: gold;
+    }
+    100% {
+        transform: translateX(-50%) scale(1.1);
+        background-color: #FFDF00;
+    }
+}
+
+
+/* Basis-Optimierungen für alle Bildschirmgrößen */
+.stats-container {
+    width: 100%;
+    overflow-x: hidden;
+}
+
+/* Allgemeine Mobile-Optimierungen */
+@media (max-width: 767px) {
+    .container {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    h2 {
+        font-size: 1.4rem;
+    }
+
+    .app-navigation {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .nav-item {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+
+    /* Verbesserte Header auf kleinen Geräten */
+    .app-logo-text {
+        font-size: 1.6rem;
+    }
+
+    .app-logo-icon {
+        font-size: 1.8rem;
+    }
+}
+
+/* Statistik-spezifische Mobiloptimierungen */
+@media (max-width: 767px) {
+    /* Filter und Zoom-Steuerelemente */
+    .chart-zoom-controls {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .date-filter {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        gap: 10px;
+    }
+
+    .date-filter label {
+        margin-bottom: 2px;
+    }
+
+    .date-filter input[type="date"] {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    .filter-btn {
+        width: 100%;
+        margin-top: 5px;
+    }
+
+    .zoom-buttons {
+        margin-left: 0;
+        margin-top: 10px;
+        align-self: center;
+    }
+
+    /* Chart Container */
+    .chart-container {
+        height: 350px !important;
+        padding: 10px;
+    }
+
+    /* Stat Cards */
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .stat-card {
+        padding: 15px;
+    }
+
+    .stat-title {
+        font-size: 1.1rem;
+    }
+
+    /* Aktionen */
+    .actions-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .actions-row button {
+        width: 100%;
+    }
+
+    /* Spieletabelle */
+    table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    th, td {
+        min-width: 80px;
+        padding: 8px;
+        font-size: 0.85rem;
+    }
+
+    /* Optimiere Tabelle für mobile Ansicht */
+    .mobile-friendly-table {
+        width: 100%;
+        border: none;
+        background: transparent;
+    }
+
+    .mobile-friendly-table thead {
+        display: none; /* Ausblenden der Kopfzeile auf Mobilgeräten */
+    }
+
+    .mobile-friendly-table tbody,
+    .mobile-friendly-table tr {
+        display: block;
+        width: 100%;
+    }
+
+    .mobile-friendly-table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 10px;
+        text-align: right;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .mobile-friendly-table td:before {
+        content: attr(data-label);
+        float: left;
+        font-weight: bold;
+        color: var(--accent-color);
+        text-align: left;
+    }
+
+    .mobile-friendly-table tr {
+        margin-bottom: 15px;
+        border-radius: var(--border-radius);
+        background-color: var(--card-background);
+        box-shadow: var(--box-shadow);
+        overflow: hidden;
+    }
+
+    /* Player Management Modal */
+    .modal-content {
+        width: 95%;
+        padding: 15px;
+        margin: 15% auto;
+    }
+
+    .player-list {
+        max-height: 300px;
+    }
+
+    .player-item {
+        padding: 10px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .player-item button {
+        width: 100%;
+    }
+
+    /* Confirmation Modal */
+    #confirmation-message {
+        font-size: 0.95rem;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .modal-actions button {
+        width: 100%;
+    }
+}
+
+/* Verbesserungen für die kleinsten Bildschirme */
+@media (max-width: 480px) {
+    .container {
+        padding: 8px;
+    }
+
+    .stats-container {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    h2 {
+        font-size: 1.3rem;
+    }
+
+    .chart-container {
+        height: 300px !important;
+    }
+
+    .app-logo-text {
+        font-size: 1.4rem;
+    }
+
+    .app-logo-icon {
+        font-size: 1.6rem;
+    }
+
+    .nav-item {
+        font-size: 0.85rem;
+        padding: 6px 8px;
+    }
+
+    .theme-toggle {
+        top: 15px;
+        right: 15px;
+    }
 }

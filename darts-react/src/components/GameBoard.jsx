@@ -53,9 +53,32 @@ const GameBoard = () => {
         setShowRestartConfirmation(false);
     };
 
+    // Finde den Gewinner des Spiels
+    const getWinner = () => {
+        if (!gameState.isGameActive && gameState.winner) {
+            return gameState.winner;
+        }
+
+        for (const player of gameState.players) {
+            if (player.setsWon >= Math.ceil(gameState.numSets / 2)) {
+                return player.name;
+            }
+        }
+
+        return null;
+    };
+
+    const winner = getWinner();
+
     return (
         <>
             <div className="game-container" id="game">
+                {winner && (
+                    <div className="winner-banner">
+                        <h2>🏆 {winner} hat das Spiel gewonnen! 🏆</h2>
+                    </div>
+                )}
+
                 <div className="scoreboard">
                     <div className="scoreboard-header">
                         <h2>Punktestand</h2>
@@ -63,6 +86,7 @@ const GameBoard = () => {
                             id="undo-throw"
                             className="accent"
                             onClick={undoLastThrow}
+                            disabled={!!winner}
                         >
                             Wurf zurücknehmen
                         </button>
@@ -73,19 +97,22 @@ const GameBoard = () => {
                             <PlayerCard
                                 key={index}
                                 player={player}
-                                isActive={index === gameState.currentPlayerIndex}
+                                isActive={index === gameState.currentPlayerIndex && !winner}
                                 isLeading={player === leadingPlayer}
                                 hasLowestScore={player === playerWithLowestScore}
+                                isWinner={player.name === winner}
                                 numSets={gameState.numSets}
                                 numLegs={gameState.numLegs}
                             />
                         ))}
                     </div>
 
-                    <div className="eingabe-section">
-                        <h3>Punkteeingabe</h3>
-                        <ScoreInput ref={scoreInputRef} />
-                    </div>
+                    {!winner && (
+                        <div className="eingabe-section">
+                            <h3>Punkteeingabe</h3>
+                            <ScoreInput ref={scoreInputRef} />
+                        </div>
+                    )}
                 </div>
 
                 <div className="input-area">
@@ -112,7 +139,7 @@ const GameBoard = () => {
                     className="restart-btn"
                     onClick={handleRestartClick}
                 >
-                    Neues Spiel starten
+                    {winner ? 'Neues Spiel starten' : 'Spiel abbrechen und neu starten'}
                 </button>
 
                 {showRestartConfirmation && (

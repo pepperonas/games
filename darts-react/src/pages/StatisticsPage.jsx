@@ -24,9 +24,20 @@ const StatisticsPage = () => {
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
     const [confirmationMessage, setConfirmationMessage] = useState('');
     const [pendingAction, setPendingAction] = useState(null);
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 767);
 
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
+
+    // Überprüfen der Bildschirmgröße
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 767);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // Load data on component mount
     useEffect(() => {
@@ -43,7 +54,7 @@ const StatisticsPage = () => {
         if (filteredThrows.length > 0) {
             createScoreHistoryChart();
         }
-    }, [filteredThrows, darkMode]);
+    }, [filteredThrows, darkMode, isMobile]);
 
     const loadData = async () => {
         const playersData = await getAllPlayers();
@@ -156,8 +167,8 @@ const StatisticsPage = () => {
                     borderColor: colors[playerIndex % colors.length],
                     backgroundColor: colors[playerIndex % colors.length] + '33',
                     tension: 0.1,
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
+                    pointRadius: isMobile ? 3 : 4,
+                    pointHoverRadius: isMobile ? 4 : 6,
                     spanGaps: true
                 });
             });
@@ -186,12 +197,15 @@ const StatisticsPage = () => {
                     y: {
                         beginAtZero: true,
                         title: {
-                            display: true,
+                            display: !isMobile,
                             text: 'Punktzahl',
                             color: darkMode ? '#f5f5f5' : '#333'
                         },
                         ticks: {
-                            color: darkMode ? '#f5f5f5' : '#333'
+                            color: darkMode ? '#f5f5f5' : '#333',
+                            font: {
+                                size: isMobile ? 10 : 12
+                            }
                         },
                         grid: {
                             color: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
@@ -200,7 +214,7 @@ const StatisticsPage = () => {
                     x: {
                         type: 'category',
                         title: {
-                            display: true,
+                            display: !isMobile,
                             text: 'Zeitpunkt',
                             color: darkMode ? '#f5f5f5' : '#333'
                         },
@@ -208,16 +222,25 @@ const StatisticsPage = () => {
                             maxRotation: 45,
                             minRotation: 45,
                             color: darkMode ? '#f5f5f5' : '#333',
+                            font: {
+                                size: isMobile ? 8 : 12
+                            },
                             callback: function(value, index, values) {
-                                // Show only date for first entry of the day
-                                const label = uniqueLabels[index];
-                                if (!label) return '';
-
-                                const datePart = label.split(' ')[0];
-                                if (index === 0 || !uniqueLabels[index - 1]?.startsWith(datePart)) {
-                                    return label;
+                                if (isMobile) {
+                                    // Auf Mobilgeräten nur die Zeit anzeigen
+                                    const label = uniqueLabels[index];
+                                    if (!label) return '';
+                                    return label.split(' ')[1] || '';
+                                } else {
+                                    // Auf Desktop vollständiges Datum + Zeit anzeigen
+                                    const label = uniqueLabels[index];
+                                    if (!label) return '';
+                                    const datePart = label.split(' ')[0];
+                                    if (index === 0 || !uniqueLabels[index - 1]?.startsWith(datePart)) {
+                                        return label;
+                                    }
+                                    return label.split(' ')[1] || '';
                                 }
-                                return label.split(' ')[1] || '';
                             }
                         },
                         grid: {
@@ -238,9 +261,15 @@ const StatisticsPage = () => {
                         }
                     },
                     legend: {
+                        position: isMobile ? 'bottom' : 'top',
                         labels: {
-                            color: darkMode ? '#f5f5f5' : '#333'
-                        }
+                            color: darkMode ? '#f5f5f5' : '#333',
+                            boxWidth: isMobile ? 10 : 20,
+                            font: {
+                                size: isMobile ? 10 : 12
+                            }
+                        },
+                        display: !isMobile || datasets.length <= 3 // Auf Mobilgeräten nur anzeigen wenn wenige Datasets
                     }
                 }
             }
@@ -418,6 +447,75 @@ const StatisticsPage = () => {
 
     const playerStatsData = calculatePlayerStats();
 
+    // Render mobile-freundliche Tabelle
+    const renderMobileTable = () => {
+        if (games.length === 0) {
+            return (
+                <div className="no-data-message">Keine Spiele gefunden</div>
+            );
+        }
+
+        return (
+            <div className="mobile-game-list">
+                {games
+                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                    .map(game => {
+                        // Find winner if possible
+                        let winner = 'Nicht abgeschlossen';
+                        if (game.players) {
+                            game.players.forEach(player => {
+                                if (player.setsWon >= Math.ceil(game.numSets / 2)) {
+                                    winner = player.name;
+                                }
+                            });
+                        }
+
+                        const gameDate = new Date(game.timestamp);
+
+                        return (
+                            <div className="mobile-game-card" key={game.id}>
+                                <div className="mobile-game-header">
+                                    <div className="mobile-game-date">
+                                        {gameDate.toLocaleDateString()} {gameDate.toLocaleTimeString([], {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}
+                                    </div>
+                                    <div className="mobile-game-type">{game.gameType}</div>
+                                </div>
+                                <div className="mobile-game-info">
+                                    <div className="mobile-game-detail">
+                                        <span className="mobile-label">Spieler:</span>
+                                        <span>{game.players ? game.players.map(p => p.name).join(', ') : 'Unbekannt'}</span>
+                                    </div>
+                                    <div className="mobile-game-detail">
+                                        <span className="mobile-label">Gewinner:</span>
+                                        <span>{winner}</span>
+                                    </div>
+                                    <div className="mobile-game-detail">
+                                        <span className="mobile-label">Sets:</span>
+                                        <span>{game.numSets}</span>
+                                    </div>
+                                    <div className="mobile-game-detail">
+                                        <span className="mobile-label">Legs:</span>
+                                        <span>{game.numLegs}</span>
+                                    </div>
+                                </div>
+                                <div className="mobile-game-actions">
+                                    <button
+                                        className="btn-danger delete-game"
+                                        onClick={() => showDeleteGameConfirmation(game.id)}
+                                    >
+                                        Löschen
+                                    </button>
+                                </div>
+                            </div>
+                        );
+                    })}
+            </div>
+        );
+    };
+
     return (
         <>
             <ThemeToggle />
@@ -432,6 +530,7 @@ const StatisticsPage = () => {
                     <nav className="app-navigation">
                         <Link to="/" className="nav-item">Home</Link>
                         <Link to="/statistics" className="nav-item active">Statistiken</Link>
+                        <a href="#" className="nav-item">Einstellungen</a>
                     </nav>
                 </header>
 
@@ -586,66 +685,72 @@ const StatisticsPage = () => {
 
                 <div className="stats-container">
                     <h2>Spielübersicht</h2>
-                    <table id="games-table">
-                        <thead>
-                        <tr>
-                            <th>Datum</th>
-                            <th>Spieltyp</th>
-                            <th>Spieler</th>
-                            <th>Gewinner</th>
-                            <th>Sets</th>
-                            <th>Legs</th>
-                            <th>Aktionen</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {games.length > 0 ? (
-                            games
-                                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-                                .map(game => {
-                                    // Find winner if possible
-                                    let winner = 'Nicht abgeschlossen';
-                                    if (game.players) {
-                                        game.players.forEach(player => {
-                                            if (player.setsWon >= Math.ceil(game.numSets / 2)) {
-                                                winner = player.name;
-                                            }
-                                        });
-                                    }
-
-                                    const gameDate = new Date(game.timestamp);
-
-                                    return (
-                                        <tr key={game.id}>
-                                            <td>
-                                                {gameDate.toLocaleDateString()} {gameDate.toLocaleTimeString([], {
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })}
-                                            </td>
-                                            <td>{game.gameType}</td>
-                                            <td>{game.players ? game.players.map(p => p.name).join(', ') : 'Unbekannt'}</td>
-                                            <td>{winner}</td>
-                                            <td>{game.numSets}</td>
-                                            <td>{game.numLegs}</td>
-                                            <td>
-                                                <button
-                                                    className="btn-danger delete-game"
-                                                    onClick={() => showDeleteGameConfirmation(game.id)}
-                                                >
-                                                    Löschen
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })
-                        ) : (
+                    {isMobile ? (
+                        // Mobile-freundliche Alternative zur Tabelle
+                        renderMobileTable()
+                    ) : (
+                        // Desktop-Tabelle
+                        <table id="games-table">
+                            <thead>
                             <tr>
-                                <td colSpan="7">Keine Spiele gefunden</td>
+                                <th>Datum</th>
+                                <th>Spieltyp</th>
+                                <th>Spieler</th>
+                                <th>Gewinner</th>
+                                <th>Sets</th>
+                                <th>Legs</th>
+                                <th>Aktionen</th>
                             </tr>
-                        )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                            {games.length > 0 ? (
+                                games
+                                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                                    .map(game => {
+                                        // Find winner if possible
+                                        let winner = 'Nicht abgeschlossen';
+                                        if (game.players) {
+                                            game.players.forEach(player => {
+                                                if (player.setsWon >= Math.ceil(game.numSets / 2)) {
+                                                    winner = player.name;
+                                                }
+                                            });
+                                        }
+
+                                        const gameDate = new Date(game.timestamp);
+
+                                        return (
+                                            <tr key={game.id}>
+                                                <td>
+                                                    {gameDate.toLocaleDateString()} {gameDate.toLocaleTimeString([], {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                                </td>
+                                                <td>{game.gameType}</td>
+                                                <td>{game.players ? game.players.map(p => p.name).join(', ') : 'Unbekannt'}</td>
+                                                <td>{winner}</td>
+                                                <td>{game.numSets}</td>
+                                                <td>{game.numLegs}</td>
+                                                <td>
+                                                    <button
+                                                        className="btn-danger delete-game"
+                                                        onClick={() => showDeleteGameConfirmation(game.id)}
+                                                    >
+                                                        Löschen
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                            ) : (
+                                <tr>
+                                    <td colSpan="7">Keine Spiele gefunden</td>
+                                </tr>
+                            )}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
             </div>
 

@@ -1,13 +1,17 @@
 import React from 'react';
 
-const PlayerCard = ({ player, isActive, isLeading, hasLowestScore, numSets, numLegs }) => {
+const PlayerCard = ({ player, isActive, isLeading, hasLowestScore, isWinner, numSets, numLegs }) => {
     const legsNeeded = Math.ceil(numLegs / 2);
     const setsNeeded = Math.ceil(numSets / 2);
 
     return (
-        <div className={`player-card ${isActive ? 'active' : ''}`}>
+        <div className={`player-card ${isActive ? 'active' : ''} ${isWinner ? 'winner' : ''}`}>
             {isActive && (
                 <div className="player-turn-indicator">Aktuell am Zug</div>
+            )}
+
+            {isWinner && (
+                <div className="winner-indicator">🏆 Gewinner 🏆</div>
             )}
 
             <div className="player-name">

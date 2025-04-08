@@ -6,7 +6,7 @@ const GameContext = createContext();
 export const useGame = () => useContext(GameContext);
 
 export const GameProvider = ({ children }) => {
-    const { saveGame, savePlayer, saveThrow } = useDatabase();
+    const { saveGame, savePlayer, saveThrow, db } = useDatabase();
 
     const [gameState, setGameState] = useState({
         players: [],
@@ -20,8 +20,10 @@ export const GameProvider = ({ children }) => {
         history: [],
         turnStartTime: null,
         gameStartTime: null,
+        gameEndTime: null,
         gameId: null,
-        isGameActive: false
+        isGameActive: false,
+        winner: null
     });
 
     const [timerInterval, setTimerInterval] = useState(null);
@@ -34,11 +36,16 @@ export const GameProvider = ({ children }) => {
                 const parsedState = JSON.parse(savedState);
                 parsedState.turnStartTime = new Date(parsedState.turnStartTime);
                 parsedState.gameStartTime = new Date(parsedState.gameStartTime);
+                if (parsedState.gameEndTime) {
+                    parsedState.gameEndTime = new Date(parsedState.gameEndTime);
+                }
                 parsedState.history.forEach(entry => entry.timestamp = new Date(entry.timestamp));
-                parsedState.isGameActive = true;
+                parsedState.isGameActive = parsedState.isGameActive !== false; // Falls undefined, auf true setzen
 
                 setGameState(parsedState);
-                startTurnTimer();
+                if (parsedState.isGameActive) {
+                    startTurnTimer();
+                }
             } catch (error) {
                 console.error('Error loading saved game state:', error);
                 sessionStorage.removeItem('dartGameState');
@@ -89,8 +96,10 @@ export const GameProvider = ({ children }) => {
             history: [],
             turnStartTime: new Date(),
             gameStartTime: new Date(),
+            gameEndTime: null,
             gameId: null,
-            isGameActive: true
+            isGameActive: true,
+            winner: null
         };
 
         // Create player objects
@@ -234,6 +243,11 @@ export const GameProvider = ({ children }) => {
 
                 // Check if player has won the game
                 if (currentPlayer.setsWon >= Math.ceil(newGameState.numSets / 2)) {
+                    // Setze das isGameActive-Flag auf false, um das Spielende zu signalisieren
+                    newGameState.isGameActive = false;
+                    newGameState.gameEndTime = new Date();
+                    newGameState.winner = currentPlayer.name;
+
                     newGameState.history.push({
                         text: `${currentPlayer.name} gewinnt das Spiel!`,
                         timestamp: new Date()
@@ -256,6 +270,38 @@ export const GameProvider = ({ children }) => {
 
                     // Create confetti animation
                     createConfetti();
+
+                    // Speichere den finalen Spielstatus in der Datenbank
+                    if (newGameState.gameId && db) {
+                        const finalGameData = {
+                            gameType: newGameState.gameType,
+                            numSets: newGameState.numSets,
+                            numLegs: newGameState.numLegs,
+                            startTime: newGameState.gameStartTime,
+                            endTime: newGameState.gameEndTime,
+                            winner: currentPlayer.name,
+                            timestamp: new Date(),
+                            players: newGameState.players.map(player => ({
+                                name: player.name,
+                                finalScore: player.score,
+                                legsWon: player.legsWon,
+                                setsWon: player.setsWon
+                            }))
+                        };
+
+                        try {
+                            // Aktualisiere das Spiel in der Datenbank
+                            const tx = db.transaction('games', 'readwrite');
+                            const gamesStore = tx.objectStore('games');
+                            await gamesStore.put({
+                                ...finalGameData,
+                                id: newGameState.gameId
+                            });
+                            await tx.done;
+                        } catch (error) {
+                            console.error('Error updating final game state:', error);
+                        }
+                    }
 
                     return { success: true, message: 'game_won' };
                 }
@@ -448,8 +494,10 @@ export const GameProvider = ({ children }) => {
             history: [],
             turnStartTime: null,
             gameStartTime: null,
+            gameEndTime: null,
             gameId: null,
-            isGameActive: false
+            isGameActive: false,
+            winner: null
         });
     };
 
@@ -506,3 +554,5 @@ export const GameProvider = ({ children }) => {
         </GameContext.Provider>
     );
 };
+
+export default GameContext;
