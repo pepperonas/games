@@ -208,7 +208,7 @@ const App = () => {
         <div
             className={`app-container ${isMobile ? 'mobile-view' : ''} ${isLandscape ? 'landscape-view' : 'portrait-view'} ${gameState.screen === 'stats' ? 'stats-visible' : ''}`}>
             {gameState.screen === 'profile' && (
-                <PlayerProfile onProfileSubmit={handleProfileSubmit} />
+                <PlayerProfile onProfileSubmit={handleProfileSubmit}/>
             )}
 
             {gameState.screen === 'start' && (
@@ -232,7 +232,8 @@ const App = () => {
                     onBallExchange={handleBallExchange}
                     isMobile={isMobile}
                     isLandscape={isLandscape}
-                    resetCount={resetCounter} // Der Reset-Counter als Prop
+                    resetCount={resetCounter}
+                    onMainMenu={returnToMainMenu}
                 />
             )}
 

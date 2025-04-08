@@ -19,7 +19,8 @@ const PongGame = ({
                       onBallExchange,
                       isMobile,
                       isLandscape,
-                      resetCount
+                      resetCount,
+                      onMainMenu
                   }) => {
     const canvasRef = useRef(null);
     const requestRef = useRef(null);
@@ -32,6 +33,8 @@ const PongGame = ({
     const [ping, setPing] = useState('-');
     const [gameRunning, setGameRunning] = useState(true);
     const [isMobileDevice, setIsMobileDevice] = useState(false);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
     // Spielstatus
     const gameStateRef = useRef({
         ballX: 400,
@@ -1199,7 +1202,36 @@ const PongGame = ({
         <div className="game-container">
             <canvas ref={canvasRef} width={800} height={500}/>
 
-            <div className="score-display">{scoreText}</div>
+            {/* Neuer Zurück-Button */}
+            <button
+                className="back-to-menu-btn"
+                onClick={() => setShowConfirmDialog(true)}
+                title="Zurück zum Hauptmenü"
+            >
+                ⮜ Menü
+            </button>
+
+            {showConfirmDialog && (
+                <div className="confirm-dialog">
+                    <div className="confirm-dialog-content">
+                        <p>Spiel wirklich beenden?</p>
+                        <div className="confirm-buttons">
+                            <button
+                                className="confirm-yes"
+                                onClick={onMainMenu}
+                            >
+                                Ja
+                            </button>
+                            <button
+                                className="confirm-no"
+                                onClick={() => setShowConfirmDialog(false)}
+                            >
+                                Nein
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {gameMode === 'online-multiplayer' && (
                 <>

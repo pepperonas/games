@@ -38,3 +38,119 @@ canvas {
     font-size: 14px;
     text-align: right;
 }
+
+.back-to-menu-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 8px 12px;
+    background-color: #2C2E3B;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    z-index: 100;
+    opacity: 0.7;
+}
+
+.back-to-menu-btn:hover {
+    background-color: #3a3c4e;
+    opacity: 1;
+}
+
+.back-to-menu-btn:active {
+    transform: scale(0.95);
+}
+
+/* Anpassungen für mobile Geräte */
+@media (max-width: 768px) {
+    .back-to-menu-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    /* Score-Display nach rechts verschieben, damit es nicht mit dem Button überlappt */
+    .score-display {
+        right: 0;
+        width: auto;
+        padding-right: 10px;
+    }
+}
+
+/* Spezifische Anpassung für Landscape-Modus */
+@media (max-width: 915px) and (orientation: landscape) {
+    .back-to-menu-btn {
+        top: 5px;
+        left: 5px;
+        padding: 5px 8px;
+        font-size: 12px;
+    }
+}
+
+.confirm-dialog {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+}
+
+.confirm-dialog-content {
+    background-color: #2C2E3B;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    max-width: 80%;
+}
+
+.confirm-dialog p {
+    margin-bottom: 20px;
+    font-size: 18px;
+}
+
+.confirm-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.confirm-buttons button {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.confirm-yes {
+    background-color: #757575;
+    color: white;
+}
+
+.confirm-no {
+    background-color: #4CAF50;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .confirm-dialog-content {
+        padding: 15px;
+    }
+
+    .confirm-dialog p {
+        font-size: 16px;
+        margin-bottom: 15px;
+    }
+
+    .confirm-buttons button {
+        padding: 6px 15px;
+        font-size: 14px;
+    }
+}
