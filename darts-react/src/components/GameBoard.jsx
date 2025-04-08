@@ -9,9 +9,27 @@ import RestartGameDialog from './RestartGameDialog.jsx';
 const GameBoard = () => {
     const { gameState, undoLastThrow, resetGame, getLeadingPlayer } = useGame();
     const [showRestartConfirmation, setShowRestartConfirmation] = useState(false);
+    const [isMobileView, setIsMobileView] = useState(false);
     const scoreInputRef = useRef(null);
 
     const leadingPlayer = getLeadingPlayer();
+
+    // Erkennt die tatsächliche Viewport-Breite unabhängig von CSS Media Queries
+    useEffect(() => {
+        const checkScreenSize = () => {
+            setIsMobileView(window.innerWidth <= 1024);
+        };
+
+        // Initiale Prüfung
+        checkScreenSize();
+
+        // Event-Listener für Größenänderungen
+        window.addEventListener('resize', checkScreenSize);
+
+        return () => {
+            window.removeEventListener('resize', checkScreenSize);
+        };
+    }, []);
 
     // Finde den Spieler mit den wenigsten verbleibenden Punkten (über 0)
     const getPlayerWithLowestScore = () => {
@@ -88,7 +106,16 @@ const GameBoard = () => {
                             onClick={undoLastThrow}
                             disabled={!!winner}
                         >
-                            Wurf zurücknehmen
+                            {isMobileView ? (
+                                <svg width="20" height="20" viewBox="0 0 24 24">
+                                    <path
+                                        fill="currentColor"
+                                        d="M12.5 8c-2.65 0-5.05 1-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"
+                                    />
+                                </svg>
+                            ) : (
+                                "Wurf zurücknehmen"
+                            )}
                         </button>
                     </div>
 

@@ -1609,3 +1609,30 @@ tr:hover td {
         right: 15px;
     }
 }
+
+@media (max-width: 1024px) {
+    /* Größerer Breakpoint, um auch große Smartphones abzudecken */
+    #undo-throw .button-text {
+        display: none !important; /* Höhere Priorität mit !important */
+    }
+
+    #undo-throw .button-icon {
+        display: inline-block !important;
+    }
+
+    /* Button etwas kompakter gestalten */
+    #undo-throw {
+        padding: 10px 12px;
+        min-width: auto;
+        background-color: #E91E63;
+    }
+}
+
+/* Default Styles für Desktop - höhere Spezifität */
+body #undo-throw .button-icon {
+    display: none;
+}
+
+body #undo-throw .button-text {
+    display: inline-block;
+}
