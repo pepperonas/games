@@ -6,8 +6,8 @@
 }
 
 .touch-button {
-    width: 70px;
-    height: 70px;
+    width: 90px;
+    height: 90px;
     border-radius: 50%;
     background-color: rgba(255, 255, 255, 0.2);
     border: 2px solid rgba(255, 255, 255, 0.4);
@@ -37,17 +37,17 @@
     }
 
     .up-button {
-        left: 20%;
+        left: 10%;
         bottom: 0;
     }
 
     .down-button {
-        right: 20%;
+        right: 10%;
         bottom: 0;
     }
 
     .game-container {
-        padding-bottom: 80px; /* Raum für die Touch-Controls */
+        padding-bottom: 240px; /* Raum für die Touch-Controls */
     }
 }
 
@@ -65,8 +65,8 @@
 
     .touch-button {
         pointer-events: auto; /* Überschreibt parent property */
-        width: 60px;
-        height: 60px;
+        width: 80px;
+        height: 80px;
         position: fixed; /* Fixed statt absolute für konstante Position */
     }
 
