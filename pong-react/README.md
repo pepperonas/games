@@ -66,6 +66,110 @@ Um deine Statistiken auf ein anderes Gerät zu übertragen:
 - Die Statistiken werden als JSON-Struktur im Speicher abgelegt
 - Keine Daten werden an Server übertragen; alles bleibt lokal auf deinem Gerät
 
+# Spielerwechsel im StartScreen
+
+Diese Dokumentation erklärt, wie die neue Spielerwechsel-Funktion im StartScreen implementiert wurde
+und was für die Integration in das bestehende Projekt notwendig ist.
+
+## Überblick der Funktionalität
+
+Die neue Spielerwechsel-Funktion ermöglicht es Benutzern:
+
+- Den aktuellen Spieler direkt aus dem StartScreen zu wechseln, ohne zum Profilbildschirm
+  zurückkehren zu müssen
+- Zwischen bereits erstellten Spielerprofilen zu wechseln
+- Bei Bedarf zur Erstellung eines neuen Spielers zurückzukehren
+- Die Funktion auf allen Geräten (Desktop, Tablet, Smartphone) nutzen zu können
+
+## Benötigte Änderungen
+
+### 1. StartScreen.jsx
+
+Der StartScreen wurde erweitert, um:
+
+- Einen Wechsel-Button neben dem Spielernamen anzuzeigen
+- Eine Spielerliste darzustellen, wenn der Button geklickt wird
+- Die Auswahl eines vorhandenen Spielers zu ermöglichen
+- Die Option zur Erstellung eines neuen Spielers anzubieten
+
+### 2. StartScreen.css
+
+Das CSS wurde um folgende Stile erweitert:
+
+- Styling für den Spielerwechsel-Button
+- Design der Spielerliste im Modal/Dropdown
+- Responsive Anpassungen für verschiedene Bildschirmgrößen und Ausrichtungen
+- Animationen für ein zeitgemäßes Benutzererlebnis
+
+### 3. App.jsx
+
+In der App-Komponente muss:
+
+- Eine neue `handleSwitchPlayer`-Funktion implementiert werden
+- Diese Funktion als Prop an den StartScreen übergeben werden
+
+## Implementierungsschritte
+
+### In App.jsx hinzufügen:
+
+```jsx
+// Neue Funktion zum Wechseln des Spielers
+const handleSwitchPlayer = (newPlayerName = null) => {
+    if (newPlayerName) {
+        // Wenn ein Spieler ausgewählt wurde, direkt zu diesem wechseln
+        setPlayerName(newPlayerName);
+        localStorage.setItem('pongLastProfile', newPlayerName);
+    } else {
+        // Wenn kein Spieler ausgewählt wurde, zum Profilbildschirm wechseln
+        setGameState({
+            ...gameState,
+            screen: 'profile'
+        });
+    }
+};
+
+// Die Prop an StartScreen übergeben
+{
+    gameState.screen === 'start' && (
+        <StartScreen
+            // Bestehende Props...
+            onSwitchPlayer={handleSwitchPlayer} // Neue Prop
+        />
+    )
+}
+```
+
+### In StartScreen.jsx:
+
+Den StartScreen entsprechend der bereitgestellten Implementierung aktualisieren. Hauptpunkte:
+
+- `showPlayerList` State zum Anzeigen/Verbergen der Spielerliste
+- `availablePlayers` State zum Laden der verfügbaren Spieler
+- Funktionen für den Spielerwechsel und die Auswahl
+- UI-Elemente für den Button und die Spielerliste
+
+### CSS-Stile:
+
+Die CSS-Stile aus der bereitgestellten Implementierung in StartScreen.css einfügen.
+
+## Designentscheidungen
+
+1. **Overlay statt Dropdown**: Für bessere mobile Unterstützung wurde ein Vollbild-Overlay gewählt
+2. **Erkennbar als aktueller Spieler**: Der aktuelle Spieler wird mit einem Häkchen und
+   hervorgehobenem Hintergrund markiert
+3. **Animationen**: Sanfte Ein-/Ausblendanimationen für ein modernes Gefühl
+4. **Responsive Design**: Anpassungen für verschiedene Bildschirmgrößen und Orientierungen
+5. **Farbschema**: Konsistente Farben mit #2C2E3B als Hauptfarbton gemäß Anforderung
+
+## Verbesserungen für die Zukunft
+
+Mögliche zukünftige Erweiterungen könnten sein:
+
+- Suchfunktion für viele Spielerprofile
+- Option zum Bearbeiten oder Löschen von Spielerprofilen
+- Avatare oder Icons für Spielerprofile
+- Pagination für sehr viele Spieler
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

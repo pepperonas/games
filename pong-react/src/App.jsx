@@ -88,6 +88,23 @@ const App = () => {
         });
     };
 
+    const handleSwitchPlayer = (newPlayerName = null) => {
+        if (newPlayerName) {
+            // Wenn ein bestimmter Spieler ausgewählt wurde, wechsle direkt zu diesem
+            setPlayerName(newPlayerName);
+            setStatsService(new StatsService(newPlayerName));
+            // Setze diesen Spieler als zuletzt verwendeten Spieler
+            localStorage.setItem('pongLastProfile', newPlayerName);
+            // Bleibe im Start-Screen
+        } else {
+            // Wenn kein Spieler ausgewählt wurde, zeige Profile-Screen
+            setGameState({
+                ...gameState,
+                screen: 'profile'
+            });
+        }
+    };
+
     const startSinglePlayerGame = (difficulty) => {
         setGameState({
             ...gameState,
@@ -220,6 +237,7 @@ const App = () => {
                     playerName={playerName}
                     isMobile={isMobile}
                     isLandscape={isLandscape}
+                    onSwitchPlayer={handleSwitchPlayer}
                 />
             )}
 

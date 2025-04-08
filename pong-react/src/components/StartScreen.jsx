@@ -1,4 +1,4 @@
-// components/StartScreen.jsx - Mit Statistik-Button
+// Änderungen für StartScreen.jsx
 import React, { useEffect, useState } from 'react';
 import './StartScreen.css';
 
@@ -9,9 +9,22 @@ const StartScreen = ({
                          onShowStats,
                          playerName,
                          isMobile,
-                         isLandscape
+                         isLandscape,
+                         onSwitchPlayer // Neue Prop für den Spielerwechsel
                      }) => {
     const [isWideDevice, setIsWideDevice] = useState(false);
+    const [showPlayerList, setShowPlayerList] = useState(false);
+    const [availablePlayers, setAvailablePlayers] = useState([]);
+
+    // Laden der verfügbaren Spieler aus localStorage
+    useEffect(() => {
+        const loadPlayers = () => {
+            const profiles = JSON.parse(localStorage.getItem('pongProfiles')) || [];
+            setAvailablePlayers(profiles);
+        };
+
+        loadPlayers();
+    }, []);
 
     // Prüft, ob das Gerät sehr breit ist (wie S24 Ultra)
     useEffect(() => {
@@ -32,6 +45,29 @@ const StartScreen = ({
         };
     }, []);
 
+    // Spielerwechsel initiieren
+    const handlePlayerSwitch = () => {
+        if (availablePlayers.length <= 1) {
+            // Wenn keine anderen Spieler verfügbar sind, direkt zum Profilbildschirm
+            onSwitchPlayer();
+        } else {
+            // Sonst Spielerliste anzeigen
+            setShowPlayerList(!showPlayerList);
+        }
+    };
+
+    // Spieler auswählen
+    const selectPlayer = (name) => {
+        onSwitchPlayer(name);
+        setShowPlayerList(false);
+    };
+
+    // Neuen Spieler erstellen
+    const createNewPlayer = () => {
+        onSwitchPlayer(); // Zurück zum Profilbildschirm ohne Spieler auszuwählen
+        setShowPlayerList(false);
+    };
+
     // CSS-Klassen basierend auf Gerätetyp und Orientierung
     const screenClasses = `start-screen ${isLandscape ? 'landscape-mode' : ''} ${isWideDevice ? 'wide-device' : ''}`;
 
@@ -41,7 +77,38 @@ const StartScreen = ({
 
             <div className="player-welcome">
                 Willkommen, <span className="player-name">{playerName}</span>!
+                <button
+                    className="switch-player-btn"
+                    onClick={handlePlayerSwitch}
+                    aria-label="Spieler wechseln"
+                >
+                    <span className="switch-icon">⟳</span>
+                </button>
             </div>
+
+            {/* Spielerliste Dropdown/Popover */}
+            {showPlayerList && (
+                <div className="player-list-container">
+                    <div className="player-list">
+                        <h3>Spieler wechseln</h3>
+                        <ul>
+                            {availablePlayers.map((player, index) => (
+                                <li key={index} className={player === playerName ? 'current-player' : ''}>
+                                    <button onClick={() => selectPlayer(player)}>
+                                        {player} {player === playerName && <span className="current-mark">✓</span>}
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                        <button className="new-player-btn" onClick={createNewPlayer}>
+                            + Neuer Spieler
+                        </button>
+                        <button className="close-list-btn" onClick={() => setShowPlayerList(false)}>
+                            Schließen
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <div className="button-group">
                 {/* Die drei Schwierigkeits-Buttons immer in einer horizontalen Reihe */}

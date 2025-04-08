@@ -11,3 +11,209 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.player-welcome {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #ccc;
+  text-align: center;
+}
+
+.switch-player-btn {
+  background: none;
+  border: none;
+  color: #4CAF50;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: rgba(76, 175, 80, 0.2);
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.switch-player-btn:hover {
+  background-color: rgba(76, 175, 80, 0.3);
+  transform: rotate(30deg);
+}
+
+.switch-icon {
+  display: inline-block;
+  font-size: 16px;
+}
+
+/* Spieler-Liste */
+.player-list-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: 300px;
+  z-index: 100;
+}
+
+.player-list {
+  background-color: #2C2E3B;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  padding: 15px;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease;
+}
+
+.player-list h3 {
+  margin: 0 0 15px 0;
+  text-align: center;
+  color: white;
+  font-size: 18px;
+}
+
+.player-list ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0 0 15px 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.player-list li {
+  margin-bottom: 5px;
+}
+
+.player-list li button {
+  width: 100%;
+  padding: 10px;
+  text-align: left;
+  background-color: #3a3c4e;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.player-list li.current-player button {
+  background-color: #4a4d5e;
+  font-weight: bold;
+}
+
+.player-list li button:hover {
+  background-color: #4a4d5e;
+}
+
+.current-mark {
+  color: #4CAF50;
+  margin-left: 5px;
+}
+
+.new-player-btn, .close-list-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.new-player-btn:hover {
+  background-color: #45a049;
+}
+
+.close-list-btn {
+  background-color: #757575;
+  margin-bottom: 0;
+}
+
+.close-list-btn:hover {
+  background-color: #616161;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile-Anpassungen */
+@media (max-width: 768px) {
+  .player-welcome {
+    font-size: 16px;
+  }
+
+  .switch-player-btn {
+    width: 22px;
+    height: 22px;
+    font-size: 14px;
+  }
+
+  .player-list-container {
+    width: 90%;
+  }
+
+  .player-list h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  .player-list li button {
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  .new-player-btn, .close-list-btn {
+    padding: 8px;
+  }
+}
+
+/* Landscape-Anpassungen */
+@media (max-width: 915px) and (orientation: landscape) {
+  .player-list {
+    padding: 10px;
+  }
+
+  .player-list ul {
+    max-height: 150px;
+    margin-bottom: 10px;
+  }
+
+  .player-list li button {
+    padding: 6px 8px;
+    font-size: 14px;
+  }
+
+  .new-player-btn, .close-list-btn {
+    padding: 6px 8px;
+    font-size: 13px;
+    margin-bottom: 5px;
+  }
+}
+
+/* Sehr schmale Geräte */
+@media (max-width: 320px) {
+  .player-list-container {
+    width: 95%;
+  }
+}
