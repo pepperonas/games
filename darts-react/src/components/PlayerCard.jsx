@@ -11,7 +11,8 @@ const PlayerCard = ({ player, isActive, isLeading, numSets, numLegs }) => {
             )}
 
             <div className="player-name">
-                {isLeading && player.setsWon > 0 || player.legsWon > 0 || player.averageScore > 0 ? (
+                {/* Korrigierte Logik: Nur der führende Spieler erhält die Krone */}
+                {isLeading ? (
                     <>
                         <span className="crown-icon">👑</span> {player.name}
                     </>

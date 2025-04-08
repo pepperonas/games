@@ -29,6 +29,12 @@ const HomePage = () => {
             <footer className="footer">
                 Made with ❤️ by Martin Pfeffer
             </footer>
+
+            {/* Konfiguriere das Audio-Element mit der korrekten Pfadeinstellung */}
+            <audio id="relight-sound" preload="auto" style={{ display: 'none' }}>
+                <source src="assets/relight.m4a" type="audio/mp4" />
+                Ihr Browser unterstützt das Audio-Element nicht.
+            </audio>
         </>
     );
 };

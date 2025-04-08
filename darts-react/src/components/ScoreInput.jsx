@@ -3,7 +3,6 @@ import { useGame } from '../context/GameContext';
 
 const ScoreInput = forwardRef((props, ref) => {
     const { submitScore } = useGame();
-    const [score, setScore] = useState('');
     const [message, setMessage] = useState(null);
 
     useEffect(() => {
@@ -12,17 +11,30 @@ const ScoreInput = forwardRef((props, ref) => {
             const timer = setTimeout(() => {
                 setMessage(null);
             }, 3000);
-
             return () => clearTimeout(timer);
         }
     }, [message]);
 
     const handleSubmit = () => {
-        const scoreValue = parseInt(score) || 0;
+        // Imperativ den DOM-Wert direkt auslesen
+        const inputElement = document.getElementById('current-input');
+        if (!inputElement) return;
+
+        const scoreValue = parseInt(inputElement.value, 10) || 0;
+
+        // Validierung der Punktzahl
+        if (isNaN(scoreValue) || scoreValue < 0 || scoreValue > 180) {
+            setMessage("Bitte gib eine gültige Punktzahl zwischen 0 und 180 ein.");
+            return;
+        }
 
         const result = submitScore(scoreValue);
+
         if (result.success) {
-            setScore('');
+            // Imperativ das Eingabefeld zurücksetzen
+            inputElement.value = '';
+
+            // Fehlermeldungen anzeigen wenn nötig
             if (result.message && result.message !== 'score_updated') {
                 setMessage(result.message);
             }
@@ -31,30 +43,36 @@ const ScoreInput = forwardRef((props, ref) => {
         }
     };
 
-    const handleKeyPress = (e) => {
+    const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
+            e.preventDefault();
             handleSubmit();
         }
     };
 
     const handleClear = () => {
-        setScore('');
-        ref.current.focus();
+        // Imperativ das Eingabefeld leeren
+        const inputElement = document.getElementById('current-input');
+        if (inputElement) {
+            inputElement.value = '';
+            inputElement.focus();
+        }
+        setMessage(null);
     };
 
     return (
         <div className="input-container">
             <div className="input-group">
                 <input
-                    type="number"
+                    type="text"
                     id="current-input"
                     ref={ref}
                     placeholder="Gesamtpunkte für 3 Würfe"
-                    min="0"
-                    max="180"
-                    value={score}
-                    onChange={(e) => setScore(e.target.value)}
-                    onKeyPress={handleKeyPress}
+                    defaultValue="" // Wir verwenden defaultValue statt value
+                    onKeyDown={handleKeyDown}
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    autoComplete="off"
                 />
                 <button
                     id="clear-input"

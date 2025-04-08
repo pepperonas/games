@@ -244,10 +244,14 @@ export const GameProvider = ({ children }) => {
                     setGameState(newGameState);
 
                     // Play win sound
-                    const winSound = document.getElementById('relight-sound');
-                    if (winSound) {
-                        winSound.currentTime = 0;
-                        winSound.play();
+                    try {
+                        const winSound = document.getElementById('relight-sound');
+                        if (winSound) {
+                            winSound.currentTime = 0;
+                            winSound.play().catch(e => console.error("Audio Playback Error:", e));
+                        }
+                    } catch (error) {
+                        console.error("Error playing victory sound:", error);
                     }
 
                     // Create confetti animation
@@ -284,10 +288,14 @@ export const GameProvider = ({ children }) => {
             setGameState(newGameState);
 
             // Play win sound
-            const winSound = document.getElementById('relight-sound');
-            if (winSound) {
-                winSound.currentTime = 0;
-                winSound.play();
+            try {
+                const winSound = document.getElementById('relight-sound');
+                if (winSound) {
+                    winSound.currentTime = 0;
+                    winSound.play().catch(e => console.error("Audio Playback Error:", e));
+                }
+            } catch (error) {
+                console.error("Error playing victory sound:", error);
             }
 
             // Create confetti for leg win
@@ -466,12 +474,13 @@ export const GameProvider = ({ children }) => {
             return playersWithMaxLegs[0];
         }
 
-        // If tied on legs, check average score
-        const maxAvg = Math.max(...playersWithMaxLegs.map(p => p.averageScore));
-        const playersWithMaxAvg = playersWithMaxLegs.filter(p => p.averageScore === maxAvg);
+        // Wenn Gleichstand bei Sätzen und Legs besteht, gewinnt der Spieler mit dem
+        // niedrigsten verbleibenden Punktestand (weil man bei Darts Punkte abzieht)
+        const minRemainingScore = Math.min(...playersWithMaxLegs.map(p => p.score));
+        const playersWithMinScore = playersWithMaxLegs.filter(p => p.score === minRemainingScore);
 
-        if (playersWithMaxAvg.length >= 1) {
-            return playersWithMaxAvg[0];
+        if (playersWithMinScore.length >= 1) {
+            return playersWithMinScore[0];
         }
 
         // Fallback to first player
@@ -491,7 +500,7 @@ export const GameProvider = ({ children }) => {
         >
             {children}
             <audio id="relight-sound" preload="auto">
-                <source src="/assets/relight.m4a" type="audio/mp4" />
+                <source src="assets/relight.m4a" type="audio/mp4" />
                 Ihr Browser unterstützt das Audio-Element nicht.
             </audio>
         </GameContext.Provider>
