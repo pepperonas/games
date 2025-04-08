@@ -6,7 +6,6 @@ const {v4: uuidv4} = require('uuid');
 const path = require('path');
 require('dotenv').config();
 
-// Sample questions (you can replace these with your own question database)
 const sampleQuestions = require('./questions');
 
 const app = express();
