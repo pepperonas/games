@@ -1,11 +1,11 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { openDB } from 'idb';
+import React, {createContext, useContext, useEffect, useState} from 'react';
+import {openDB} from 'idb';
 
 const DatabaseContext = createContext();
 
 export const useDatabase = () => useContext(DatabaseContext);
 
-export const DatabaseProvider = ({ children }) => {
+export const DatabaseProvider = ({children}) => {
     const [db, setDb] = useState(null);
     const [dbStatus, setDbStatus] = useState('connecting'); // 'connecting', 'connected', 'error'
 
@@ -20,9 +20,9 @@ export const DatabaseProvider = ({ children }) => {
                                 keyPath: 'id',
                                 autoIncrement: true
                             });
-                            throwsStore.createIndex('gameId', 'gameId', { unique: false });
-                            throwsStore.createIndex('playerId', 'playerId', { unique: false });
-                            throwsStore.createIndex('timestamp', 'timestamp', { unique: false });
+                            throwsStore.createIndex('gameId', 'gameId', {unique: false});
+                            throwsStore.createIndex('playerId', 'playerId', {unique: false});
+                            throwsStore.createIndex('timestamp', 'timestamp', {unique: false});
                         }
 
                         // Create games store if it doesn't exist
@@ -31,7 +31,7 @@ export const DatabaseProvider = ({ children }) => {
                                 keyPath: 'id',
                                 autoIncrement: true
                             });
-                            gamesStore.createIndex('timestamp', 'timestamp', { unique: false });
+                            gamesStore.createIndex('timestamp', 'timestamp', {unique: false});
                         }
 
                         // Create players store if it doesn't exist
@@ -40,7 +40,7 @@ export const DatabaseProvider = ({ children }) => {
                                 keyPath: 'id',
                                 autoIncrement: true
                             });
-                            playersStore.createIndex('name', 'name', { unique: false });
+                            playersStore.createIndex('name', 'name', {unique: false});
                         }
                     }
                 });
@@ -194,15 +194,25 @@ export const DatabaseProvider = ({ children }) => {
                 await tx.objectStore('players').delete(playerId);
             }
 
-            // Delete all throws of this player
+            // Verbesserte Methode zum Löschen aller Würfe dieses Spielers
             const throwsStore = tx.objectStore('throws');
-            const throwsCursor = await throwsStore.openCursor();
 
-            while (throwsCursor) {
-                if (throwsCursor.value.playerId === playerId || throwsCursor.value.playerName === playerName) {
-                    await throwsCursor.delete();
+            // Alle Würfe mit der Spieler-ID finden (falls vorhanden)
+            if (playerId) {
+                const playerThrows = await throwsStore.index('playerId').getAll(playerId);
+                for (const throwData of playerThrows) {
+                    await throwsStore.delete(throwData.id);
                 }
-                await throwsCursor.continue();
+            }
+
+            // Zusätzlich nach dem Namen suchen, falls Würfe nur mit Namen, aber ohne ID existieren
+            if (playerName) {
+                const allThrows = await throwsStore.getAll();
+                for (const throwData of allThrows) {
+                    if (throwData.playerName === playerName) {
+                        await throwsStore.delete(throwData.id);
+                    }
+                }
             }
 
             await tx.done;
@@ -223,13 +233,16 @@ export const DatabaseProvider = ({ children }) => {
             // Delete game
             await tx.objectStore('games').delete(Number(gameId));
 
-            // Delete all throws of this game
-            const throwsIndex = tx.objectStore('throws').index('gameId');
-            const throwsCursor = await throwsIndex.openCursor(IDBKeyRange.only(Number(gameId)));
+            // Delete all throws of this game - korrigierte Cursor-Implementierung
+            const throwsStore = tx.objectStore('throws');
+            const throwsIndex = throwsStore.index('gameId');
 
-            while (throwsCursor) {
-                await throwsCursor.delete();
-                await throwsCursor.continue();
+            // Holen aller Würfe dieses Spiels ohne Cursor
+            const gameThrows = await throwsIndex.getAll(Number(gameId));
+
+            // Jeder Wurf einzeln löschen
+            for (const throwData of gameThrows) {
+                await throwsStore.delete(throwData.id);
             }
 
             await tx.done;
@@ -376,7 +389,7 @@ export const DatabaseProvider = ({ children }) => {
 
     // Function to import game data
     const importGameData = async (jsonData, clearBefore = false) => {
-        if (!db) return { success: false, message: "Keine Datenbankverbindung vorhanden." };
+        if (!db) return {success: false, message: "Keine Datenbankverbindung vorhanden."};
 
         try {
             const data = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
@@ -410,7 +423,7 @@ export const DatabaseProvider = ({ children }) => {
             if (exportType === 'single_game') {
                 // Import single game
                 const game = data.game;
-                const gameCopy = { ...game };
+                const gameCopy = {...game};
                 delete gameCopy.id;
 
                 const gameId = await db.add('games', gameCopy);
@@ -444,7 +457,7 @@ export const DatabaseProvider = ({ children }) => {
                 // Import throws
                 const throws = Array.isArray(data.throws) ? data.throws : [];
                 for (const throwData of throws) {
-                    const throwCopy = { ...throwData };
+                    const throwCopy = {...throwData};
                     delete throwCopy.id;
                     throwCopy.gameId = gameId;
 
@@ -458,7 +471,7 @@ export const DatabaseProvider = ({ children }) => {
             } else if (exportType === 'all_games') {
                 // Import multiple games
                 for (const game of data.games) {
-                    const gameCopy = { ...game };
+                    const gameCopy = {...game};
                     delete gameCopy.id;
                     delete gameCopy.throws;
                     delete gameCopy.throwCount;
@@ -494,7 +507,7 @@ export const DatabaseProvider = ({ children }) => {
                     // Import throws
                     const throws = game.throws || [];
                     for (const throwData of throws) {
-                        const throwCopy = { ...throwData };
+                        const throwCopy = {...throwData};
                         delete throwCopy.id;
                         throwCopy.gameId = gameId;
 
@@ -535,7 +548,10 @@ export const DatabaseProvider = ({ children }) => {
             };
         } catch (error) {
             console.error('Error importing data:', error);
-            return { success: false, message: `Die Datei konnte nicht importiert werden: ${error.message}` };
+            return {
+                success: false,
+                message: `Die Datei konnte nicht importiert werden: ${error.message}`
+            };
         }
     };
 

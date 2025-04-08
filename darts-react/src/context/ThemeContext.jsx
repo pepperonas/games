@@ -1,23 +1,24 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, {createContext, useContext, useEffect, useState} from 'react';
 
 const ThemeContext = createContext();
 
 export const useTheme = () => useContext(ThemeContext);
 
-export const ThemeProvider = ({ children }) => {
+export const ThemeProvider = ({children}) => {
     const [darkMode, setDarkMode] = useState(false);
 
     useEffect(() => {
         // Check for saved theme preference
         const savedTheme = localStorage.getItem('dartTheme');
-        if (savedTheme === 'light') {
-            setDarkMode(false);
-            document.documentElement.classList.remove('dark-theme');
-        } else {
+        if (savedTheme === 'dark') {
             setDarkMode(true);
             document.documentElement.classList.add('dark-theme');
+        } else {
+            setDarkMode(false);
+            document.documentElement.classList.remove('dark-theme');
+            // Speichere die Präferenz falls noch nicht gesetzt
             if (!savedTheme) {
-                localStorage.setItem('dartTheme', 'dark');
+                localStorage.setItem('dartTheme', 'light');
             }
         }
     }, []);
@@ -37,7 +38,7 @@ export const ThemeProvider = ({ children }) => {
     };
 
     return (
-        <ThemeContext.Provider value={{ darkMode, toggleDarkMode }}>
+        <ThemeContext.Provider value={{darkMode, toggleDarkMode}}>
             {children}
         </ThemeContext.Provider>
     );
