@@ -1,3 +1,93 @@
+/* StatsScreen.css mit Scrolling-Fix */
+.stats-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    background-color: #2C2E3B;
+    padding: 20px;
+    box-sizing: border-box;
+    color: white;
+}
+
+.stats-screen h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.player-selection {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.player-select {
+    padding: 8px 12px;
+    background-color: #3a3c4e;
+    border: 1px solid #4a4d5e;
+    border-radius: 5px;
+    color: white;
+    min-width: 150px;
+}
+
+.stats-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.export-btn {
+    background-color: #FF9800;
+}
+
+.export-btn:hover {
+    background-color: #F57C00;
+}
+
+.import-btn {
+    background-color: #2196F3;
+}
+
+.import-btn:hover {
+    background-color: #1976D2;
+}
+
+.back-btn {
+    background-color: #757575;
+    display: block;
+    margin: 20px auto;
+}
+
+.back-btn:hover {
+    background-color: #616161;
+}
+
+.import-error {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: #f44336;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
 .stats-overview {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -78,6 +168,12 @@
     font-size: 16px;
     color: #ccc;
     text-align: center;
+}
+
+.chart-container {
+    height: 200px;
+    width: 100%;
+    position: relative;
 }
 
 .chart-placeholder {
@@ -162,10 +258,22 @@
     margin: 30px 0;
 }
 
+.no-data {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #888;
+    font-style: italic;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+
 /* Mobile Anpassungen */
 @media (max-width: 768px) {
     .stats-screen {
-        padding: 15px;
+        padding: 15px 10px;
     }
 
     .player-selection {
@@ -179,10 +287,14 @@
 
     .stats-actions {
         width: 100%;
+        justify-content: center;
+        margin-top: 10px;
     }
 
     .stats-actions .button {
         flex: 1;
+        font-size: 14px;
+        padding: 8px 10px;
     }
 
     .stats-overview, .stats-details {
@@ -197,8 +309,12 @@
         min-height: 200px;
     }
 
-    .chart-placeholder {
-        height: 150px;
+    .chart-container {
+        height: 180px;
+    }
+
+    .stat-value {
+        font-size: 24px;
     }
 }
 
@@ -211,4 +327,23 @@
         padding: 8px 5px;
         font-size: 13px;
     }
+}
+
+/* Farben zum Farbschema anpassen */
+.stat-card, .chart-card, .game-history {
+    background-color: rgba(44, 46, 59, 0.7);
+    border: 1px solid rgba(60, 63, 80, 0.5);
+}
+
+.stat-detail-card {
+    background-color: rgba(44, 46, 59, 0.5);
+}
+
+.player-select, .button {
+    background-color: #2C2E3B;
+    border: 1px solid #3a3c4e;
+}
+
+.back-btn {
+    margin-bottom: 50px; /* Platz für den Footer */
 }
