@@ -2,8 +2,15 @@ import React, { useState, forwardRef, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 
 const ScoreInput = forwardRef((props, ref) => {
-    const { submitScore } = useGame();
+    const { submitScore, gameState } = useGame();
     const [message, setMessage] = useState(null);
+    const [inputValue, setInputValue] = useState('');
+
+    // Reagiere auf Spielerwechsel
+    useEffect(() => {
+        // Leere das Eingabefeld bei Spielerwechsel
+        setInputValue('');
+    }, [gameState.currentPlayerIndex]);
 
     useEffect(() => {
         // Clear message after 3 seconds
@@ -16,11 +23,7 @@ const ScoreInput = forwardRef((props, ref) => {
     }, [message]);
 
     const handleSubmit = () => {
-        // Imperativ den DOM-Wert direkt auslesen
-        const inputElement = document.getElementById('current-input');
-        if (!inputElement) return;
-
-        const scoreValue = parseInt(inputElement.value, 10) || 0;
+        const scoreValue = parseInt(inputValue, 10) || 0;
 
         // Validierung der Punktzahl
         if (isNaN(scoreValue) || scoreValue < 0 || scoreValue > 180) {
@@ -31,8 +34,7 @@ const ScoreInput = forwardRef((props, ref) => {
         const result = submitScore(scoreValue);
 
         if (result.success) {
-            // Imperativ das Eingabefeld zurücksetzen
-            inputElement.value = '';
+            setInputValue(''); // Eingabefeld leeren
 
             // Fehlermeldungen anzeigen wenn nötig
             if (result.message && result.message !== 'score_updated') {
@@ -51,13 +53,11 @@ const ScoreInput = forwardRef((props, ref) => {
     };
 
     const handleClear = () => {
-        // Imperativ das Eingabefeld leeren
-        const inputElement = document.getElementById('current-input');
-        if (inputElement) {
-            inputElement.value = '';
-            inputElement.focus();
-        }
+        setInputValue('');
         setMessage(null);
+        if (ref && ref.current) {
+            ref.current.focus();
+        }
     };
 
     return (
@@ -68,7 +68,8 @@ const ScoreInput = forwardRef((props, ref) => {
                     id="current-input"
                     ref={ref}
                     placeholder="Gesamtpunkte für 3 Würfe"
-                    defaultValue="" // Wir verwenden defaultValue statt value
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
                     inputMode="numeric"
                     pattern="[0-9]*"
