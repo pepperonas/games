@@ -13,6 +13,26 @@ const GameBoard = () => {
 
     const leadingPlayer = getLeadingPlayer();
 
+    // Finde den Spieler mit den wenigsten verbleibenden Punkten (über 0)
+    const getPlayerWithLowestScore = () => {
+        if (!gameState.players || gameState.players.length === 0) return null;
+
+        // Filtere Spieler mit Score > 0
+        const activePlayers = gameState.players.filter(player => player.score > 0);
+        if (activePlayers.length === 0) return null;
+
+        let lowestScorePlayer = activePlayers[0];
+        activePlayers.forEach(player => {
+            if (player.score < lowestScorePlayer.score) {
+                lowestScorePlayer = player;
+            }
+        });
+
+        return lowestScorePlayer;
+    };
+
+    const playerWithLowestScore = getPlayerWithLowestScore();
+
     useEffect(() => {
         // Focus on score input when component mounts
         if (scoreInputRef.current) {
@@ -55,6 +75,7 @@ const GameBoard = () => {
                                 player={player}
                                 isActive={index === gameState.currentPlayerIndex}
                                 isLeading={player === leadingPlayer}
+                                hasLowestScore={player === playerWithLowestScore}
                                 numSets={gameState.numSets}
                                 numLegs={gameState.numLegs}
                             />

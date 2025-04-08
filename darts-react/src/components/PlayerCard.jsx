@@ -1,6 +1,6 @@
 import React from 'react';
 
-const PlayerCard = ({ player, isActive, isLeading, numSets, numLegs }) => {
+const PlayerCard = ({ player, isActive, isLeading, hasLowestScore, numSets, numLegs }) => {
     const legsNeeded = Math.ceil(numLegs / 2);
     const setsNeeded = Math.ceil(numSets / 2);
 
@@ -11,12 +11,9 @@ const PlayerCard = ({ player, isActive, isLeading, numSets, numLegs }) => {
             )}
 
             <div className="player-name">
-                {/* Korrigierte Logik: Nur der führende Spieler erhält die Krone */}
-                {isLeading ? (
-                    <>
-                        <span className="crown-icon">👑</span> {player.name}
-                    </>
-                ) : player.name}
+                {isLeading && <span className="crown-icon">👑</span>}
+                {hasLowestScore && <span className="target-icon">🎯</span>}
+                {" "}{player.name}
             </div>
 
             <div className="player-score">{player.score}</div>
