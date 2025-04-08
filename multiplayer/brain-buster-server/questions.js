@@ -1,8 +1,6 @@
-import {v4 as uuidv4} from 'uuid'
-// Sample questions for BrainBuster Multiplayer
 module.exports = [
     {
-        id: uuidv4(),
+        id: '0',
         question: 'Welches Land hat die größte Fläche?',
         options: ['Russland', 'Kanada', 'China', 'USA'],
         correctAnswer: 0,
@@ -10,7 +8,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1',
         question: 'Welche Sprache wird in Brasilien hauptsächlich gesprochen?',
         options: ['Spanisch', 'Englisch', 'Französisch', 'Portugiesisch'],
         correctAnswer: 3,
@@ -18,7 +16,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '2',
         question: 'Was ist die Hauptstadt von Australien?',
         options: ['Sydney', 'Melbourne', 'Canberra', 'Perth'],
         correctAnswer: 2,
@@ -26,7 +24,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '3',
         question: 'Welches Land hat die höchste Bevölkerungsdichte?',
         options: ['Indien', 'Singapur', 'Monaco', 'Bangladesch'],
         correctAnswer: 2,
@@ -34,7 +32,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '4',
         question: 'Welcher ist der längste Fluss der Welt?',
         options: ['Amazonas', 'Nil', 'Jangtse', 'Mississippi'],
         correctAnswer: 1,
@@ -42,7 +40,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '5',
         question: 'Zu welchem Land gehört die Insel Grönland?',
         options: ['Island', 'Norwegen', 'Kanada', 'Dänemark'],
         correctAnswer: 3,
@@ -50,7 +48,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '6',
         question: 'Welches ist der höchste Berg Deutschlands?',
         options: ['Feldberg', 'Großer Arber', 'Zugspitze', 'Brocken'],
         correctAnswer: 2,
@@ -58,7 +56,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '7',
         question: 'Welcher See ist der tiefste der Welt?',
         options: ['Baikalsee', 'Kaspisches Meer', 'Victoriasee', 'Michigansee'],
         correctAnswer: 0,
@@ -66,7 +64,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '8',
         question: 'An wie viele Länder grenzt Deutschland?',
         options: ['7', '8', '9', '10'],
         correctAnswer: 2,
@@ -74,7 +72,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '9',
         question: 'Welche Stadt ist die Hauptstadt von Kanada?',
         options: ['Ottawa', 'Toronto', 'Montreal', 'Vancouver'],
         correctAnswer: 0,
@@ -82,7 +80,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '10',
         question: 'Welches ist der längste Fluss der Welt?',
         options: ['Nil', 'Amazonas', 'Mississippi', 'Jangtse'],
         correctAnswer: 0,
@@ -90,7 +88,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '11',
         question: 'An welchem Ozean liegt Portugal?',
         options: ['Atlantischer Ozean', 'Indischer Ozean', 'Pazifischer Ozean', 'Mittelmeer'],
         correctAnswer: 0,
@@ -98,7 +96,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '12',
         question: 'Welches ist das bevölkerungsreichste Land der Erde?',
         options: ['Indien', 'China', 'USA', 'Indonesien'],
         correctAnswer: 1,
@@ -106,7 +104,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '13',
         question: 'Welches Land wird auch als "Land der tausend Seen" bezeichnet?',
         options: ['Schweden', 'Finnland', 'Kanada', 'Norwegen'],
         correctAnswer: 1,
@@ -114,7 +112,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '14',
         question: 'Welcher Kontinent hat die wenigsten Länder?',
         options: ['Australien', 'Antarktika', 'Europa', 'Asien'],
         correctAnswer: 1,
@@ -122,7 +120,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '15',
         question: 'Was ist die Hauptstadt von Argentinien?',
         options: ['Santiago', 'Lima', 'Buenos Aires', 'Montevideo'],
         correctAnswer: 2,
@@ -130,7 +128,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '16',
         question: 'Welches dieser Länder ist ein Binnenstaat?',
         options: ['Spanien', 'Ungarn', 'Portugal', 'Dänemark'],
         correctAnswer: 1,
@@ -138,7 +136,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '17',
         question: 'Welches ist der höchste Berg Deutschlands?',
         options: ['Watzmann', 'Zugspitze', 'Feldberg', 'Brocken'],
         correctAnswer: 1,
@@ -146,7 +144,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '18',
         question: 'Welches Land besteht aus den meisten Inseln?',
         options: ['Philippinen', 'Indonesien', 'Japan', 'Griechenland'],
         correctAnswer: 1,
@@ -154,7 +152,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '19',
         question: 'Welches ist das kleinste Land der Welt nach Fläche?',
         options: ['Monaco', 'Liechtenstein', 'San Marino', 'Vatikanstadt'],
         correctAnswer: 3,
@@ -162,7 +160,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '20',
         question: 'Welcher Kontinent hat die meisten Länder?',
         options: ['Afrika', 'Asien', 'Europa', 'Nordamerika'],
         correctAnswer: 0,
@@ -170,7 +168,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '21',
         question: 'Welches Land wird auch als "Land der tausend Seen" bezeichnet?',
         options: ['Schweden', 'Finnland', 'Kanada', 'Norwegen'],
         correctAnswer: 1,
@@ -178,7 +176,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '22',
         question: 'An welchen Ozean grenzt Portugal?',
         options: ['Indischer Ozean', 'Pazifischer Ozean', 'Atlantischer Ozean', 'Arktischer Ozean'],
         correctAnswer: 2,
@@ -186,7 +184,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '23',
         question: 'Welcher Berg ist der höchste außerhalb Asiens?',
         options: ['Mount McKinley (Denali)', 'Kilimandscharo', 'Mount Elbrus', 'Aconcagua'],
         correctAnswer: 3,
@@ -194,7 +192,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '24',
         question: 'Welcher Fluss fließt durch Paris?',
         options: ['Rhein', 'Seine', 'Themse', 'Loire'],
         correctAnswer: 1,
@@ -202,7 +200,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '25',
         question: 'Was ist der größte See Deutschlands?',
         options: ['Chiemsee', 'Starnberger See', 'Bodensee', 'Müritz'],
         correctAnswer: 2,
@@ -210,7 +208,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '26',
         question: 'Welches ist die bevölkerungsreichste Stadt der Welt?',
         options: ['Shanghai', 'Tokio', 'Delhi', 'São Paulo'],
         correctAnswer: 1,
@@ -218,7 +216,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '27',
         question: 'Zu welchem Land gehört die Insel Sizilien?',
         options: ['Spanien', 'Griechenland', 'Italien', 'Frankreich'],
         correctAnswer: 2,
@@ -226,7 +224,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '28',
         question: 'Welche Wüste ist die kälteste der Welt?',
         options: ['Gobi', 'Atacama', 'Antarktis', 'Namib'],
         correctAnswer: 2,
@@ -234,7 +232,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '29',
         question: 'Welche ist die nördlichste Hauptstadt Europas?',
         options: ['Helsinki', 'Oslo', 'Stockholm', 'Reykjavik'],
         correctAnswer: 3,
@@ -242,7 +240,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '30',
         question: 'An welchen Staat grenzt Deutschland nicht?',
         options: ['Belgien', 'Luxemburg', 'Slowenien', 'Österreich'],
         correctAnswer: 2,
@@ -250,7 +248,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '31',
         question: 'Welcher Fluss fließt durch London?',
         options: ['Themse', 'Rhein', 'Seine', 'Tiber'],
         correctAnswer: 0,
@@ -258,7 +256,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '32',
         question: 'Welches ist das flächenmäßig kleinste Bundesland Deutschlands?',
         options: ['Berlin', 'Bremen', 'Hamburg', 'Saarland'],
         correctAnswer: 1,
@@ -266,7 +264,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '33',
         question: 'Welche Wüste erstreckt sich über Teile von Marokko, Westsahara und Mauretanien?',
         options: ['Kalahari', 'Gobi', 'Sahara', 'Atacama'],
         correctAnswer: 2,
@@ -274,7 +272,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '34',
         question: 'Welches ist der höchste Wasserfall der Welt?',
         options: ['Victoriafälle', 'Niagarafälle', 'Angelfall (Salto Ángel)', 'Iguazú-Wasserfälle'],
         correctAnswer: 2,
@@ -282,7 +280,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '35',
         question: 'In welchem Land liegt der Kilimandscharo?',
         options: ['Kenia', 'Tansania', 'Uganda', 'Äthiopien'],
         correctAnswer: 1,
@@ -290,7 +288,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '36',
         question: 'Welche Stadt liegt auf zwei Kontinenten?',
         options: ['Moskau', 'Istanbul', 'Kairo', 'Teheran'],
         correctAnswer: 1,
@@ -298,7 +296,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '37',
         question: 'Welcher Ozean ist der größte der Welt?',
         options: ['Atlantischer Ozean', 'Indischer Ozean', 'Arktischer Ozean', 'Pazifischer Ozean'],
         correctAnswer: 3,
@@ -306,7 +304,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '38',
         question: 'Welches Land hat die meisten Zeitzonenunterschiede?',
         options: ['Russland', 'USA', 'Frankreich', 'Australien'],
         correctAnswer: 2,
@@ -314,7 +312,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '39',
         question: 'Wie heißt die Hauptstadt von Schweden?',
         options: ['Oslo', 'Kopenhagen', 'Helsinki', 'Stockholm'],
         correctAnswer: 3,
@@ -322,7 +320,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '40',
         question: 'Was ist der längste Fluss Europas?',
         options: ['Donau', 'Rhein', 'Wolga', 'Loire'],
         correctAnswer: 2,
@@ -330,7 +328,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '41',
         question: 'Welche Insel gehört nicht zu den Balearen?',
         options: ['Mallorca', 'Ibiza', 'Menorca', 'Gran Canaria'],
         correctAnswer: 3,
@@ -338,7 +336,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '42',
         question: 'Welches dieser Länder liegt NICHT in Europa?',
         options: ['Slowenien', 'Montenegro', 'Georgien', 'Kasachstan'],
         correctAnswer: 3,
@@ -346,7 +344,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '43',
         question: 'Welches Land hat die meisten Einwohner in Europa?',
         options: ['Deutschland', 'Frankreich', 'Großbritannien', 'Russland'],
         correctAnswer: 3,
@@ -354,7 +352,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '44',
         question: 'Wo wurde die erste Olympiade der Neuzeit ausgetragen?',
         options: ['Paris', 'Athen', 'London', 'Rom'],
         correctAnswer: 1,
@@ -362,7 +360,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '45',
         question: 'Welches Land hat die längste Küstenlinie?',
         options: ['USA', 'Kanada', 'Australien', 'Russland'],
         correctAnswer: 1,
@@ -370,7 +368,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '46',
         question: 'In welcher Stadt steht das Brandenburger Tor?',
         options: ['Hamburg', 'München', 'Berlin', 'Frankfurt'],
         correctAnswer: 2,
@@ -378,7 +376,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '47',
         question: 'Was ist ein Geysir?',
         options: ['Ein heißer Wasserstrahl', 'Ein Vulkan', 'Ein Gletscher', 'Ein Wasserfall'],
         correctAnswer: 0,
@@ -386,7 +384,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '48',
         question: 'Welcher Fluss fließt durch Wien?',
         options: ['Donau', 'Rhein', 'Elbe', 'Moldau'],
         correctAnswer: 0,
@@ -394,7 +392,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '49',
         question: 'Wie viele Bundesstaaten haben die USA?',
         options: ['48', '50', '52', '55'],
         correctAnswer: 1,
@@ -402,7 +400,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '50',
         question: 'Wie viele Planeten hat unser Sonnensystem?',
         options: ['7', '8', '9', '10'],
         correctAnswer: 1,
@@ -410,7 +408,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '51',
         question: 'Welcher Planet ist der Sonne am nächsten?',
         options: ['Venus', 'Merkur', 'Mars', 'Erde'],
         correctAnswer: 1,
@@ -418,7 +416,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '52',
         question: 'Welches dieser Galaxien ist die Milchstraße am nächsten?',
         options: ['Andromeda-Galaxie', 'Dreiecksgalaxie', 'Whirlpool-Galaxie', 'Sombrerogalaxie'],
         correctAnswer: 0,
@@ -426,7 +424,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '53',
         question: 'Welcher Planet hat die meisten Monde in unserem Sonnensystem?',
         options: ['Jupiter', 'Saturn', 'Uranus', 'Neptun'],
         correctAnswer: 1,
@@ -434,7 +432,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '54',
         question: 'Wie lange braucht das Licht der Sonne, um die Erde zu erreichen?',
         options: ['8 Minuten', '8 Sekunden', '8 Stunden', '8 Tage'],
         correctAnswer: 0,
@@ -442,7 +440,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '55',
         question: 'Welcher Planet wird auch als "Abendstern" bezeichnet?',
         options: ['Mars', 'Venus', 'Merkur', 'Jupiter'],
         correctAnswer: 1,
@@ -450,7 +448,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '56',
         question: 'Wie wird ein Himmelskörper bezeichnet, der um die Sonne kreist, aber kein Planet ist?',
         options: ['Asteroid', 'Komet', 'Zwergplanet', 'Meteorit'],
         correctAnswer: 2,
@@ -458,7 +456,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '57',
         question: 'Was ist ein Pulsar?',
         options: [
             'Ein explodierender Stern',
@@ -471,7 +469,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '58',
         question: 'Welcher Planet wird auch als "Abendstern" bezeichnet?',
         options: ['Mars', 'Jupiter', 'Venus', 'Saturn'],
         correctAnswer: 2,
@@ -479,7 +477,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '59',
         question: 'Wie lange braucht das Licht von der Sonne zur Erde?',
         options: ['8 Minuten', '8 Stunden', '8 Sekunden', '8 Tage'],
         correctAnswer: 0,
@@ -487,7 +485,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '60',
         question: 'Welcher Planet hat den größten Durchmesser im Sonnensystem?',
         options: ['Erde', 'Saturn', 'Jupiter', 'Neptun'],
         correctAnswer: 2,
@@ -495,7 +493,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '61',
         question: 'Was ist ein Pulsar?',
         options: ['Ein explodierender Stern', 'Ein rotierender Neutronenstern', 'Ein schwarzes Loch', 'Ein Komet'],
         correctAnswer: 1,
@@ -503,7 +501,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '62',
         question: 'Wie viele Monde hat der Planet Mars?',
         options: ['1', '2', '3', '4'],
         correctAnswer: 1,
@@ -511,7 +509,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '63',
         question: 'Welches ist der hellste Stern am Nachthimmel?',
         options: ['Polarstern', 'Sirius', 'Beteigeuze', 'Wega'],
         correctAnswer: 1,
@@ -519,7 +517,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '64',
         question: 'Wer war der erste Mensch auf dem Mond?',
         options: ['Juri Gagarin', 'Neil Armstrong', 'Buzz Aldrin', 'John Glenn'],
         correctAnswer: 1,
@@ -527,7 +525,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '65',
         question: 'Was ist der Große Rote Fleck auf dem Jupiter?',
         options: ['Ein Krater', 'Ein Sturm', 'Ein Vulkan', 'Eine Wüste'],
         correctAnswer: 1,
@@ -535,7 +533,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '66',
         question: 'Welche Galaxie wird voraussichtlich in etwa 4,5 Milliarden Jahren mit unserer Milchstraße kollidieren?',
         options: ['Andromeda-Galaxie', 'Dreiecksgalaxie', 'Messier 87', 'Sombrerogalaxie'],
         correctAnswer: 0,
@@ -543,7 +541,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '67',
         question: 'Was ist ein Lichtjahr?',
         options: ['Eine Zeiteinheit', 'Eine Entfernungseinheit', 'Eine Helligkeitseinheit', 'Eine Temperatureinheit'],
         correctAnswer: 1,
@@ -551,7 +549,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '68',
         question: 'Was ist eine Supernova?',
         options: [
             'Ein neu entdeckter Planet',
@@ -564,7 +562,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '69',
         question: 'Welcher Planet hat einen Tag, der länger ist als sein Jahr?',
         options: ['Mars', 'Venus', 'Merkur', 'Jupiter'],
         correctAnswer: 1,
@@ -572,7 +570,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '70',
         question: 'Was ist das Zodiakallicht?',
         options: [
             'Eine Sternschnuppe',
@@ -585,7 +583,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '71',
         question: 'Wie nennt man eine totale Mondfinsternis auch?',
         options: ['Schwarzer Mond', 'Supermond', 'Blutmond', 'Goldener Mond'],
         correctAnswer: 2,
@@ -593,7 +591,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '72',
         question: 'Aus was bestehen die Ringe des Saturn hauptsächlich?',
         options: ['Gas', 'Eis und Gestein', 'Flüssiges Metall', 'Staub'],
         correctAnswer: 1,
@@ -601,7 +599,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '73',
         question: 'Was ist ein Exoplanet?',
         options: [
             'Ein Planet, der aus unserem Sonnensystem ausgetreten ist',
@@ -614,7 +612,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '74',
         question: 'Welches ist der hellste Stern am Nachthimmel?',
         options: ['Polarstern', 'Sirius', 'Beteigeuze', 'Aldebaran'],
         correctAnswer: 1,
@@ -622,7 +620,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '75',
         question: 'Was ist ein Quasar?',
         options: [
             'Ein extrem heller Galaxienkern',
@@ -635,7 +633,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '76',
         question: 'Welcher Planet unseres Sonnensystems rotiert als einziger rückläufig (retrograd)?',
         options: ['Merkur', 'Mars', 'Venus', 'Uranus'],
         correctAnswer: 2,
@@ -643,7 +641,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '77',
         question: 'Wie nennt man die Bewegung eines Himmelskörpers um einen anderen?',
         options: ['Rotation', 'Revolution', 'Translation', 'Oszillation'],
         correctAnswer: 1,
@@ -651,7 +649,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '78',
         question: 'Welcher Planet unseres Sonnensystems hat die meisten Monde?',
         options: ['Jupiter', 'Saturn', 'Uranus', 'Neptun'],
         correctAnswer: 1,
@@ -659,7 +657,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '79',
         question: 'Was ist eine Schwarzschildradius?',
         options: [
             'Die Entfernung zwischen Erde und Sonne',
@@ -672,7 +670,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '80',
         question: 'Welcher Planet hat die kürzeste Umlaufzeit um die Sonne?',
         options: ['Venus', 'Mars', 'Merkur', 'Jupiter'],
         correctAnswer: 2,
@@ -680,7 +678,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '81',
         question: 'Was versteht man unter einer "Supermondphase"?',
         options: [
             'Eine besonders lange Mondfinsternis',
@@ -693,7 +691,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '82',
         question: 'Was ist die Oortsche Wolke?',
         options: [
             'Ein Nebel im Zentrum unserer Galaxie',
@@ -706,7 +704,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '83',
         question: 'Welcher Planet hat die meisten Monde in unserem Sonnensystem?',
         options: ['Jupiter', 'Saturn', 'Uranus', 'Neptun'],
         correctAnswer: 1,
@@ -714,7 +712,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '84',
         question: 'Was ist ein "Weißer Zwerg"?',
         options: [
             'Ein kleiner Planet',
@@ -727,7 +725,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '85',
         question: 'Wie nennt man den Punkt der Erdbahn, an dem die Erde der Sonne am nächsten ist?',
         options: ['Aphel', 'Perihel', 'Zenit', 'Nadir'],
         correctAnswer: 1,
@@ -735,7 +733,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '86',
         question: 'Welches Phänomen tritt auf, wenn der Mond zwischen Sonne und Erde steht?',
         options: ['Mondfinsternis', 'Sonnenfinsternis', 'Halo-Effekt', 'Aurora'],
         correctAnswer: 1,
@@ -743,7 +741,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '87',
         question: 'Wie wird eine Sonnenfinsternis verursacht?',
         options: ['Der Mond steht zwischen Sonne und Erde', 'Die Erde steht zwischen Sonne und Mond', 'Die Sonne steht zwischen Erde und Mond', 'Die Erde dreht sich weg von der Sonne'],
         correctAnswer: 0,
@@ -751,7 +749,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '88',
         question: 'Welches ist der kleinste Planet im Sonnensystem?',
         options: ['Mars', 'Venus', 'Merkur', 'Erde'],
         correctAnswer: 2,
@@ -759,7 +757,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '89',
         question: 'Welche Farbe hat ein schwarzes Loch?',
         options: ['Schwarz', 'Weiß', 'Es hat keine Farbe', 'Blau'],
         correctAnswer: 2,
@@ -768,7 +766,7 @@ module.exports = [
     },
     // Hier beginnen die 11 neuen Fragen für Astronomie
     {
-        id: uuidv4(),
+        id: '90',
         question: 'Wie nennt man das Zentrum einer Galaxie, in dem sich oft ein supermassereiches Schwarzes Loch befindet?',
         options: ['Galaxienkern', 'Bulge', 'Nukleus', 'Zentral-Cluster'],
         correctAnswer: 2,
@@ -776,7 +774,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '91',
         question: 'Was ist der Kuipergürtel?',
         options: [
             'Ein Ring um den Saturn',
@@ -789,7 +787,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '92',
         question: 'Welcher Stern ist der nächste an unserem Sonnensystem?',
         options: ['Sirius', 'Alpha Centauri', 'Pollux', 'Deneb'],
         correctAnswer: 1,
@@ -797,7 +795,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '93',
         question: 'Was ist die Magnitude in der Astronomie?',
         options: [
             'Die Entfernung eines Sterns',
@@ -810,7 +808,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '94',
         question: 'Was ist ein Trojaner in der Astronomie?',
         options: [
             'Ein Asteroid, der die Sonne umkreist',
@@ -823,7 +821,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '95',
         question: 'Welches astronomische Instrument wird verwendet, um die Uhrzeit anhand der Sonne zu bestimmen?',
         options: ['Astrolabium', 'Teleskop', 'Sonnenuhr', 'Sextant'],
         correctAnswer: 2,
@@ -831,7 +829,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '96',
         question: 'Woher haben die Mondmeere ("maria") ihren Namen?',
         options: [
             'Sie enthalten gefrorenes Wasser',
@@ -844,7 +842,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '97',
         question: 'Was ist ein Planetarischer Nebel?',
         options: [
             'Ein Gas- und Staubnebel, in dem Planeten entstehen',
@@ -857,7 +855,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '98',
         question: 'Was ist die Hauptkomponente der Atmosphäre des Mars?',
         options: ['Stickstoff', 'Sauerstoff', 'Kohlendioxid', 'Wasserstoff'],
         correctAnswer: 2,
@@ -865,7 +863,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '99',
         question: 'Was sind die Lagrange-Punkte?',
         options: [
             'Punkte auf der Mondoberfläche, an denen Raumsonden landen können',
@@ -878,7 +876,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '100',
         question: 'Was ist die Chandrasche Grenze?',
         options: [
             'Die maximale Größe eines Neutronensterns',
@@ -891,7 +889,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '101',
         question: 'Welches Element hat die chemische Abkürzung "O"?',
         options: ['Osmium', 'Sauerstoff', 'Gold', 'Silber'],
         correctAnswer: 1,
@@ -899,7 +897,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '102',
         question: 'Welches ist das am häufigsten vorkommende chemische Element im Universum?',
         options: ['Wasserstoff', 'Helium', 'Sauerstoff', 'Stickstoff'],
         correctAnswer: 0,
@@ -907,7 +905,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '103',
         question: 'In welchem Jahr wurde die Allgemeine Relativitätstheorie von Albert Einstein veröffentlicht?',
         options: ['1905', '1915', '1925', '1935'],
         correctAnswer: 1,
@@ -915,7 +913,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '104',
         question: 'Was ist das chemische Symbol für Gold?',
         options: ['Ag', 'Au', 'Fe', 'Hg'],
         correctAnswer: 1,
@@ -923,7 +921,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '105',
         question: 'Was misst die Richterskala?',
         options: ['Windgeschwindigkeit', 'Temperatur', 'Erdbebenstärke', 'Luftdruck'],
         correctAnswer: 2,
@@ -931,7 +929,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '106',
         question: 'Welche dieser Krankheiten wird durch Viren verursacht?',
         options: ['Malaria', 'Cholera', 'Tollwut', 'Tuberkulose'],
         correctAnswer: 2,
@@ -939,7 +937,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '107',
         question: 'Was ist der Unterschied zwischen DNA und RNA?',
         options: [
             'DNA enthält Uracil, RNA enthält Thymin',
@@ -952,7 +950,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '108',
         question: 'Welches Teilchen wurde am CERN im Jahr 2012 nachgewiesen?',
         options: ['Higgs-Boson', 'Quark', 'Graviton', 'Positron'],
         correctAnswer: 0,
@@ -960,7 +958,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '109',
         question: 'Was misst die Richter-Skala?',
         options: ['Windstärke', 'Temperatur', 'Erdbebenstärke', 'Lautstärke'],
         correctAnswer: 2,
@@ -968,7 +966,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '110',
         question: 'Welches Element hat die Ordnungszahl 1 im Periodensystem?',
         options: ['Helium', 'Wasserstoff', 'Lithium', 'Kohlenstoff'],
         correctAnswer: 1,
@@ -976,7 +974,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '111',
         question: 'Was bedeutet die Abkürzung "DNA"?',
         options: ['Deoxyribonucleic Acid', 'Dinitrogen Acid', 'Double Nucleus Arrangement', 'Dynamic Natural Atom'],
         correctAnswer: 0,
@@ -984,7 +982,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '112',
         question: 'Wer formulierte die Relativitätstheorie?',
         options: ['Isaac Newton', 'Niels Bohr', 'Albert Einstein', 'Max Planck'],
         correctAnswer: 2,
@@ -992,7 +990,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '113',
         question: 'Was ist der Hauptbestandteil der Erdatmosphäre?',
         options: ['Sauerstoff', 'Stickstoff', 'Kohlendioxid', 'Argon'],
         correctAnswer: 1,
@@ -1000,7 +998,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '114',
         question: 'Welche Einheit wird zur Messung elektrischer Spannung verwendet?',
         options: ['Ampere', 'Watt', 'Volt', 'Ohm'],
         correctAnswer: 2,
@@ -1008,7 +1006,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '115',
         question: 'Was bezeichnet man als "Schwarzes Loch"?',
         options: ['Ein Vakuum im Weltall', 'Eine Region mit extrem starker Gravitation', 'Ein Planet ohne Licht', 'Ein Sternennebel'],
         correctAnswer: 1,
@@ -1016,7 +1014,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '116',
         question: 'Wofür steht das "C" in E=mc²?',
         options: ['Coulomb', 'Celsius', 'Lichtgeschwindigkeit', 'Konstante'],
         correctAnswer: 2,
@@ -1024,7 +1022,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '117',
         question: 'Welches dieser Elemente ist kein Edelgas?',
         options: ['Helium', 'Neon', 'Chlor', 'Argon'],
         correctAnswer: 2,
@@ -1032,7 +1030,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '118',
         question: 'Welches Organ im menschlichen Körper produziert Insulin?',
         options: ['Leber', 'Bauchspeicheldrüse', 'Niere', 'Milz'],
         correctAnswer: 1,
@@ -1040,7 +1038,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '119',
         question: 'Welche Krankheit wurde durch Impfung weltweit ausgerottet?',
         options: ['Malaria', 'Pocken', 'Tuberkulose', 'Cholera'],
         correctAnswer: 1,
@@ -1048,7 +1046,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '120',
         question: 'Was misst man mit der Einheit Kelvin?',
         options: ['Druck', 'Zeit', 'Temperatur', 'Lautstärke'],
         correctAnswer: 2,
@@ -1056,7 +1054,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '121',
         question: 'Was beschreibt die Heisenbergsche Unschärferelation?',
         options: [
             'Die Unmöglichkeit, Ort und Impuls eines Teilchens gleichzeitig genau zu bestimmen',
@@ -1069,7 +1067,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '122',
         question: 'Wie heißt das härteste natürliche Material der Erde?',
         options: ['Diamant', 'Stahl', 'Titan', 'Graphen'],
         correctAnswer: 0,
@@ -1077,7 +1075,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '123',
         question: 'Was ist ein Isomer?',
         options: [
             'Ein Molekül mit gleicher Summenformel aber unterschiedlicher Struktur',
@@ -1090,7 +1088,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '124',
         question: 'Was versteht man unter dem "Treibhauseffekt"?',
         options: [
             'Die Erwärmung von Gewächshäusern durch Sonnenlicht',
@@ -1103,7 +1101,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '125',
         question: 'Welches chemische Element ist flüssig bei Raumtemperatur?',
         options: ['Wasserstoff', 'Sauerstoff', 'Quecksilber', 'Helium'],
         correctAnswer: 2,
@@ -1111,7 +1109,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '126',
         question: 'Was ist der pH-Wert?',
         options: [
             'Ein Maß für die Lautstärke',
@@ -1124,7 +1122,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '127',
         question: 'Welches Teilchen hat eine positive elektrische Ladung?',
         options: ['Elektron', 'Neutron', 'Proton', 'Photon'],
         correctAnswer: 2,
@@ -1132,7 +1130,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '128',
         question: 'Was ist Osmose?',
         options: [
             'Die Bewegung von Wasser durch eine selektiv durchlässige Membran',
@@ -1145,7 +1143,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '129',
         question: 'Was ist ein Polymer?',
         options: [
             'Ein chemisches Element',
@@ -1158,7 +1156,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '130',
         question: 'Was ist Biolumineszenz?',
         options: [
             'Die Fähigkeit mancher Lebewesen, Licht zu erzeugen',
@@ -1171,7 +1169,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '131',
         question: 'Was ist die Einheit der elektrischen Spannung?',
         options: ['Ampere', 'Watt', 'Volt', 'Ohm'],
         correctAnswer: 2,
@@ -1179,7 +1177,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '132',
         question: 'Was besagt die Heisenbergsche Unschärferelation?',
         options: [
             'Energie kann weder erzeugt noch vernichtet werden',
@@ -1192,7 +1190,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '133',
         question: 'Welches chemische Element hat die Abkürzung "Na" im Periodensystem?',
         options: ['Natrium', 'Neon', 'Nickel', 'Nobelium'],
         correctAnswer: 0,
@@ -1200,7 +1198,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '134',
         question: 'Welches Element trägt das Kürzel "Cu" im Periodensystem?',
         options: ['Calcium', 'Kupfer', 'Kalium', 'Kohlenstoff'],
         correctAnswer: 1,
@@ -1208,7 +1206,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '135',
         question: 'Welches dieser Tiere ist ein Beuteltier?',
         options: ['Koala', 'Panda', 'Faultier', 'Gürteltier'],
         correctAnswer: 0,
@@ -1216,7 +1214,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '136',
         question: 'Was ist die chemische Formel für Wasser?',
         options: ['H2O', 'CO2', 'O2', 'H2SO4'],
         correctAnswer: 0,
@@ -1224,7 +1222,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '137',
         question: 'Was misst man mit einem Barometer?',
         options: ['Temperatur', 'Luftdruck', 'Feuchtigkeit', 'Windgeschwindigkeit'],
         correctAnswer: 1,
@@ -1233,7 +1231,7 @@ module.exports = [
     },
     // Hier beginnen die 14 neuen Fragen für Wissenschaft
     {
-        id: uuidv4(),
+        id: '138',
         question: 'Was ist die Einheit für Strahlenbelastung im internationalen Einheitensystem?',
         options: ['Gray', 'Newton', 'Pascal', 'Joule'],
         correctAnswer: 0,
@@ -1241,7 +1239,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '139',
         question: 'Welches chemische Element trägt die Ordnungszahl 92?',
         options: ['Xenon', 'Uran', 'Plutonium', 'Thorium'],
         correctAnswer: 1,
@@ -1249,7 +1247,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '140',
         question: 'Was ist ein Fullerene?',
         options: [
             'Eine spezielle Form von Kohlenstoffmolekülen',
@@ -1262,7 +1260,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '141',
         question: 'Welche dieser Substanzen ist kein Halbleiter?',
         options: ['Silizium', 'Germanium', 'Galliumarsenid', 'Kupfer'],
         correctAnswer: 3,
@@ -1270,7 +1268,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '142',
         question: 'Was ist ein Boson?',
         options: [
             'Ein subatomares Teilchen mit ganzzahligem Spin',
@@ -1283,7 +1281,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '143',
         question: 'Welcher dieser Stoffe hat den höchsten Schmelzpunkt?',
         options: ['Gold', 'Eisen', 'Wolfram', 'Platin'],
         correctAnswer: 2,
@@ -1291,7 +1289,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '144',
         question: 'Was ist eine Katalyse?',
         options: [
             'Die Beschleunigung einer chemischen Reaktion durch einen Katalysator',
@@ -1304,7 +1302,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '145',
         question: 'Was ist ein Enzym?',
         options: [
             'Ein Hormon',
@@ -1317,7 +1315,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '146',
         question: 'Welcher Stoff im menschlichen Körper transportiert Sauerstoff im Blut?',
         options: ['Myoglobin', 'Hämoglobin', 'Collagen', 'Melanin'],
         correctAnswer: 1,
@@ -1325,7 +1323,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '147',
         question: 'Was ist die Dunkle Materie?',
         options: [
             'Schwarze Löcher im Weltall',
@@ -1338,7 +1336,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '148',
         question: 'Was ist der Unterschied zwischen einer Säure und einer Base?',
         options: [
             'Säuren schmecken süß, Basen bitter',
@@ -1351,7 +1349,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '149',
         question: 'Was ist die kleinste strukturelle und funktionale Einheit eines Lebewesens?',
         options: ['Atom', 'Molekül', 'Zelle', 'Gewebe'],
         correctAnswer: 2,
@@ -1359,7 +1357,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '150',
         question: 'Welche dieser Aussagen über Vakuum ist richtig?',
         options: [
             'Ein perfektes Vakuum enthält überhaupt keine Materie',
@@ -1372,7 +1370,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '151',
         question: 'Was ist die Bedeutung von "pH" in der Chemie?',
         options: [
             'potentia Hydrogenii (Wasserstoff-Potenz)',
@@ -1385,7 +1383,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '152',
         question: 'Wer schrieb "Romeo und Julia"?',
         options: ['Charles Dickens', 'Mark Twain', 'William Shakespeare', 'Friedrich Schiller'],
         correctAnswer: 2,
@@ -1393,7 +1391,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '153',
         question: 'Wer schrieb "Faust"?',
         options: ['Friedrich Schiller', 'Johann Wolfgang von Goethe', 'Heinrich Heine', 'Thomas Mann'],
         correctAnswer: 1,
@@ -1401,7 +1399,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '154',
         question: 'Wer ist der Autor der "Harry Potter"-Buchreihe?',
         options: ['J.R.R. Tolkien', 'Stephen King', 'J.K. Rowling', 'George R.R. Martin'],
         correctAnswer: 2,
@@ -1409,7 +1407,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '155',
         question: 'Welches dieser Werke stammt nicht von Franz Kafka?',
         options: ['Die Verwandlung', 'Der Prozess', 'Das Schloss', 'Der Zauberberg'],
         correctAnswer: 3,
@@ -1417,7 +1415,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '156',
         question: 'Welcher Literaturnobelpreisträger schrieb "Hundert Jahre Einsamkeit"?',
         options: ['Gabriel García Márquez', 'Pablo Neruda', 'Mario Vargas Llosa', 'Octavio Paz'],
         correctAnswer: 0,
@@ -1425,7 +1423,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '157',
         question: 'Welche Figur taucht in mehreren Romanen von Charles Dickens auf?',
         options: ['Sherlock Holmes', 'Mr. Pickwick', 'Oliver Twist', 'David Copperfield'],
         correctAnswer: 1,
@@ -1433,7 +1431,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '158',
         question: 'Wer schrieb "Faust"?',
         options: ['Friedrich Schiller', 'Johann Wolfgang von Goethe', 'Heinrich Heine', 'Thomas Mann'],
         correctAnswer: 1,
@@ -1441,7 +1439,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '159',
         question: 'Welcher dieser Romane stammt von Franz Kafka?',
         options: ['Der Zauberberg', 'Der Prozess', 'Der Tod in Venedig', 'Der Steppenwolf'],
         correctAnswer: 1,
@@ -1449,7 +1447,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '160',
         question: 'Wer schrieb "Der Herr der Ringe"?',
         options: ['C.S. Lewis', 'J.R.R. Tolkien', 'George R.R. Martin', 'Terry Pratchett'],
         correctAnswer: 1,
@@ -1457,7 +1455,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '161',
         question: 'Welches Werk gilt als der erste moderne Roman der Weltliteratur?',
         options: ['Ulysses', 'Don Quijote', 'Die göttliche Komödie', 'Madame Bovary'],
         correctAnswer: 1,
@@ -1465,7 +1463,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '162',
         question: 'Wer verfasste die Tragödie "Hamlet"?',
         options: ['Christopher Marlowe', 'William Shakespeare', 'Oscar Wilde', 'George Bernard Shaw'],
         correctAnswer: 1,
@@ -1473,7 +1471,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '163',
         question: 'Welcher Roman beginnt mit dem Satz "Lange Zeit bin ich früh schlafen gegangen"?',
         options: ['Der Zauberberg', 'Moby Dick', 'Auf der Suche nach der verlorenen Zeit', 'Ulysses'],
         correctAnswer: 2,
@@ -1481,7 +1479,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '164',
         question: 'Wer schrieb "Die Verwandlung"?',
         options: ['Hermann Hesse', 'Thomas Mann', 'Franz Kafka', 'Heinrich Böll'],
         correctAnswer: 2,
@@ -1489,7 +1487,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '165',
         question: 'Welches dieser Werke wurde NICHT von Friedrich Schiller geschrieben?',
         options: ['Die Räuber', 'Wilhelm Tell', 'Nathan der Weise', 'Kabale und Liebe'],
         correctAnswer: 2,
@@ -1497,7 +1495,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '166',
         question: 'Wer ist die Autorin der "Harry Potter"-Reihe?',
         options: ['Joanne K. Rowling', 'Stephenie Meyer', 'Suzanne Collins', 'Veronica Roth'],
         correctAnswer: 0,
@@ -1505,7 +1503,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '167',
         question: 'Welcher Autor hat den Detektiv Sherlock Holmes erschaffen?',
         options: ['Edgar Allan Poe', 'Agatha Christie', 'Arthur Conan Doyle', 'Raymond Chandler'],
         correctAnswer: 2,
@@ -1513,7 +1511,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '168',
         question: 'Von wem stammt das Zitat "Sein oder Nichtsein, das ist hier die Frage"?',
         options: ['Hamlet in Shakespeares "Hamlet"', 'Faust in Goethes "Faust"', 'Romeo in Shakespeares "Romeo und Julia"', 'Macbeth in Shakespeares "Macbeth"'],
         correctAnswer: 0,
@@ -1521,7 +1519,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '169',
         question: 'Welches Werk gilt als erster moderner Roman der Weltliteratur?',
         options: ['"Ulysses" von James Joyce', '"Don Quijote" von Miguel de Cervantes', '"Die göttliche Komödie" von Dante Alighieri', '"Krieg und Frieden" von Leo Tolstoi'],
         correctAnswer: 1,
@@ -1529,7 +1527,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '170',
         question: 'Wer schrieb die Novelle "Die Verwandlung"?',
         options: ['Thomas Mann', 'Franz Kafka', 'Hermann Hesse', 'Stefan Zweig'],
         correctAnswer: 1,
@@ -1537,7 +1535,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '171',
         question: 'In welchem Jahrhundert lebte William Shakespeare?',
         options: ['15./16. Jahrhundert', '16./17. Jahrhundert', '17./18. Jahrhundert', '18./19. Jahrhundert'],
         correctAnswer: 1,
@@ -1545,7 +1543,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '172',
         question: 'Welche literarische Bewegung entstand im Deutschland des 18. Jahrhunderts?',
         options: ['Expressionismus', 'Naturalismus', 'Sturm und Drang', 'Symbolismus'],
         correctAnswer: 2,
@@ -1553,7 +1551,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '173',
         question: 'Wer schrieb "Die Blechtrommel"?',
         options: ['Heinrich Böll', 'Thomas Mann', 'Günter Grass', 'Hermann Hesse'],
         correctAnswer: 2,
@@ -1561,7 +1559,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '174',
         question: 'Welcher Dichter schrieb den Gedichtzyklus "West-östlicher Divan"?',
         options: ['Heinrich Heine', 'Friedrich Schiller', 'Johann Wolfgang von Goethe', 'Rainer Maria Rilke'],
         correctAnswer: 2,
@@ -1569,7 +1567,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '175',
         question: 'Wer ist der Autor von "Der Name der Rose"?',
         options: ['Umberto Eco', 'Italo Calvino', 'Gabriel García Márquez', 'Milan Kundera'],
         correctAnswer: 0,
@@ -1577,7 +1575,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '176',
         question: 'Was ist ein Haiku?',
         options: [
             'Ein japanisches Theaterstück',
@@ -1590,7 +1588,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '177',
         question: 'In welchem fiktiven Land spielt die Fantasyreihe "Das Lied von Eis und Feuer"?',
         options: ['Mittelerde', 'Narnia', 'Westeros', 'Oz'],
         correctAnswer: 2,
@@ -1598,7 +1596,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '178',
         question: 'Welcher deutsche Dichter schrieb "Die Räuber"?',
         options: ['Johann Wolfgang von Goethe', 'Friedrich Schiller', 'Heinrich Heine', 'Bertolt Brecht'],
         correctAnswer: 1,
@@ -1606,7 +1604,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '179',
         question: 'Wer ist der Autor der "Buddenbrooks"?',
         options: ['Heinrich Böll', 'Günter Grass', 'Hermann Hesse', 'Thomas Mann'],
         correctAnswer: 3,
@@ -1614,7 +1612,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '180',
         question: 'In welchem Jahrhundert lebte Johann Wolfgang von Goethe?',
         options: ['16./17. Jahrhundert', '17./18. Jahrhundert', '18./19. Jahrhundert', '19./20. Jahrhundert'],
         correctAnswer: 2,
@@ -1622,7 +1620,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '181',
         question: 'Wer schrieb "Der Prozess"?',
         options: ['Franz Kafka', 'Robert Musil', 'Hermann Hesse', 'Stefan Zweig'],
         correctAnswer: 0,
@@ -1630,7 +1628,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '182',
         question: 'Welches berühmte Epos beginnt mit den Worten "Sage mir, Muse, die Taten des vielgewanderten Mannes"?',
         options: ['Ilias', 'Odyssee', 'Aeneis', 'Metamorphosen'],
         correctAnswer: 1,
@@ -1638,7 +1636,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '183',
         question: 'Wer schrieb "Die Verwandlung"?',
         options: ['Thomas Mann', 'Franz Kafka', 'Hermann Hesse', 'Stefan Zweig'],
         correctAnswer: 1,
@@ -1646,7 +1644,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '184',
         question: 'Welches dieser Werke stammt von Johann Wolfgang von Goethe?',
         options: ['"Kabale und Liebe"', '"Nathan der Weise"', '"Die Räuber"', '"Die Wahlverwandtschaften"'],
         correctAnswer: 3,
@@ -1654,7 +1652,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '185',
         question: 'Wer ist der Autor der "Sherlock Holmes"-Geschichten?',
         options: ['Edgar Allan Poe', 'Arthur Conan Doyle', 'Agatha Christie', 'Mark Twain'],
         correctAnswer: 1,
@@ -1663,7 +1661,7 @@ module.exports = [
     },
     // Hier beginnen die 18 neuen Fragen für Literatur
     {
-        id: uuidv4(),
+        id: '186',
         question: 'Welches Werk wird oft als der erste Science-Fiction-Roman angesehen?',
         options: ['"Die Zeitmaschine" von H.G. Wells', '"Frankenstein" von Mary Shelley', '"20.000 Meilen unter dem Meer" von Jules Verne', '"Die Krieg der Welten" von H.G. Wells'],
         correctAnswer: 1,
@@ -1671,7 +1669,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '187',
         question: 'Wer verfasste das Epos "Paradise Lost"?',
         options: ['John Milton', 'Geoffrey Chaucer', 'John Donne', 'Alexander Pope'],
         correctAnswer: 0,
@@ -1679,7 +1677,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '188',
         question: 'Welcher Schriftsteller schrieb "Die Pest"?',
         options: ['Jean-Paul Sartre', 'Albert Camus', 'Simone de Beauvoir', 'André Gide'],
         correctAnswer: 1,
@@ -1687,7 +1685,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '189',
         question: 'Welches berühmte Kinderbuch schrieb Lewis Carroll?',
         options: ['"Peter Pan"', '"Alice im Wunderland"', '"Der Zauberer von Oz"', '"Pinocchio"'],
         correctAnswer: 1,
@@ -1695,7 +1693,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '190',
         question: 'Wer ist der Autor von "1984"?',
         options: ['Aldous Huxley', 'George Orwell', 'Ray Bradbury', 'Philip K. Dick'],
         correctAnswer: 1,
@@ -1703,7 +1701,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '191',
         question: 'Welches berühmte russische Werk wurde von Leo Tolstoi geschrieben?',
         options: ['"Verbrechen und Strafe"', '"Anna Karenina"', '"Die Brüder Karamasow"', '"Eugen Onegin"'],
         correctAnswer: 1,
@@ -1711,7 +1709,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '192',
         question: 'Welcher dieser Autoren gehört zur "Beat Generation"?',
         options: ['Ernest Hemingway', 'Jack Kerouac', 'F. Scott Fitzgerald', 'William Faulkner'],
         correctAnswer: 1,
@@ -1719,7 +1717,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '193',
         question: 'Wer schrieb "Der Alte Mann und das Meer"?',
         options: ['Ernest Hemingway', 'William Faulkner', 'John Steinbeck', 'F. Scott Fitzgerald'],
         correctAnswer: 0,
@@ -1727,7 +1725,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '194',
         question: 'Wer ist der Autor der "Chroniken von Narnia"?',
         options: ['J.R.R. Tolkien', 'C.S. Lewis', 'Philip Pullman', 'Roald Dahl'],
         correctAnswer: 1,
@@ -1735,7 +1733,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '195',
         question: 'Welches ist das Nationalepos Finnlands?',
         options: ['Edda', 'Beowulf', 'Kalevala', 'Nibelungenlied'],
         correctAnswer: 2,
@@ -1743,7 +1741,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '196',
         question: 'Welcher dieser Autoren hat den Literaturnobelpreis erhalten?',
         options: ['Leo Tolstoi', 'Franz Kafka', 'Toni Morrison', 'James Joyce'],
         correctAnswer: 2,
@@ -1751,7 +1749,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '197',
         question: 'Wer schrieb "Der kleine Prinz"?',
         options: ['Antoine de Saint-Exupéry', 'Victor Hugo', 'Albert Camus', 'Alexandre Dumas'],
         correctAnswer: 0,
@@ -1759,7 +1757,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '198',
         question: 'Was ist der Bildungsroman?',
         options: [
             'Ein Roman über Schulen und Bildungssysteme',
@@ -1772,7 +1770,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '199',
         question: 'Wer schrieb das Drama "Die Physiker"?',
         options: ['Bertolt Brecht', 'Friedrich Dürrenmatt', 'Max Frisch', 'Heinrich Böll'],
         correctAnswer: 1,
@@ -1780,7 +1778,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '200',
         question: 'Welcher Dichter ist bekannt für seine Sonette an Laura?',
         options: ['Dante Alighieri', 'Francesco Petrarca', 'Giovanni Boccaccio', 'Torquato Tasso'],
         correctAnswer: 1,
@@ -1788,7 +1786,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '201',
         question: 'Wer ist die Hauptfigur in "Der Herr der Ringe"?',
         options: ['Gandalf', 'Aragorn', 'Frodo', 'Legolas'],
         correctAnswer: 2,
@@ -1796,7 +1794,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '202',
         question: 'Was ist ein Sonett?',
         options: ['Ein Musikinstrument', 'Eine Gedichtform', 'Ein Tanzstil', 'Ein Gemälde'],
         correctAnswer: 1,
@@ -1804,14 +1802,14 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '203',
         question: 'Was ist Limerick?',
         options: ['Eine Stadt in Irland', 'Eine Form von Gedicht', 'Ein alkoholisches Getränk', 'Ein traditioneller Tanz'],
         correctAnswer: 1,
         category: 'Literatur',
         difficulty: 'medium',
     }, {
-        id: uuidv4(),
+        id: '204',
         question: 'Welches Jahr markiert den Beginn des Ersten Weltkriegs?',
         options: ['1914', '1916', '1918', '1920'],
         correctAnswer: 0,
@@ -1819,7 +1817,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '205',
         question: 'In welchem Jahr fiel die Berliner Mauer?',
         options: ['1987', '1989', '1991', '1993'],
         correctAnswer: 1,
@@ -1827,7 +1825,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '206',
         question: 'Wer war der erste Bundeskanzler der Bundesrepublik Deutschland?',
         options: ['Helmut Schmidt', 'Willy Brandt', 'Konrad Adenauer', 'Helmut Kohl'],
         correctAnswer: 2,
@@ -1835,7 +1833,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '207',
         question: 'Welches Ereignis löste den Ersten Weltkrieg unmittelbar aus?',
         options: [
             'Die Ermordung von Franz Ferdinand',
@@ -1848,7 +1846,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '208',
         question: 'In welchem Jahr wurde die Europäische Union (EU) gegründet?',
         options: ['1957', '1973', '1993', '2002'],
         correctAnswer: 2,
@@ -1856,7 +1854,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '209',
         question: 'Wer war der letzte Kaiser des Heiligen Römischen Reiches?',
         options: ['Karl V.', 'Joseph II.', 'Franz II.', 'Friedrich III.'],
         correctAnswer: 2,
@@ -1864,7 +1862,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '210',
         question: 'In welchem Jahr fiel die Berliner Mauer?',
         options: ['1987', '1989', '1991', '1993'],
         correctAnswer: 1,
@@ -1872,7 +1870,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '211',
         question: 'Wer war der erste Bundeskanzler der Bundesrepublik Deutschland?',
         options: ['Willy Brandt', 'Helmut Schmidt', 'Konrad Adenauer', 'Ludwig Erhard'],
         correctAnswer: 2,
@@ -1880,7 +1878,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '212',
         question: 'Welches Ereignis markiert den Beginn der Französischen Revolution?',
         options: ['Hinrichtung von Ludwig XVI.', 'Sturm auf die Bastille', 'Ballhausschwur', 'Kriegserklärung an Österreich'],
         correctAnswer: 1,
@@ -1888,7 +1886,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '213',
         question: 'Wann wurde die Europäische Union gegründet?',
         options: ['1957', '1967', '1993', '2002'],
         correctAnswer: 2,
@@ -1896,7 +1894,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '214',
         question: 'Welches dieser Länder war keine Großmacht im Ersten Weltkrieg?',
         options: ['Deutschland', 'Russland', 'Spanien', 'Großbritannien'],
         correctAnswer: 2,
@@ -1904,7 +1902,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '215',
         question: 'Wer war die erste Frau im Weltall?',
         options: ['Sally Ride', 'Valentina Tereschkowa', 'Christa McAuliffe', 'Mae Jemison'],
         correctAnswer: 1,
@@ -1912,7 +1910,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '216',
         question: 'Welches Ereignis wird als Beginn des Zweiten Weltkriegs angesehen?',
         options: ['Anschluss Österreichs', 'Überfall auf Polen', 'Invasion der Sowjetunion', 'Bombardierung von Pearl Harbor'],
         correctAnswer: 1,
@@ -1920,7 +1918,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '217',
         question: 'Wer war der erste Präsident der Vereinigten Staaten?',
         options: ['Thomas Jefferson', 'Benjamin Franklin', 'John Adams', 'George Washington'],
         correctAnswer: 3,
@@ -1928,7 +1926,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '218',
         question: 'In welchem Jahr wurde die DDR gegründet?',
         options: ['1945', '1949', '1953', '1961'],
         correctAnswer: 1,
@@ -1936,7 +1934,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '219',
         question: 'Welches antike Volk erfand die Demokratie?',
         options: ['Römer', 'Griechen', 'Ägypter', 'Perser'],
         correctAnswer: 1,
@@ -1944,7 +1942,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '220',
         question: 'Welches Ereignis markiert den Beginn des Mittelalters in Europa?',
         options: [
             'Eroberung Roms durch die Germanen',
@@ -1957,7 +1955,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '221',
         question: 'Wann begann die Französische Revolution?',
         options: ['1776', '1789', '1804', '1815'],
         correctAnswer: 1,
@@ -1965,7 +1963,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '222',
         question: 'Welches Land war nie Teil des britischen Empires?',
         options: ['Indien', 'Südafrika', 'Thailand', 'Australien'],
         correctAnswer: 2,
@@ -1973,7 +1971,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '223',
         question: 'Wer war der erste Präsident der Vereinigten Staaten?',
         options: ['Thomas Jefferson', 'George Washington', 'Abraham Lincoln', 'John Adams'],
         correctAnswer: 1,
@@ -1981,7 +1979,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '224',
         question: 'In welchem Jahr wurde die Berliner Mauer gebaut?',
         options: ['1953', '1961', '1968', '1975'],
         correctAnswer: 1,
@@ -1989,7 +1987,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '225',
         question: 'Welches antike Volk erfand das Alphabet?',
         options: ['Ägypter', 'Römer', 'Phönizier', 'Griechen'],
         correctAnswer: 2,
@@ -1997,7 +1995,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '226',
         question: 'In welchem Jahr endete der Zweite Weltkrieg in Europa?',
         options: ['1944', '1945', '1946', '1947'],
         correctAnswer: 1,
@@ -2005,7 +2003,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '227',
         question: 'Wer war der erste Mensch im Weltraum?',
         options: ['Neil Armstrong', 'Juri Gagarin', 'Alan Shepard', 'Buzz Aldrin'],
         correctAnswer: 1,
@@ -2013,7 +2011,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '228',
         question: 'Welches historische Ereignis wird als Beginn der Neuzeit angesehen?',
         options: [
             'Französische Revolution',
@@ -2026,7 +2024,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '229',
         question: 'Wer war die letzte Königin von Frankreich vor der Revolution?',
         options: ['Elisabeth I.', 'Katharina die Große', 'Marie Antoinette', 'Victoria'],
         correctAnswer: 2,
@@ -2034,7 +2032,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '230',
         question: 'Wann wurde das Deutsche Reich gegründet?',
         options: ['1815', '1848', '1871', '1918'],
         correctAnswer: 2,
@@ -2042,7 +2040,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '231',
         question: 'Wer war der letzte Kaiser von China?',
         options: ['Puyi', 'Sun Yat-sen', 'Mao Zedong', 'Chiang Kai-shek'],
         correctAnswer: 0,
@@ -2050,7 +2048,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '232',
         question: 'In welchem Jahr fand die Französische Revolution statt?',
         options: ['1776', '1789', '1804', '1815'],
         correctAnswer: 1,
@@ -2058,7 +2056,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '233',
         question: 'Welches Ereignis markiert den Beginn des Zweiten Weltkriegs?',
         options: [
             'Die Besetzung des Sudetenlandes',
@@ -2071,7 +2069,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '234',
         question: 'Welche antike Zivilisation baute die Pyramiden von Gizeh?',
         options: ['Griechen', 'Römer', 'Ägypter', 'Perser'],
         correctAnswer: 2,
@@ -2079,7 +2077,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '235',
         question: 'In welchem Jahr endete der Zweite Weltkrieg?',
         options: ['1943', '1945', '1947', '1949'],
         correctAnswer: 1,
@@ -2087,7 +2085,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '236',
         question: 'Wer hat den Buchdruck mit beweglichen Lettern erfunden?',
         options: ['Leonardo da Vinci', 'Johannes Gutenberg', 'Galileo Galilei', 'Isaac Newton'],
         correctAnswer: 1,
@@ -2095,7 +2093,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '237',
         question: 'Welche antike Weltwunder steht heute noch?',
         options: ['Der Koloss von Rhodos', 'Die hängenden Gärten von Babylon', 'Der Leuchtturm von Alexandria', 'Die Pyramiden von Gizeh'],
         correctAnswer: 3,
@@ -2104,7 +2102,7 @@ module.exports = [
     },
     // Hier beginnen die 18 neuen Fragen für Geschichte
     {
-        id: uuidv4(),
+        id: '238',
         question: 'In welchem Jahr wurde die Unabhängigkeitserklärung der Vereinigten Staaten unterzeichnet?',
         options: ['1773', '1776', '1781', '1787'],
         correctAnswer: 1,
@@ -2112,7 +2110,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '239',
         question: 'Wer war der erste Kaiser des Römischen Reiches?',
         options: ['Julius Caesar', 'Augustus', 'Nero', 'Konstantin'],
         correctAnswer: 1,
@@ -2120,7 +2118,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '240',
         question: 'Welches Ereignis löste den Dreißigjährigen Krieg aus?',
         options: [
             'Die Eroberung Konstantinopels',
@@ -2133,7 +2131,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '241',
         question: 'Wer war Mahatma Gandhi?',
         options: [
             'Ein indischer Dichter',
@@ -2146,7 +2144,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '242',
         question: 'In welchem Jahr begann der amerikanische Bürgerkrieg?',
         options: ['1855', '1861', '1865', '1870'],
         correctAnswer: 1,
@@ -2154,7 +2152,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '243',
         question: 'Was war die Magna Carta?',
         options: [
             'Eine mittelalterliche Karte',
@@ -2167,7 +2165,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '244',
         question: 'Welches dieser Ereignisse fand zuerst statt?',
         options: ['Die Französische Revolution', 'Die Erfindung des Buchdrucks', 'Die Entdeckung Amerikas', 'Die Reformation'],
         correctAnswer: 1,
@@ -2175,7 +2173,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '245',
         question: 'Wer war Kleopatra?',
         options: ['Eine römische Kaiserin', 'Eine ägyptische Pharaonin', 'Eine griechische Göttin', 'Eine persische Prinzessin'],
         correctAnswer: 1,
@@ -2183,7 +2181,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '246',
         question: 'Welches war das erste Land, das Frauen das Wahlrecht gewährte?',
         options: ['USA', 'Großbritannien', 'Neuseeland', 'Frankreich'],
         correctAnswer: 2,
@@ -2191,7 +2189,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '247',
         question: 'Wie hieß die Dynastie, die von 1368 bis 1644 in China herrschte?',
         options: ['Han-Dynastie', 'Tang-Dynastie', 'Ming-Dynastie', 'Qing-Dynastie'],
         correctAnswer: 2,
@@ -2199,7 +2197,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '248',
         question: 'Welches Ereignis markiert den Beginn der Industriellen Revolution?',
         options: [
             'Die Erfindung der Dampfmaschine',
@@ -2212,7 +2210,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '249',
         question: 'Wer war Napoléon Bonaparte?',
         options: [
             'Ein französischer Dichter',
@@ -2225,7 +2223,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '250',
         question: 'Was war der Marshallplan?',
         options: [
             'Ein Plan zur Kolonisierung Afrikas',
@@ -2238,7 +2236,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '251',
         question: 'Welches Ereignis löste den Ersten Weltkrieg unmittelbar aus?',
         options: [
             'Die Ermordung von Erzherzog Franz Ferdinand',
@@ -2251,7 +2249,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '252',
         question: 'Wer war Rosa Luxemburg?',
         options: [
             'Eine französische Königin',
@@ -2264,7 +2262,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '253',
         question: 'Was war der Kalte Krieg?',
         options: [
             'Ein militärischer Konflikt in der Antarktis',
@@ -2277,7 +2275,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '254',
         question: 'Wann wurde die Chinesische Mauer hauptsächlich erbaut?',
         options: ['5.-3. Jahrhundert v. Chr.', '221-206 v. Chr. (Qin-Dynastie)', '1368-1644 (Ming-Dynastie)', 'Alle genannten Zeiträume'],
         correctAnswer: 3,
@@ -2285,7 +2283,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '255',
         question: 'Was war die Weimarer Republik?',
         options: [
             'Ein deutscher Teilstaat nach dem Zweiten Weltkrieg',
@@ -2298,7 +2296,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '256',
         question: 'Welches dieser Tiere ist kein Säugetier?',
         options: ['Delfin', 'Fledermaus', 'Wal', 'Pinguin'],
         correctAnswer: 3,
@@ -2306,7 +2304,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '257',
         question: 'Was ist die kleinste Einheit des Lebens?',
         options: ['Atom', 'Molekül', 'Zelle', 'Gewebe'],
         correctAnswer: 2,
@@ -2314,7 +2312,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '258',
         question: 'Welches Tier hat das größte Herz?',
         options: ['Elefant', 'Blauwal', 'Giraffe', 'Gorilla'],
         correctAnswer: 1,
@@ -2322,7 +2320,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '259',
         question: 'Wie heißt der Prozess, bei dem Pflanzen Licht in Energie umwandeln?',
         options: ['Photosynthese', 'Zellatmung', 'Fermentation', 'Oxidation'],
         correctAnswer: 0,
@@ -2330,7 +2328,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '260',
         question: 'Welches Tier kann seinen Kopf um 180 Grad drehen?',
         options: ['Adler', 'Eule', 'Fledermaus', 'Chamäleon'],
         correctAnswer: 1,
@@ -2338,7 +2336,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '261',
         question: 'Was ist der Unterschied zwischen Mitose und Meiose?',
         options: [
             'Mitose erzeugt haploide Zellen, Meiose diploide',
@@ -2351,7 +2349,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '262',
         question: 'Wie viele Chromosomen hat ein gesunder Mensch?',
         options: ['23', '46', '48', '64'],
         correctAnswer: 1,
@@ -2359,7 +2357,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '263',
         question: 'Welches ist das größte Organ des Menschen?',
         options: ['Herz', 'Lunge', 'Leber', 'Haut'],
         correctAnswer: 3,
@@ -2367,7 +2365,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '264',
         question: 'Was bewirkt das Enzym Amylase im menschlichen Körper?',
         options: ['Eiweißverdauung', 'Stärkeverdauung', 'Fettverdauung', 'Zellabbau'],
         correctAnswer: 1,
@@ -2375,7 +2373,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '265',
         question: 'Welches Tier hat den längsten Schlaf?',
         options: ['Koala', 'Faultier', 'Fledermaus', 'Braunbär'],
         correctAnswer: 1,
@@ -2383,7 +2381,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '266',
         question: 'Welches Lebewesen hat kein Herz?',
         options: ['Qualle', 'Seestern', 'Regenwurm', 'Krebstier'],
         correctAnswer: 0,
@@ -2391,7 +2389,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '267',
         question: 'Welcher Teil des Gehirns ist für das Gedächtnis zuständig?',
         options: ['Kleinhirn', 'Stammhirn', 'Großhirn', 'Hippocampus'],
         correctAnswer: 3,
@@ -2399,7 +2397,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '268',
         question: 'Welches ist das am schnellsten wachsende Gewebe im menschlichen Körper?',
         options: ['Haut', 'Haar', 'Nägel', 'Knochen'],
         correctAnswer: 1,
@@ -2407,7 +2405,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '269',
         question: 'Wie viele Zähne hat ein erwachsener Mensch normalerweise?',
         options: ['28', '30', '32', '36'],
         correctAnswer: 2,
@@ -2415,7 +2413,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '270',
         question: 'Was ist Photosynthese?',
         options: ['Lichterzeugung', 'Umwandlung von Sonnenlicht in chemische Energie', 'Zellteilung', 'Atmungsprozess'],
         correctAnswer: 1,
@@ -2423,7 +2421,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '271',
         question: 'Welches ist das größte Raubtier der Welt?',
         options: ['Braunbär', 'Weißer Hai', 'Tiger', 'Orca'],
         correctAnswer: 3,
@@ -2431,7 +2429,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '272',
         question: 'Was ist Symbiose?',
         options: [
             'Ein Kampf zwischen zwei Arten',
@@ -2444,7 +2442,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '273',
         question: 'Welches Tier hat das größte Gehirn im Verhältnis zu seiner Körpergröße?',
         options: ['Ameise', 'Delfin', 'Mensch', 'Elefant'],
         correctAnswer: 0,
@@ -2452,7 +2450,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '274',
         question: 'Was ist der Unterschied zwischen DNA und RNA?',
         options: [
             'DNA ist einsträngig, RNA ist doppelsträngig',
@@ -2465,7 +2463,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '275',
         question: 'Was sind Kapillaren?',
         options: [
             'Knorpel in den Gelenken',
@@ -2478,7 +2476,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '276',
         question: 'Welcher Teil der Pflanze nimmt hauptsächlich Wasser auf?',
         options: ['Blätter', 'Stängel', 'Wurzeln', 'Blüten'],
         correctAnswer: 2,
@@ -2486,7 +2484,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '277',
         question: 'Was ist Photosynthese?',
         options: [
             'Die Atmung der Pflanzen',
@@ -2499,7 +2497,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '278',
         question: 'Welches Organ filtert Abfallstoffe aus dem Blut?',
         options: ['Leber', 'Milz', 'Niere', 'Bauchspeicheldrüse'],
         correctAnswer: 2,
@@ -2507,7 +2505,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '279',
         question: 'Was ist ein Plasmid?',
         options: [
             'Ein Blutbestandteil',
@@ -2520,7 +2518,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '280',
         question: 'Wie viele Wirbel hat die menschliche Wirbelsäule?',
         options: ['24', '26', '33', '34'],
         correctAnswer: 2,
@@ -2528,7 +2526,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '281',
         question: 'Was ist ein Enzym?',
         options: [
             'Ein Hormon',
@@ -2541,7 +2539,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '282',
         question: 'Welches Tier kann am längsten ohne Wasser auskommen?',
         options: ['Kamel', 'Wüstenratte', 'Wasserschildkröte', 'Kängururatte'],
         correctAnswer: 3,
@@ -2549,7 +2547,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '283',
         question: 'Welches Organ ist für die Produktion von Insulin verantwortlich?',
         options: ['Leber', 'Niere', 'Bauchspeicheldrüse', 'Milz'],
         correctAnswer: 2,
@@ -2557,7 +2555,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '284',
         question: 'Was ist der Unterschied zwischen Prokaryoten und Eukaryoten?',
         options: [
             'Prokaryoten haben einen Zellkern, Eukaryoten nicht',
@@ -2570,7 +2568,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '285',
         question: 'Was ist das größte Säugetier der Welt?',
         options: ['Elefant', 'Blauwal', 'Giraffe', 'Pottwal'],
         correctAnswer: 1,
@@ -2578,7 +2576,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '286',
         question: 'Welches dieser Gemüse ist botanisch gesehen eine Frucht?',
         options: ['Kartoffel', 'Zwiebel', 'Tomate', 'Brokkoli'],
         correctAnswer: 2,
@@ -2586,7 +2584,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '287',
         question: 'Wie viele Knochen hat ein erwachsener Mensch?',
         options: ['186', '206', '226', '246'],
         correctAnswer: 1,
@@ -2595,7 +2593,7 @@ module.exports = [
     },
     // Hier beginnen die 20 neuen Fragen für Biologie
     {
-        id: uuidv4(),
+        id: '288',
         question: 'Welche Struktur in der Zelle ist für die Energieproduktion verantwortlich?',
         options: ['Zellkern', 'Mitochondrien', 'Golgi-Apparat', 'Ribosomen'],
         correctAnswer: 1,
@@ -2603,7 +2601,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '289',
         question: 'Was ist eine Mutation?',
         options: [
             'Die Vermehrung von Zellen',
@@ -2616,7 +2614,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '290',
         question: 'Welcher Prozess findet in den Chloroplasten statt?',
         options: ['Zellatmung', 'Photosynthese', 'Proteinsynthese', 'Glykolyse'],
         correctAnswer: 1,
@@ -2624,7 +2622,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '291',
         question: 'Was versteht man unter Homeostase?',
         options: [
             'Die Veränderung von Arten über lange Zeiträume',
@@ -2637,7 +2635,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '292',
         question: 'Welcher Teil des menschlichen Gehirns ist für das Gleichgewicht zuständig?',
         options: ['Großhirn', 'Kleinhirn', 'Zwischenhirn', 'Stammhirn'],
         correctAnswer: 1,
@@ -2645,7 +2643,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '293',
         question: 'Was sind Zygoten?',
         options: [
             'Krankheitserzeugende Bakterien',
@@ -2658,7 +2656,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '294',
         question: 'Welches Tier kann seine Hautfarbe am schnellsten ändern?',
         options: ['Chamäleon', 'Tintenfisch', 'Oktopus', 'Seepferdchen'],
         correctAnswer: 1,
@@ -2666,7 +2664,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '295',
         question: 'Was ist Parthenogenese?',
         options: [
             'Die Teilung von Zellen',
@@ -2679,7 +2677,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '296',
         question: 'Welche dieser Tiere sind Hermaphroditen?',
         options: ['Löwen', 'Adler', 'Regenwürmer', 'Kühe'],
         correctAnswer: 2,
@@ -2687,7 +2685,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '297',
         question: 'Was ist der Unterschied zwischen Genotyp und Phänotyp?',
         options: [
             'Genotyp bezieht sich auf Tiere, Phänotyp auf Pflanzen',
@@ -2700,7 +2698,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '298',
         question: 'Welches Organ produziert Galle?',
         options: ['Niere', 'Leber', 'Bauchspeicheldrüse', 'Milz'],
         correctAnswer: 1,
@@ -2708,7 +2706,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '299',
         question: 'Was ist ein Kokon?',
         options: [
             'Eine schützende Hülle für Insektenlarven oder Puppen',
@@ -2721,7 +2719,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '300',
         question: 'Welches Tier hat die meisten Zähne?',
         options: ['Hai', 'Elefant', 'Schnecke', 'Delfin'],
         correctAnswer: 0,
@@ -2729,7 +2727,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '301',
         question: 'Was ist Osmose?',
         options: [
             'Die Bewegung von Wasser durch eine semipermeable Membran',
@@ -2742,7 +2740,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '302',
         question: 'Welche Funktion haben die Lysosomen in der Zelle?',
         options: [
             'Proteinproduktion',
@@ -2755,7 +2753,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '303',
         question: 'Was sind Röhrenbakterien?',
         options: [
             'Bakterien mit röhrenförmigem Körperbau',
@@ -2768,7 +2766,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '304',
         question: 'Welches dieser Tiere legt keine Eier?',
         options: ['Schnabeltier', 'Fledermaus', 'Ameisenigel', 'Krokodil'],
         correctAnswer: 1,
@@ -2776,7 +2774,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '305',
         question: 'Was ist Apoptose?',
         options: [
             'Die Bildung neuer Blutgefäße',
@@ -2789,7 +2787,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '306',
         question: 'Welche Tiere gehören zu den Insekten?',
         options: ['Spinnen', 'Tausendfüßer', 'Käfer', 'Krebse'],
         correctAnswer: 2,
@@ -2797,7 +2795,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '307',
         question: 'Was ist ein Omnivore?',
         options: [
             'Ein Tier, das nur Pflanzen frisst',
@@ -2809,7 +2807,7 @@ module.exports = [
         category: 'Biologie',
         difficulty: 'medium',
     }, {
-        id: uuidv4(),
+        id: '308',
         question: 'Wer komponierte die "Mondscheinsonate"?',
         options: ['Wolfgang Amadeus Mozart', 'Johann Sebastian Bach', 'Ludwig van Beethoven', 'Franz Schubert'],
         correctAnswer: 2,
@@ -2817,7 +2815,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '309',
         question: 'Welches Instrument wird auch "Königin der Instrumente" genannt?',
         options: ['Klavier', 'Orgel', 'Violine', 'Cello'],
         correctAnswer: 1,
@@ -2825,7 +2823,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '310',
         question: 'Aus wie vielen Symphonien besteht Beethovens Gesamtwerk?',
         options: ['5', '7', '9', '12'],
         correctAnswer: 2,
@@ -2833,7 +2831,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '311',
         question: 'Welche Band veröffentlichte das Album "Dark Side of the Moon"?',
         options: ['The Beatles', 'Led Zeppelin', 'Pink Floyd', 'The Rolling Stones'],
         correctAnswer: 2,
@@ -2841,7 +2839,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '312',
         question: 'Welcher Komponist ist bekannt als der "Walzerkönig"?',
         options: ['Johann Strauss (Sohn)', 'Franz Schubert', 'Wolfgang Amadeus Mozart', 'Franz Liszt'],
         correctAnswer: 0,
@@ -2849,7 +2847,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '313',
         question: 'Welches Instrument wurde von Adolphe Sax erfunden?',
         options: ['Saxophon', 'Klarinette', 'Trompete', 'Oboe'],
         correctAnswer: 0,
@@ -2857,7 +2855,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '314',
         question: 'Welches Instrument spielte Louis Armstrong?',
         options: ['Saxophon', 'Trompete', 'Klarinette', 'Posaune'],
         correctAnswer: 1,
@@ -2865,7 +2863,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '315',
         question: 'Aus wie vielen Musikern besteht ein Quartett?',
         options: ['2', '3', '4', '5'],
         correctAnswer: 2,
@@ -2873,7 +2871,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '316',
         question: 'Welche Band veröffentlichte das Album "Abbey Road"?',
         options: ['The Rolling Stones', 'The Beatles', 'The Who', 'Pink Floyd'],
         correctAnswer: 1,
@@ -2881,7 +2879,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '317',
         question: 'Wer komponierte "Die Zauberflöte"?',
         options: ['Ludwig van Beethoven', 'Joseph Haydn', 'Richard Wagner', 'Wolfgang Amadeus Mozart'],
         correctAnswer: 3,
@@ -2889,7 +2887,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '318',
         question: 'Welches Instrument hat die tiefste Stimmlage im Streichquartett?',
         options: ['Viola', 'Cello', 'Kontrabass', 'Violine'],
         correctAnswer: 1,
@@ -2897,7 +2895,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '319',
         question: 'Welcher Musiker wurde als "King of Pop" bezeichnet?',
         options: ['Prince', 'Elvis Presley', 'Michael Jackson', 'Freddie Mercury'],
         correctAnswer: 2,
@@ -2905,7 +2903,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '320',
         question: 'Aus welchem Land stammt die Musikrichtung Reggae?',
         options: ['Brasilien', 'Kuba', 'Jamaika', 'Haiti'],
         correctAnswer: 2,
@@ -2913,7 +2911,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '321',
         question: 'Welches dieser Instrumente gehört NICHT zu den Holzblasinstrumenten?',
         options: ['Querflöte', 'Oboe', 'Fagott', 'Trompete'],
         correctAnswer: 3,
@@ -2921,7 +2919,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '322',
         question: 'In welchem Jahr wurde die Band ABBA gegründet?',
         options: ['1968', '1970', '1972', '1974'],
         correctAnswer: 1,
@@ -2929,7 +2927,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '323',
         question: 'Welcher dieser Komponisten gehört zur Epoche der Romantik?',
         options: ['Wolfgang Amadeus Mozart', 'Johann Sebastian Bach', 'Johannes Brahms', 'Joseph Haydn'],
         correctAnswer: 2,
@@ -2937,7 +2935,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '324',
         question: 'Welches Instrument spielt man, indem man Tasten drückt und Pedale tritt?',
         options: ['Akkordeon', 'Harfe', 'Orgel', 'Saxophon'],
         correctAnswer: 2,
@@ -2945,7 +2943,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '325',
         question: 'Wer komponierte die "Vier Jahreszeiten"?',
         options: ['Johann Sebastian Bach', 'Wolfgang Amadeus Mozart', 'Antonio Vivaldi', 'Ludwig van Beethoven'],
         correctAnswer: 2,
@@ -2953,7 +2951,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '326',
         question: 'In welcher Stadt fand das legendäre Woodstock-Festival 1969 statt?',
         options: ['Woodstock', 'Bethel', 'San Francisco', 'New York'],
         correctAnswer: 1,
@@ -2961,7 +2959,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '327',
         question: 'Welches Musikgenre entstand in den 1950er Jahren in Jamaika?',
         options: ['Reggae', 'Hip-Hop', 'Techno', 'Ska'],
         correctAnswer: 3,
@@ -2969,7 +2967,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '328',
         question: 'Welches war das meistverkaufte Album aller Zeiten?',
         options: ['"Thriller" von Michael Jackson', '"Back in Black" von AC/DC', '"The Dark Side of the Moon" von Pink Floyd', '"Abbey Road" von The Beatles'],
         correctAnswer: 0,
@@ -2977,7 +2975,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '329',
         question: 'Welches ist das tiefste Streichinstrument im Orchester?',
         options: ['Bratsche', 'Cello', 'Kontrabass', 'Geige'],
         correctAnswer: 2,
@@ -2985,7 +2983,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '330',
         question: 'Wer schrieb die Oper "Die Zauberflöte"?',
         options: ['Ludwig van Beethoven', 'Wolfgang Amadeus Mozart', 'Richard Wagner', 'Giuseppe Verdi'],
         correctAnswer: 1,
@@ -2993,7 +2991,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '331',
         question: 'Welches Musikinstrument wird auch als "Königin des Jazz" bezeichnet?',
         options: ['Saxophon', 'Trompete', 'Kontrabass', 'Schlagzeug'],
         correctAnswer: 0,
@@ -3001,7 +2999,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '332',
         question: 'In welchem Jahr gründete sich die Band The Beatles?',
         options: ['1956', '1960', '1964', '1968'],
         correctAnswer: 1,
@@ -3009,7 +3007,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '333',
         question: 'Was ist ein Leitmotiv in der Musik?',
         options: [
             'Die erste Melodie eines Musikstücks',
@@ -3022,7 +3020,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '334',
         question: 'Welches Instrument gehört nicht zur Gruppe der Blechblasinstrumente?',
         options: ['Trompete', 'Posaune', 'Horn', 'Klarinette'],
         correctAnswer: 3,
@@ -3030,7 +3028,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '335',
         question: 'Wer komponierte die "Unvollendete Symphonie"?',
         options: ['Ludwig van Beethoven', 'Wolfgang Amadeus Mozart', 'Franz Schubert', 'Johannes Brahms'],
         correctAnswer: 2,
@@ -3038,7 +3036,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '336',
         question: 'Aus welchen drei Akkorden besteht eine typische Blues-Progression?',
         options: ['C-D-E', 'G-A-B', 'C-F-G', 'A-D-E'],
         correctAnswer: 2,
@@ -3047,7 +3045,7 @@ module.exports = [
     },
     // Hier beginnen die 23 neuen Fragen für Musik
     {
-        id: uuidv4(),
+        id: '337',
         question: 'Wie viele Saiten hat eine klassische Gitarre?',
         options: ['4', '6', '8', '12'],
         correctAnswer: 1,
@@ -3055,7 +3053,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '338',
         question: 'Welche Note liegt auf der untersten Linie des Violinschlüssels?',
         options: ['C', 'D', 'E', 'F'],
         correctAnswer: 2,
@@ -3063,7 +3061,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '339',
         question: 'Welche Band gilt als Begründer des Heavy Metal?',
         options: ['Led Zeppelin', 'Deep Purple', 'Black Sabbath', 'Iron Maiden'],
         correctAnswer: 2,
@@ -3071,7 +3069,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '340',
         question: 'Wer gilt als "Vater der Symphonie"?',
         options: ['Ludwig van Beethoven', 'Joseph Haydn', 'Wolfgang Amadeus Mozart', 'Franz Schubert'],
         correctAnswer: 1,
@@ -3079,7 +3077,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '341',
         question: 'Welches Instrument spielt man mit einem Plektrum?',
         options: ['Klavier', 'Gitarre', 'Flöte', 'Schlagzeug'],
         correctAnswer: 1,
@@ -3087,7 +3085,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '342',
         question: 'Welcher berühmte Komponist wurde im späteren Leben taub?',
         options: ['Wolfgang Amadeus Mozart', 'Johann Sebastian Bach', 'Ludwig van Beethoven', 'Frédéric Chopin'],
         correctAnswer: 2,
@@ -3095,7 +3093,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '343',
         question: 'Welche dieser Opern wurde NICHT von Giuseppe Verdi komponiert?',
         options: ['Rigoletto', 'La Traviata', 'Carmen', 'Aida'],
         correctAnswer: 2,
@@ -3103,7 +3101,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '344',
         question: 'Welches Instrument hat 88 Tasten?',
         options: ['Orgel', 'Synthesizer', 'Akkordeon', 'Klavier'],
         correctAnswer: 3,
@@ -3111,7 +3109,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '345',
         question: 'Was ist eine Kadenz in der Musik?',
         options: [
             'Eine Verzierung am Ende eines Stückes',
@@ -3124,7 +3122,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '346',
         question: 'Welches dieser Instrumente ist KEIN Tasteninstrument?',
         options: ['Cembalo', 'Harmonium', 'Celesta', 'Oboe'],
         correctAnswer: 3,
@@ -3132,7 +3130,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '347',
         question: 'Wie nennt man die höchste Männerstimme im Gesang?',
         options: ['Tenor', 'Bariton', 'Bass', 'Countertenor'],
         correctAnswer: 3,
@@ -3140,7 +3138,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '348',
         question: 'Welcher Tanz stammt ursprünglich aus Argentinien?',
         options: ['Salsa', 'Tango', 'Samba', 'Flamenco'],
         correctAnswer: 1,
@@ -3148,7 +3146,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '349',
         question: 'Wie viele Noten gibt es in einer Oktave?',
         options: ['5', '7', '8', '12'],
         correctAnswer: 3,
@@ -3156,7 +3154,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '350',
         question: 'Welches dieser Instrumente wurde im 20. Jahrhundert erfunden?',
         options: ['Theremin', 'Klavier', 'Geige', 'Gitarre'],
         correctAnswer: 0,
@@ -3164,7 +3162,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '351',
         question: 'Was ist ein A-cappella-Gesang?',
         options: [
             'Gesang mit Klavierbegleitung',
@@ -3177,7 +3175,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '352',
         question: 'Wer komponierte das Ballett "Der Nussknacker"?',
         options: ['Igor Stravinsky', 'Pjotr Iljitsch Tschaikowski', 'Sergei Prokofjew', 'Richard Strauss'],
         correctAnswer: 1,
@@ -3185,7 +3183,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '353',
         question: 'Wie nennt man in der Musik eine Gruppe von vier Achtelnoten?',
         options: ['Quartole', 'Septole', 'Triole', 'Sextole'],
         correctAnswer: 0,
@@ -3193,7 +3191,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '354',
         question: 'Welche dieser Bands wurde in den 1970er Jahren gegründet?',
         options: ['Nirvana', 'Queen', 'Radiohead', 'Coldplay'],
         correctAnswer: 1,
@@ -3201,7 +3199,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '355',
         question: 'Was ist eine Sonatenhauptsatzform?',
         options: [
             'Eine Aufführungspraxis',
@@ -3214,7 +3212,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '356',
         question: 'Welcher Begriff beschreibt die Geschwindigkeit eines Musikstücks?',
         options: ['Dynamik', 'Tempo', 'Intonation', 'Artikulation'],
         correctAnswer: 1,
@@ -3222,7 +3220,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '357',
         question: 'In welcher Stadt findet jährlich das Bayreuther Festspiel statt?',
         options: ['München', 'Hamburg', 'Bayreuth', 'Berlin'],
         correctAnswer: 2,
@@ -3230,7 +3228,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '358',
         question: 'Welches ist das größte Blechblasinstrument im Orchester?',
         options: ['Tuba', 'Posaune', 'Horn', 'Euphonium'],
         correctAnswer: 0,
@@ -3238,7 +3236,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '359',
         question: 'Was ist der Unterschied zwischen Dur und Moll?',
         options: [
             'Dur verwendet die große Terz, Moll die kleine Terz',
@@ -3251,7 +3249,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '360',
         question: 'Welches ist das längste Wort in der deutschen Sprache laut Duden?',
         options: [
             'Donaudampfschifffahrtsgesellschaftskapitän',
@@ -3264,7 +3262,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '361',
         question: 'Welche Sprache hat die meisten Muttersprachler weltweit?',
         options: ['Englisch', 'Spanisch', 'Mandarin', 'Hindi'],
         correctAnswer: 2,
@@ -3272,7 +3270,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '362',
         question: 'Was ist ein Palindrom?',
         options: [
             'Ein Wort mit zwei Bedeutungen',
@@ -3285,7 +3283,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '363',
         question: 'Welches dieser Wörter ist ein Oxymoron?',
         options: ['Tischbein', 'Bitterschokolade', 'Ohrwurm', 'Jumboschrimp'],
         correctAnswer: 3,
@@ -3293,7 +3291,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '364',
         question: 'Was bedeutet "serendipity" auf Englisch?',
         options: [
             'Glücklicher Zufall',
@@ -3306,7 +3304,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '365',
         question: 'In welcher Sprache gibt es die meisten Zeitformen?',
         options: ['Französisch', 'Griechisch', 'Türkisch', 'Spanisch'],
         correctAnswer: 1,
@@ -3314,7 +3312,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '366',
         question: 'Welcher Vokal kommt in der deutschen Sprache am häufigsten vor?',
         options: ['A', 'E', 'I', 'O'],
         correctAnswer: 1,
@@ -3322,7 +3320,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '367',
         question: 'Was ist ein Anagramm?',
         options: [
             'Ein Wort, das aus den gleichen Buchstaben wie ein anderes Wort besteht',
@@ -3335,7 +3333,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '368',
         question: 'Welche ist die meistgesprochene Sprache in Südamerika?',
         options: ['Englisch', 'Portugiesisch', 'Spanisch', 'Französisch'],
         correctAnswer: 2,
@@ -3343,7 +3341,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '369',
         question: 'Was ist die Bedeutung des Wortes "polyglott"?',
         options: [
             'Mehrsprachig',
@@ -3356,7 +3354,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '370',
         question: 'Welche Sprache hat das längste Alphabet der Welt?',
         options: ['Russisch', 'Arabisch', 'Chinesisch', 'Khmer (Kambodschanisch)'],
         correctAnswer: 3,
@@ -3364,7 +3362,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '371',
         question: 'Was ist ein Palindrom?',
         options: ['Ein Wort mit zwei Bedeutungen', 'Ein Wort, das vorwärts und rückwärts gelesen gleich ist', 'Ein Fremdwort', 'Ein Wort ohne Vokale'],
         correctAnswer: 1,
@@ -3372,7 +3370,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '372',
         question: 'Welche Sprache hat die meisten Muttersprachler weltweit?',
         options: ['Englisch', 'Spanisch', 'Hindi', 'Mandarin'],
         correctAnswer: 3,
@@ -3380,7 +3378,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '373',
         question: 'Was bedeutet das lateinische Sprichwort "Carpe diem"?',
         options: ['Zeit ist Geld', 'Nutze den Tag', 'Leben und leben lassen', 'Der Weg ist das Ziel'],
         correctAnswer: 1,
@@ -3388,7 +3386,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '374',
         question: 'Was ist ein Anglizismus?',
         options: ['Ein englisches Lehnwort', 'Ein Wort mit angelsächsischem Ursprung', 'Ein Rechtschreibfehler', 'Eine grammatikalische Regel'],
         correctAnswer: 0,
@@ -3396,7 +3394,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '375',
         question: 'Welches dieser Wörter ist ein Pleonasmus?',
         options: ['Schwarzer Rappe', 'Weißer Schimmel', 'Grüner Baum', 'Blaues Meer'],
         correctAnswer: 1,
@@ -3404,7 +3402,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '376',
         question: 'Wie viele verschiedene Hieroglyphen gab es im alten Ägypten ungefähr?',
         options: ['50', '500', '1.000', '5.000'],
         correctAnswer: 2,
@@ -3412,7 +3410,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '377',
         question: 'Was ist die Amtssprache in Brasilien?',
         options: ['Spanisch', 'Portugiesisch', 'Englisch', 'Französisch'],
         correctAnswer: 1,
@@ -3420,7 +3418,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '378',
         question: 'Welche Sprache wird in der Schweiz NICHT als Amtssprache anerkannt?',
         options: ['Deutsch', 'Französisch', 'Italienisch', 'Spanisch'],
         correctAnswer: 3,
@@ -3428,7 +3426,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '379',
         question: 'Was ist ein Synonym?',
         options: ['Ein Wort gleicher Bedeutung', 'Ein Wort gegenteiliger Bedeutung', 'Ein zusammengesetztes Wort', 'Ein Fremdwort'],
         correctAnswer: 0,
@@ -3436,7 +3434,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '380',
         question: 'Welche ist die älteste noch gesprochene Sprache der Welt?',
         options: ['Griechisch', 'Hebräisch', 'Chinesisch', 'Latein'],
         correctAnswer: 2,
@@ -3444,7 +3442,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '381',
         question: 'Was ist ein Oxymoron?',
         options: ['Ein Stilmittel, das Gegensätze verbindet', 'Ein grammatikalischer Fehler', 'Eine rhetorische Frage', 'Ein Fremdwort mit drei Silben'],
         correctAnswer: 0,
@@ -3452,7 +3450,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '382',
         question: 'Was ist ein Känguru-Wort?',
         options: ['Ein australisches Dialektwort', 'Ein Wort, das ein anderes Wort in sich enthält', 'Ein Wort mit australischer Herkunft', 'Ein Wort, das Sprünge beschreibt'],
         correctAnswer: 1,
@@ -3460,7 +3458,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '383',
         question: 'Was ist ein Nebensatz?',
         options: ['Ein Satz ohne Verb', 'Ein grammatisch unvollständiger Satz', 'Ein Satz, der vom Hauptsatz abhängig ist', 'Ein Satz ohne Subjekt'],
         correctAnswer: 2,
@@ -3468,7 +3466,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '384',
         question: 'Welche dieser Sprachen gehört NICHT zu den romanischen Sprachen?',
         options: ['Spanisch', 'Französisch', 'Rumänisch', 'Niederländisch'],
         correctAnswer: 3,
@@ -3476,7 +3474,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '385',
         question: 'Welches ist das meistgesprochene Pidgin der Welt?',
         options: ['Tok Pisin', 'Kreolisch', 'Chinglish', 'Singlish'],
         correctAnswer: 0,
@@ -3484,7 +3482,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '386',
         question: 'Was ist ein Homonym?',
         options: [
             'Ein Wort mit gegensätzlicher Bedeutung',
@@ -3497,7 +3495,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '387',
         question: 'Welche ist die am meisten gesprochene konstruierte Sprache der Welt?',
         options: ['Klingonisch', 'Esperanto', 'Elbisch', 'Volapük'],
         correctAnswer: 1,
@@ -3505,7 +3503,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '388',
         question: 'Wie viele Buchstaben hat das deutsche Alphabet?',
         options: ['26', '27', '29', '30'],
         correctAnswer: 0,
@@ -3514,7 +3512,7 @@ module.exports = [
     },
     // Hier beginnen die 23 neuen Fragen für Sprache
     {
-        id: uuidv4(),
+        id: '389',
         question: 'Was ist der Unterschied zwischen Syntax und Semantik?',
         options: [
             'Syntax betrifft die Aussprache, Semantik die Schreibweise',
@@ -3527,7 +3525,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '390',
         question: 'Was ist eine Alliteration?',
         options: [
             'Die Wiederholung desselben Wortes',
@@ -3540,7 +3538,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '391',
         question: 'Was ist eine Ellipse in der Sprache?',
         options: [
             'Eine mathematische Kurve',
@@ -3553,7 +3551,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '392',
         question: 'Was ist Etymologie?',
         options: [
             'Die Lehre von der Aussprache',
@@ -3566,7 +3564,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '393',
         question: 'Was ist ein Euphemismus?',
         options: [
             'Eine beschönigende Umschreibung',
@@ -3579,7 +3577,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '394',
         question: 'Was ist ein Neologismus?',
         options: [
             'Ein altes, nicht mehr gebräuchliches Wort',
@@ -3592,7 +3590,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '395',
         question: 'Was versteht man unter Konnotation?',
         options: [
             'Die wörtliche Bedeutung eines Wortes',
@@ -3605,7 +3603,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '396',
         question: 'Welche Sprache gilt als die schwierigste europäische Sprache?',
         options: ['Finnisch', 'Ungarisch', 'Baskisch', 'Isländisch'],
         correctAnswer: 2,
@@ -3613,7 +3611,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '397',
         question: 'Was ist der Unterschied zwischen einem Slang und einem Dialekt?',
         options: [
             'Slang ist älter als Dialekt',
@@ -3626,7 +3624,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '398',
         question: 'Was bedeutet "Hyperbel" in der Rhetorik?',
         options: [
             'Eine Untertreibung',
@@ -3639,7 +3637,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '399',
         question: 'Was ist das Gegenteil von einem Synonym?',
         options: ['Homonym', 'Antonym', 'Pseudonym', 'Acronym'],
         correctAnswer: 1,
@@ -3647,7 +3645,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '400',
         question: 'Welche Sprache wurde von J.R.R. Tolkien für seine Bücher erfunden?',
         options: ['Dothraki', 'Na\'vi', 'Klingonisch', 'Sindarin'],
         correctAnswer: 3,
@@ -3655,7 +3653,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '401',
         question: 'Was ist ein Onomatopoetikum?',
         options: [
             'Ein erfundenes Wort',
@@ -3668,7 +3666,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '402',
         question: 'Welche dieser Sprachen verwendet nicht das lateinische Alphabet?',
         options: ['Polnisch', 'Schwedisch', 'Griechisch', 'Isländisch'],
         correctAnswer: 2,
@@ -3676,7 +3674,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '403',
         question: 'Was ist die Herkunft des Wortes "Algebra"?',
         options: ['Griechisch', 'Lateinisch', 'Arabisch', 'Sanskrit'],
         correctAnswer: 2,
@@ -3684,7 +3682,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '404',
         question: 'Was ist eine Agglutination in der Linguistik?',
         options: [
             'Eine Aneinanderreihung von Morphemen ohne Veränderung',
@@ -3697,7 +3695,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '405',
         question: 'Welche dieser Sprachen gehört zur semitischen Sprachfamilie?',
         options: ['Türkisch', 'Persisch', 'Arabisch', 'Urdu'],
         correctAnswer: 2,
@@ -3705,7 +3703,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '406',
         question: 'Was ist Digraphie?',
         options: [
             'Eine Schreibstörung',
@@ -3718,7 +3716,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '407',
         question: 'Was ist ein Schriftzeichen in der chinesischen Schrift?',
         options: ['Alphabet', 'Ideogramm', 'Hieroglyphe', 'Rune'],
         correctAnswer: 1,
@@ -3726,7 +3724,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '408',
         question: 'Was bedeutet "Linguistik"?',
         options: [
             'Die Wissenschaft von Essen und Trinken',
@@ -3739,7 +3737,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '409',
         question: 'Welches ist das am häufigsten verwendete Wort in der deutschen Sprache?',
         options: ['und', 'der', 'die', 'in'],
         correctAnswer: 1,
@@ -3747,7 +3745,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '410',
         question: 'Welche Sprache hat die meisten Wörter?',
         options: ['Englisch', 'Chinesisch', 'Deutsch', 'Arabisch'],
         correctAnswer: 0,
@@ -3755,7 +3753,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '411',
         question: 'Wie werden Wörter genannt, die aus den Anfangsbuchstaben mehrerer Wörter gebildet werden?',
         options: ['Komposita', 'Abbreviaturen', 'Akronyme', 'Präfixe'],
         correctAnswer: 2,
@@ -3763,7 +3761,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '412',
         question: 'Welcher Schauspieler spielte die Hauptrolle in "Forrest Gump"?',
         options: ['Tom Hanks', 'Leonardo DiCaprio', 'Brad Pitt', 'Will Smith'],
         correctAnswer: 0,
@@ -3771,7 +3769,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '413',
         question: 'Welcher dieser Filme wurde von Steven Spielberg gedreht?',
         options: ['Titanic', 'Avatar', 'Jurassic Park', 'The Dark Knight'],
         correctAnswer: 2,
@@ -3779,7 +3777,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '414',
         question: 'Welcher dieser Filme gewann NICHT den Oscar für den besten Film?',
         options: ['Titanic', 'Der Pate', 'Pulp Fiction', 'Forrest Gump'],
         correctAnswer: 2,
@@ -3787,7 +3785,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '415',
         question: 'Welcher Schauspieler spielte die Hauptrolle in der "Mission Impossible"-Reihe?',
         options: ['Tom Cruise', 'Brad Pitt', 'Leonardo DiCaprio', 'Matt Damon'],
         correctAnswer: 0,
@@ -3795,7 +3793,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '416',
         question: 'Welcher dieser Filme wurde NICHT von Steven Spielberg gedreht?',
         options: ['Schindlers Liste', 'E.T.', 'Der Soldat James Ryan', 'Titanic'],
         correctAnswer: 3,
@@ -3803,7 +3801,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '417',
         question: 'Welcher Schauspieler spielte die Hauptrolle in "The Truman Show"?',
         options: ['Jim Carrey', 'Adam Sandler', 'Will Smith', 'Tom Hanks'],
         correctAnswer: 0,
@@ -3811,7 +3809,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '418',
         question: 'Welcher Schauspieler spielte nicht in "Pulp Fiction" mit?',
         options: ['John Travolta', 'Bruce Willis', 'Samuel L. Jackson', 'Brad Pitt'],
         correctAnswer: 3,
@@ -3820,7 +3818,7 @@ module.exports = [
     },
     // Hier beginnen die 45 neuen Fragen für Film
     {
-        id: uuidv4(),
+        id: '419',
         question: 'Wer führte Regie bei "Der Pate"?',
         options: ['Martin Scorsese', 'Francis Ford Coppola', 'Steven Spielberg', 'Quentin Tarantino'],
         correctAnswer: 1,
@@ -3828,7 +3826,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '420',
         question: 'Welcher Film gewann 2020 den Oscar für den besten Film?',
         options: ['1917', 'Joker', 'Parasite', 'Once Upon a Time in Hollywood'],
         correctAnswer: 2,
@@ -3836,7 +3834,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '421',
         question: 'Welcher Schauspieler verkörperte "James Bond" am längsten?',
         options: ['Sean Connery', 'Roger Moore', 'Pierce Brosnan', 'Daniel Craig'],
         correctAnswer: 1,
@@ -3844,7 +3842,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '422',
         question: 'Welcher Film basiert NICHT auf einem Buch?',
         options: ['Der Herr der Ringe', 'Harry Potter', 'Inception', 'Die Tribute von Panem'],
         correctAnswer: 2,
@@ -3852,7 +3850,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '423',
         question: 'Welches Studio produzierte die "Toy Story"-Filme?',
         options: ['DreamWorks', 'Pixar', 'Universal', 'Warner Bros.'],
         correctAnswer: 1,
@@ -3860,7 +3858,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '424',
         question: 'Wer spielte die Rolle des Neo in "Matrix"?',
         options: ['Brad Pitt', 'Keanu Reeves', 'Tom Cruise', 'Will Smith'],
         correctAnswer: 1,
@@ -3868,7 +3866,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '425',
         question: 'In welchem Jahr kam der erste "Star Wars"-Film in die Kinos?',
         options: ['1975', '1977', '1980', '1983'],
         correctAnswer: 1,
@@ -3876,7 +3874,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '426',
         question: 'Welcher Film gilt als erster abendfüllender Animationsfilm der Geschichte?',
         options: ['Schneewittchen und die sieben Zwerge', 'Bambi', 'Pinocchio', 'Fantasia'],
         correctAnswer: 0,
@@ -3884,7 +3882,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '427',
         question: 'Wer spielte die Hauptrolle in "Titanic"?',
         options: ['Brad Pitt', 'Johnny Depp', 'Leonardo DiCaprio', 'Matt Damon'],
         correctAnswer: 2,
@@ -3892,7 +3890,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '428',
         question: 'Welcher Film ist der erfolgreichste Film aller Zeiten nach Einspielergebnis (nicht inflationsbereinigt)?',
         options: ['Avatar', 'Avengers: Endgame', 'Titanic', 'Star Wars: Das Erwachen der Macht'],
         correctAnswer: 1,
@@ -3900,7 +3898,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '429',
         question: 'Wer führte Regie bei "Psycho"?',
         options: ['Alfred Hitchcock', 'Stanley Kubrick', 'Orson Welles', 'Billy Wilder'],
         correctAnswer: 0,
@@ -3908,7 +3906,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '430',
         question: 'Welcher dieser Filme ist kein Animationsfilm?',
         options: ['WALL·E', 'Shrek', 'Die Unglaublichen', 'Avatar'],
         correctAnswer: 3,
@@ -3916,7 +3914,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '431',
         question: 'In welchem Film spielt Jack Nicholson einen Schriftsteller, der in einem abgelegenen Hotel wahnsinnig wird?',
         options: ['Misery', 'The Shining', 'Einer flog über das Kuckucksnest', 'Es'],
         correctAnswer: 1,
@@ -3924,7 +3922,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '432',
         question: 'Welches dieser Filmstudios ist das älteste noch existierende in den USA?',
         options: ['Paramount Pictures', 'Warner Bros.', 'Universal Studios', '20th Century Fox'],
         correctAnswer: 2,
@@ -3932,7 +3930,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '433',
         question: 'Welcher Schauspieler spielt "Indiana Jones"?',
         options: ['Harrison Ford', 'Sean Connery', 'Mark Hamill', 'Michael Douglas'],
         correctAnswer: 0,
@@ -3940,7 +3938,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '434',
         question: 'Welcher Film gewann den ersten Oscar für den besten animierten Spielfilm?',
         options: ['Toy Story', 'Shrek', 'Findet Nemo', 'Die Monster AG'],
         correctAnswer: 1,
@@ -3948,7 +3946,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '435',
         question: 'Wer spielte die Hauptrolle in "Pretty Woman"?',
         options: ['Sandra Bullock', 'Julia Roberts', 'Meg Ryan', 'Sharon Stone'],
         correctAnswer: 1,
@@ -3956,7 +3954,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '436',
         question: 'Welcher Film basiert auf einer Kurzgeschichte von Stephen King?',
         options: ['The Green Mile', 'Die Verurteilten', 'Misery', 'Es'],
         correctAnswer: 1,
@@ -3964,7 +3962,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '437',
         question: 'Welcher Film gewann den Oscar für den besten Film im Jahr 1994?',
         options: ['Forrest Gump', 'Pulp Fiction', 'Die Verurteilten', 'Der König der Löwen'],
         correctAnswer: 0,
@@ -3972,7 +3970,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '438',
         question: 'Wer spielt die Rolle der Hermine Granger in den "Harry Potter"-Filmen?',
         options: ['Emma Watson', 'Bonnie Wright', 'Helena Bonham Carter', 'Evanna Lynch'],
         correctAnswer: 0,
@@ -3980,7 +3978,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '439',
         question: 'Welcher Film gewann die meisten Oscars aller Zeiten?',
         options: ['Titanic', 'Ben Hur', 'Der Herr der Ringe: Die Rückkehr des Königs', 'La La Land'],
         correctAnswer: 2,
@@ -3988,7 +3986,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '440',
         question: 'Wer führte Regie bei "Jurassic Park"?',
         options: ['James Cameron', 'Steven Spielberg', 'George Lucas', 'Christopher Nolan'],
         correctAnswer: 1,
@@ -3996,7 +3994,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '441',
         question: 'In welchem Film spielt Leonardo DiCaprio einen Traumspezialisten?',
         options: ['Shutter Island', 'Inception', 'The Revenant', 'Catch Me If You Can'],
         correctAnswer: 1,
@@ -4004,7 +4002,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '442',
         question: 'Welcher Regisseur ist bekannt für seine Filme "Pulp Fiction" und "Django Unchained"?',
         options: ['Christopher Nolan', 'Martin Scorsese', 'Quentin Tarantino', 'Wes Anderson'],
         correctAnswer: 2,
@@ -4012,7 +4010,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '443',
         question: 'Welcher Film handelt von einem Jungen, der Menschen wie in einem Videospiel sieht?',
         options: ['Ready Player One', 'Scott Pilgrim gegen den Rest der Welt', 'Tron: Legacy', 'The Game'],
         correctAnswer: 1,
@@ -4020,7 +4018,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '444',
         question: 'Welcher dieser Filme wurde NICHT von Quentin Tarantino gedreht?',
         options: ['Kill Bill', 'Reservoir Dogs', 'Jackie Brown', 'No Country for Old Men'],
         correctAnswer: 3,
@@ -4028,7 +4026,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '445',
         question: 'Welcher Schauspieler spielt "Wolverine" in den X-Men-Filmen?',
         options: ['Chris Hemsworth', 'Hugh Jackman', 'Ryan Reynolds', 'Chris Evans'],
         correctAnswer: 1,
@@ -4036,7 +4034,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '446',
         question: 'In welchem Jahr feierte der erste "Harry Potter"-Film Premiere?',
         options: ['2000', '2001', '2002', '2003'],
         correctAnswer: 1,
@@ -4044,7 +4042,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '447',
         question: 'Welcher Film spielt in einer Welt, in der Menschen nicht lügen können?',
         options: ['Liar Liar', 'The Invention of Lying', 'Yes Man', 'The Truman Show'],
         correctAnswer: 1,
@@ -4052,7 +4050,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '448',
         question: 'Wer führte Regie bei "Avatar"?',
         options: ['Steven Spielberg', 'Peter Jackson', 'James Cameron', 'Christopher Nolan'],
         correctAnswer: 2,
@@ -4060,7 +4058,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '449',
         question: 'Welche Farbe hat der Lichtschwert von Mace Windu in Star Wars?',
         options: ['Blau', 'Grün', 'Rot', 'Lila'],
         correctAnswer: 3,
@@ -4068,7 +4066,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '450',
         question: 'Welcher Film beginnt mit der Szene einer Hochzeit?',
         options: ['Casino', 'Goodfellas', 'Der Pate', 'Scarface'],
         correctAnswer: 2,
@@ -4076,7 +4074,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '451',
         question: 'Wer spielt die Hauptrolle in "Die fabelhafte Welt der Amélie"?',
         options: ['Audrey Tautou', 'Marion Cotillard', 'Juliette Binoche', 'Sophie Marceau'],
         correctAnswer: 0,
@@ -4084,7 +4082,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '452',
         question: 'Welcher Film gewann 2019 den Oscar für den besten fremdsprachigen Film?',
         options: ['Shoplifters', 'Cold War', 'Roma', 'Capernaum'],
         correctAnswer: 2,
@@ -4092,7 +4090,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '453',
         question: 'In welchem Film sagt der Hauptcharakter: "Das Leben ist wie eine Schachtel Pralinen"?',
         options: ['Pulp Fiction', 'Forrest Gump', 'Die Verurteilten', 'The Green Mile'],
         correctAnswer: 1,
@@ -4100,7 +4098,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '454',
         question: 'Welcher Regisseur ist bekannt für seine Zusammenarbeit mit dem Komponisten Hans Zimmer?',
         options: ['Quentin Tarantino', 'Steven Spielberg', 'Christopher Nolan', 'James Cameron'],
         correctAnswer: 2,
@@ -4108,7 +4106,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '455',
         question: 'Aus welchem Land stammt der Film "Das Leben der Anderen"?',
         options: ['Frankreich', 'Italien', 'Deutschland', 'Österreich'],
         correctAnswer: 2,
@@ -4116,7 +4114,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '456',
         question: 'Welcher dieser Filme ist ein Stop-Motion-Animationsfilm?',
         options: ['Findet Nemo', 'Shrek', 'Nightmare Before Christmas', 'Madagascar'],
         correctAnswer: 2,
@@ -4124,7 +4122,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '457',
         question: 'Wer führte Regie bei "Der Herr der Ringe"?',
         options: ['James Cameron', 'Peter Jackson', 'Christopher Nolan', 'Ridley Scott'],
         correctAnswer: 1,
@@ -4132,7 +4130,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '458',
         question: 'Welcher dieser Filme gilt als der erste farbige Spielfilm in Spielfilmlänge?',
         options: ['Der Zauberer von Oz', 'Vom Winde verweht', 'Schneewittchen und die sieben Zwerge', 'Robin Hood – König der Vagabunden'],
         correctAnswer: 3,
@@ -4140,7 +4138,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '459',
         question: 'Welche Schauspielerin gewann die meisten Oscars?',
         options: ['Meryl Streep', 'Katharine Hepburn', 'Ingrid Bergman', 'Jodie Foster'],
         correctAnswer: 1,
@@ -4148,7 +4146,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '460',
         question: 'In welchem Jahr fand die erste Oscar-Verleihung statt?',
         options: ['1919', '1929', '1939', '1949'],
         correctAnswer: 1,
@@ -4156,7 +4154,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '461',
         question: 'Welcher Film erzählt die Geschichte des Schachmeisters Bobby Fischer?',
         options: ['A Beautiful Mind', 'The Queen\'s Gambit', 'Pawn Sacrifice', 'Searching for Bobby Fischer'],
         correctAnswer: 2,
@@ -4164,7 +4162,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '462',
         question: 'Welcher Film gewann 2008 den Oscar für den besten animierten Spielfilm?',
         options: ['Ratatouille', 'WALL·E', 'Kung Fu Panda', 'Die Simpsons – Der Film'],
         correctAnswer: 1,
@@ -4172,7 +4170,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '463',
         question: 'Welcher berühmte Künstler malte die "Sternennacht"?',
         options: ['Claude Monet', 'Pablo Picasso', 'Vincent van Gogh', 'Leonardo da Vinci'],
         correctAnswer: 2,
@@ -4180,7 +4178,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '464',
         question: 'Wer malte die Mona Lisa?',
         options: ['Michelangelo', 'Leonardo da Vinci', 'Raffael', 'Sandro Botticelli'],
         correctAnswer: 1,
@@ -4188,7 +4186,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '465',
         question: 'Wer hat den Kubismus mitbegründet?',
         options: ['Salvador Dalí', 'Pablo Picasso', 'Vincent van Gogh', 'Claude Monet'],
         correctAnswer: 1,
@@ -4196,7 +4194,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '466',
         question: 'Welcher dieser Künstler gehört zur Pop-Art?',
         options: ['Pablo Picasso', 'Claude Monet', 'Andy Warhol', 'Salvador Dalí'],
         correctAnswer: 2,
@@ -4204,7 +4202,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '467',
         question: 'Welche Farbe erhält man, wenn man Blau und Gelb mischt?',
         options: ['Orange', 'Grün', 'Violett', 'Braun'],
         correctAnswer: 1,
@@ -4213,7 +4211,7 @@ module.exports = [
     },
     // Hier beginnen die 47 neuen Fragen für Kunst
     {
-        id: uuidv4(),
+        id: '468',
         question: 'Wer malte "Die Geburt der Venus"?',
         options: ['Leonardo da Vinci', 'Michelangelo', 'Raffael', 'Sandro Botticelli'],
         correctAnswer: 3,
@@ -4221,7 +4219,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '469',
         question: 'Welcher Maler gehört zum Impressionismus?',
         options: ['Claude Monet', 'Pablo Picasso', 'Salvador Dalí', 'Andy Warhol'],
         correctAnswer: 0,
@@ -4229,7 +4227,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '470',
         question: 'Welcher Künstler ist bekannt für seine "Campbell\'s Soup Cans"?',
         options: ['Roy Lichtenstein', 'Keith Haring', 'Andy Warhol', 'Jackson Pollock'],
         correctAnswer: 2,
@@ -4237,7 +4235,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '471',
         question: 'Von wem stammt das Gemälde "Der Schrei"?',
         options: ['Edvard Munch', 'Gustav Klimt', 'Vincent van Gogh', 'Pablo Picasso'],
         correctAnswer: 0,
@@ -4245,7 +4243,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '472',
         question: 'In welcher Stadt befindet sich das Louvre-Museum?',
         options: ['London', 'Rom', 'Paris', 'Madrid'],
         correctAnswer: 2,
@@ -4253,7 +4251,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '473',
         question: 'Welcher Künstler schnitt sich ein Stück seines Ohres ab?',
         options: ['Pablo Picasso', 'Claude Monet', 'Vincent van Gogh', 'Salvador Dalí'],
         correctAnswer: 2,
@@ -4261,7 +4259,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '474',
         question: 'Welche Kunstrichtung entstand als erste?',
         options: ['Impressionismus', 'Kubismus', 'Renaissance', 'Surrealismus'],
         correctAnswer: 2,
@@ -4269,7 +4267,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '475',
         question: 'Wer malte die Sixtinische Kapelle?',
         options: ['Leonardo da Vinci', 'Michelangelo', 'Raffael', 'Donatello'],
         correctAnswer: 1,
@@ -4277,7 +4275,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '476',
         question: 'Welches dieser Kunstwerke wurde NICHT von Leonardo da Vinci geschaffen?',
         options: ['Mona Lisa', 'Das letzte Abendmahl', 'Die Nachtwache', 'Dame mit dem Hermelin'],
         correctAnswer: 2,
@@ -4285,7 +4283,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '477',
         question: 'Welcher Künstler ist bekannt für seine Darstellungen von Balletttänzerinnen?',
         options: ['Claude Monet', 'Edgar Degas', 'Pierre-Auguste Renoir', 'Édouard Manet'],
         correctAnswer: 1,
@@ -4293,7 +4291,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '478',
         question: 'Welche Kunstbewegung ist bekannt für ihre abstrakten geometrischen Formen und die Verwendung der Grundfarben?',
         options: ['Art déco', 'Bauhaus', 'De Stijl', 'Expressionismus'],
         correctAnswer: 2,
@@ -4301,7 +4299,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '479',
         question: 'In welchem Museum hängt "Guernica" von Pablo Picasso?',
         options: ['Louvre, Paris', 'Museo Reina Sofía, Madrid', 'Museum of Modern Art, New York', 'Tate Modern, London'],
         correctAnswer: 1,
@@ -4309,7 +4307,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '480',
         question: 'Welcher Künstler ist bekannt für seine "Drip Paintings"?',
         options: ['Mark Rothko', 'Jackson Pollock', 'Wassily Kandinsky', 'Willem de Kooning'],
         correctAnswer: 1,
@@ -4317,7 +4315,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '481',
         question: 'Welcher Kunststil folgte auf die Renaissance?',
         options: ['Barock', 'Rokoko', 'Manierismus', 'Gotik'],
         correctAnswer: 2,
@@ -4325,7 +4323,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '482',
         question: 'Wer schuf die Skulptur "David"?',
         options: ['Leonardo da Vinci', 'Michelangelo', 'Donatello', 'Raffael'],
         correctAnswer: 1,
@@ -4333,7 +4331,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '483',
         question: 'Welches dieser Museen befindet sich in New York?',
         options: ['Musée d\'Orsay', 'Tate Modern', 'Museum of Modern Art (MoMA)', 'Uffizien'],
         correctAnswer: 2,
@@ -4341,7 +4339,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '484',
         question: 'Wer malte "Die Nachtwache"?',
         options: ['Vincent van Gogh', 'Rembrandt van Rijn', 'Johannes Vermeer', 'Frans Hals'],
         correctAnswer: 1,
@@ -4349,7 +4347,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '485',
         question: 'Welche Farbe gehört nicht zu den Primärfarben?',
         options: ['Rot', 'Blau', 'Gelb', 'Grün'],
         correctAnswer: 3,
@@ -4357,7 +4355,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '486',
         question: 'Welcher Künstler ist bekannt für seine Bilder mit schmelzenden Uhren?',
         options: ['René Magritte', 'Salvador Dalí', 'Max Ernst', 'Joan Miró'],
         correctAnswer: 1,
@@ -4365,7 +4363,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '487',
         question: 'Welche Kunstrichtung zeichnet sich durch die präzise Darstellung von Alltäglichem aus?',
         options: ['Expressionismus', 'Surrealismus', 'Fotorealismus', 'Kubismus'],
         correctAnswer: 2,
@@ -4373,7 +4371,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '488',
         question: 'Welche dieser Skulpturen wurde von Auguste Rodin geschaffen?',
         options: ['David', 'Der Denker', 'Pieta', 'Venus von Milo'],
         correctAnswer: 1,
@@ -4381,7 +4379,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '489',
         question: 'Welcher Künstler gehörte NICHT zur Bewegung des Impressionismus?',
         options: ['Claude Monet', 'Pierre-Auguste Renoir', 'Edgar Degas', 'Paul Cézanne'],
         correctAnswer: 3,
@@ -4389,7 +4387,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '490',
         question: 'Wer malte "Das Mädchen mit dem Perlenohrring"?',
         options: ['Jan van Eyck', 'Johannes Vermeer', 'Rembrandt van Rijn', 'Pieter Bruegel'],
         correctAnswer: 1,
@@ -4397,7 +4395,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '491',
         question: 'Welche Technik verwendet Wasserfarben auf frischem Putz?',
         options: ['Fresko', 'Tempera', 'Gouache', 'Aquarell'],
         correctAnswer: 0,
@@ -4405,7 +4403,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '492',
         question: 'Was ist ein Triptychon?',
         options: [
             'Ein dreiteiliges Kunstwerk',
@@ -4418,7 +4416,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '493',
         question: 'Welcher Künstler malte "Die Beständigkeit der Erinnerung"?',
         options: ['René Magritte', 'Salvador Dalí', 'Max Ernst', 'Frida Kahlo'],
         correctAnswer: 1,
@@ -4426,7 +4424,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '494',
         question: 'Welche Kunstrichtung entstand in den 1960er Jahren und betont alltägliche Gegenstände?',
         options: ['Dadaismus', 'Futurismus', 'Pop Art', 'Minimalismus'],
         correctAnswer: 2,
@@ -4434,7 +4432,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '495',
         question: 'Welcher Künstler ist bekannt für seine "Sonnenblumen"-Gemälde?',
         options: ['Pablo Picasso', 'Claude Monet', 'Vincent van Gogh', 'Paul Gauguin'],
         correctAnswer: 2,
@@ -4442,7 +4440,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '496',
         question: 'Welche Kunstrichtung betont Träume und das Unterbewusste?',
         options: ['Expressionismus', 'Surrealismus', 'Kubismus', 'Dadaismus'],
         correctAnswer: 1,
@@ -4450,7 +4448,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '497',
         question: 'In welchem Museum befindet sich "Die Nachtwache" von Rembrandt?',
         options: ['Rijksmuseum, Amsterdam', 'Louvre, Paris', 'Prado, Madrid', 'National Gallery, London'],
         correctAnswer: 0,
@@ -4458,7 +4456,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '498',
         question: 'Welcher Künstler malte "Impression, Sonnenaufgang", das dem Impressionismus seinen Namen gab?',
         options: ['Claude Monet', 'Pierre-Auguste Renoir', 'Edgar Degas', 'Édouard Manet'],
         correctAnswer: 0,
@@ -4466,7 +4464,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '499',
         question: 'Was ist ein Ready-made in der Kunst?',
         options: [
             'Eine vorgefertigte Leinwand',
@@ -4479,7 +4477,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '500',
         question: 'Welcher dieser Künstler war KEIN niederländischer Maler des Goldenen Zeitalters?',
         options: ['Rembrandt van Rijn', 'Johannes Vermeer', 'Jan van Eyck', 'Frans Hals'],
         correctAnswer: 2,
@@ -4487,7 +4485,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '501',
         question: 'Welches Gemälde zeigt ein Mädchen mit einem Perlenohrring?',
         options: [
             '"Mädchen mit Perlenohrring" von Johannes Vermeer',
@@ -4500,7 +4498,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '502',
         question: 'Was ist eine Skulptur, die freistehend von allen Seiten betrachtet werden kann?',
         options: ['Relief', 'Mosaik', 'Vollplastik', 'Installation'],
         correctAnswer: 2,
@@ -4508,7 +4506,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '503',
         question: 'Welches dieser Kunstwerke ist KEINE Skulptur?',
         options: ['Auguste Rodins "Der Denker"', 'Michelangelos "David"', 'Leonardo da Vincis "Das letzte Abendmahl"', 'Auguste Rodins "Der Kuss"'],
         correctAnswer: 2,
@@ -4516,7 +4514,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '504',
         question: 'Welche Kunstströmung entstand in Russland zu Beginn des 20. Jahrhunderts?',
         options: ['Suprematismus', 'Bauhaus', 'De Stijl', 'Art Nouveau'],
         correctAnswer: 0,
@@ -4524,7 +4522,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '505',
         question: 'Wer ist der Architekt des Guggenheim-Museums in Bilbao?',
         options: ['I.M. Pei', 'Frank Gehry', 'Zaha Hadid', 'Norman Foster'],
         correctAnswer: 1,
@@ -4532,7 +4530,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '506',
         question: 'Welcher Künstler ist bekannt für das Werk "Fountain" (ein umgedrehtes Urinal)?',
         options: ['Marcel Duchamp', 'Andy Warhol', 'Salvador Dalí', 'Pablo Picasso'],
         correctAnswer: 0,
@@ -4540,7 +4538,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '507',
         question: 'Was ist ein Trompe-l\'oeil?',
         options: [
             'Eine Maltechnik, die eine optische Täuschung erzeugt',
@@ -4553,7 +4551,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '508',
         question: 'Welcher Künstler schuf die Plastik "Vogel im Raum"?',
         options: ['Alberto Giacometti', 'Henry Moore', 'Constantin Brâncuși', 'Joan Miró'],
         correctAnswer: 2,
@@ -4561,7 +4559,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '509',
         question: 'Welcher Künstler ist bekannt für seine "Marilyn Monroe"-Porträts?',
         options: ['Roy Lichtenstein', 'Mark Rothko', 'Andy Warhol', 'Jackson Pollock'],
         correctAnswer: 2,
@@ -4569,7 +4567,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '510',
         question: 'Was ist ein Selbstporträt?',
         options: [
             'Ein Gemälde, das einen Spiegel zeigt',
@@ -4582,7 +4580,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '511',
         question: 'Welche Farbe entsteht, wenn man Rot und Blau mischt?',
         options: ['Grün', 'Orange', 'Violett', 'Braun'],
         correctAnswer: 2,
@@ -4590,7 +4588,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '512',
         question: 'Welcher dieser Begriffe bezeichnet KEINE Maltechnik?',
         options: ['Tempera', 'Gouache', 'Impasto', 'Chiaroscuro'],
         correctAnswer: 3,
@@ -4598,7 +4596,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '513',
         question: 'Von wem stammt das Gemälde "Die Erschaffung Adams"?',
         options: ['Leonardo da Vinci', 'Michelangelo', 'Raffael', 'Donatello'],
         correctAnswer: 1,
@@ -4606,7 +4604,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '514',
         question: 'Welche Kunstrichtung entstand nach dem Zweiten Weltkrieg in den USA?',
         options: ['Abstrakter Expressionismus', 'Kubismus', 'Dadaismus', 'Art Nouveau'],
         correctAnswer: 0,
@@ -4614,7 +4612,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '515',
         question: 'Wer malte "Die Arnolfini-Hochzeit"?',
         options: ['Jan van Eyck', 'Hieronymus Bosch', 'Pieter Bruegel der Ältere', 'Hans Holbein der Jüngere'],
         correctAnswer: 0,
@@ -4622,7 +4620,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '516',
         question: 'In welchem Jahrhundert lebte Vincent van Gogh?',
         options: ['17. Jahrhundert', '18. Jahrhundert', '19. Jahrhundert', '20. Jahrhundert'],
         correctAnswer: 2,
@@ -4630,7 +4628,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '517',
         question: 'In welchem Sport wird bei den Olympischen Spielen auf einem Velodrom ausgetragen?',
         options: ['Schwimmen', 'Leichtathletik', 'Radsport', 'Reiten'],
         correctAnswer: 2,
@@ -4638,7 +4636,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '518',
         question: 'Welche Sportart bezeichnet man auch als "Weißen Sport"?',
         options: ['Ski Alpin', 'Tennis', 'Golf', 'Segeln'],
         correctAnswer: 1,
@@ -4646,7 +4644,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '519',
         question: 'Welche dieser Sportarten ist KEINE olympische Disziplin?',
         options: ['Fechten', 'Cricket', 'Bogenschießen', 'Gewichtheben'],
         correctAnswer: 1,
@@ -4654,7 +4652,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '520',
         question: 'In welchem Sport wird der Davis Cup ausgetragen?',
         options: ['Fußball', 'Tennis', 'Golf', 'Basketball'],
         correctAnswer: 1,
@@ -4662,7 +4660,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '521',
         question: 'Wie viele Spieler hat eine Mannschaft beim Basketball auf dem Feld?',
         options: ['4', '5', '6', '7'],
         correctAnswer: 1,
@@ -4671,7 +4669,7 @@ module.exports = [
     },
     // Hier beginnen die 47 neuen Fragen für Sport
     {
-        id: uuidv4(),
+        id: '522',
         question: 'Wie viele Spieler hat eine Mannschaft beim Fußball auf dem Feld?',
         options: ['9', '10', '11', '12'],
         correctAnswer: 2,
@@ -4679,7 +4677,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '523',
         question: 'Welches Sportereignis findet alle vier Jahre statt?',
         options: ['Tour de France', 'Super Bowl', 'Champions League', 'Olympische Sommerspiele'],
         correctAnswer: 3,
@@ -4687,7 +4685,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '524',
         question: 'In welcher Sportart wurden die Williams-Schwestern berühmt?',
         options: ['Schwimmen', 'Gymnastik', 'Tennis', 'Leichtathletik'],
         correctAnswer: 2,
@@ -4695,7 +4693,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '525',
         question: 'Wie viele Spieler hat eine Volleyball-Mannschaft auf dem Feld?',
         options: ['5', '6', '7', '8'],
         correctAnswer: 1,
@@ -4703,7 +4701,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '526',
         question: 'Welches ist das größte Tennisturnier der Welt?',
         options: ['Wimbledon', 'French Open', 'US Open', 'Australian Open'],
         correctAnswer: 0,
@@ -4711,7 +4709,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '527',
         question: 'Wie nennt man einen Wurf im Basketball, bei dem der Ball von oben direkt in den Korb gestoßen wird?',
         options: ['Layup', 'Dunk', 'Dreipunktewurf', 'Freiwurf'],
         correctAnswer: 1,
@@ -4719,7 +4717,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '528',
         question: 'Welche Sportart wird auf einem "Court" gespielt?',
         options: ['Golf', 'Tennis', 'Fußball', 'Schwimmen'],
         correctAnswer: 1,
@@ -4727,7 +4725,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '529',
         question: 'In welchem Sport gibt es den Ausdruck "Hole in One"?',
         options: ['Tennis', 'Bowling', 'Golf', 'Billard'],
         correctAnswer: 2,
@@ -4735,7 +4733,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '530',
         question: 'Wie lange dauert eine Halbzeit beim Fußball?',
         options: ['30 Minuten', '45 Minuten', '60 Minuten', '90 Minuten'],
         correctAnswer: 1,
@@ -4743,7 +4741,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '531',
         question: 'Welches Schwimmereignis gilt als das prestigeträchtigste bei Olympischen Spielen?',
         options: ['100m Freistil', '200m Brust', '400m Lagen', '1500m Freistil'],
         correctAnswer: 0,
@@ -4751,7 +4749,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '532',
         question: 'In welchem Land wurden die ersten Olympischen Spiele der Neuzeit ausgetragen?',
         options: ['Frankreich', 'Griechenland', 'Vereinigtes Königreich', 'USA'],
         correctAnswer: 1,
@@ -4759,7 +4757,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '533',
         question: 'Welche Farbe hat die Bande beim Billard?',
         options: ['Rot', 'Blau', 'Grün', 'Schwarz'],
         correctAnswer: 2,
@@ -4767,7 +4765,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '534',
         question: 'Wie viele Spieler hat eine Eishockey-Mannschaft auf dem Eis?',
         options: ['5', '6', '7', '8'],
         correctAnswer: 1,
@@ -4775,7 +4773,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '535',
         question: 'Was ist ein Grand Slam im Tennis?',
         options: [
             'Ein Aufschlag, bei dem der Gegner den Ball nicht berührt',
@@ -4788,7 +4786,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '536',
         question: 'Welches Land hat die meisten Fußball-Weltmeisterschaften gewonnen?',
         options: ['Deutschland', 'Italien', 'Argentinien', 'Brasilien'],
         correctAnswer: 3,
@@ -4796,7 +4794,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '537',
         question: 'Welche Sportart wird mit einem Puck gespielt?',
         options: ['Hockey', 'Eishockey', 'Curling', 'Lacrosse'],
         correctAnswer: 1,
@@ -4804,7 +4802,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '538',
         question: 'Wie viele Ringe hat das olympische Symbol?',
         options: ['3', '4', '5', '6'],
         correctAnswer: 2,
@@ -4812,7 +4810,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '539',
         question: 'Welches ist die höchste Spielklasse im deutschen Fußball?',
         options: ['Oberliga', 'Regionalliga', '2. Bundesliga', 'Bundesliga'],
         correctAnswer: 3,
@@ -4820,7 +4818,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '540',
         question: 'In welcher Stadt finden die Olympischen Sommerspiele 2024 statt?',
         options: ['Tokio', 'Los Angeles', 'Paris', 'Rom'],
         correctAnswer: 2,
@@ -4828,7 +4826,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '541',
         question: 'Wie viele Spieler hat eine Handball-Mannschaft auf dem Feld?',
         options: ['5', '6', '7', '8'],
         correctAnswer: 2,
@@ -4836,7 +4834,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '542',
         question: 'Welche Disziplin gehört NICHT zur Leichtathletik?',
         options: ['Speerwerfen', 'Hammerwerfen', 'Kugelstoßen', 'Gewichtheben'],
         correctAnswer: 3,
@@ -4844,7 +4842,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '543',
         question: 'Wie heißt die höchste amerikanische Basketball-Liga?',
         options: ['NHL', 'MLB', 'NFL', 'NBA'],
         correctAnswer: 3,
@@ -4852,7 +4850,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '544',
         question: 'Welche dieser Sportarten wird nicht auf Eis ausgeübt?',
         options: ['Eishockey', 'Eiskunstlauf', 'Curling', 'Squash'],
         correctAnswer: 3,
@@ -4860,7 +4858,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '545',
         question: 'Wie nennt man im Golf die Anzahl der Schläge, die theoretisch benötigt werden, um den Ball einzulochen?',
         options: ['Birdie', 'Eagle', 'Par', 'Bogey'],
         correctAnswer: 2,
@@ -4868,7 +4866,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '546',
         question: 'Welche Farbe hat die Mitte einer Dartscheibe?',
         options: ['Rot', 'Grün', 'Schwarz', 'Weiß'],
         correctAnswer: 0,
@@ -4876,7 +4874,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '547',
         question: 'In welchem Jahr fanden die ersten Olympischen Winterspiele statt?',
         options: ['1896', '1924', '1936', '1948'],
         correctAnswer: 1,
@@ -4884,7 +4882,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '548',
         question: 'Wie viele Spieler hat eine Rugby-Union-Mannschaft auf dem Feld?',
         options: ['11', '13', '15', '17'],
         correctAnswer: 2,
@@ -4892,7 +4890,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '549',
         question: 'Welcher Schwimmstil wird zuletzt beim Lagenschwimmen geschwommen?',
         options: ['Rücken', 'Brust', 'Schmetterling', 'Freistil'],
         correctAnswer: 3,
@@ -4900,7 +4898,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '550',
         question: 'In welchem Sport gibt es einen "Smash"?',
         options: ['Tennis', 'Badminton', 'Volleyball', 'Alle genannten'],
         correctAnswer: 3,
@@ -4908,7 +4906,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '551',
         question: 'Wie viele Feldspieler hat eine Baseball-Mannschaft?',
         options: ['7', '8', '9', '10'],
         correctAnswer: 2,
@@ -4916,7 +4914,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '552',
         question: 'Welches ist das berühmteste Pferderennen in England?',
         options: ['Kentucky Derby', 'Prix de l\'Arc de Triomphe', 'Epsom Derby', 'Melbourne Cup'],
         correctAnswer: 2,
@@ -4924,7 +4922,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '553',
         question: 'In welchem Land wurde Cricket erfunden?',
         options: ['Indien', 'Australien', 'Südafrika', 'England'],
         correctAnswer: 3,
@@ -4932,7 +4930,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '554',
         question: 'Welche dieser Sportarten ist keine olympische Disziplin?',
         options: ['BMX-Radfahren', 'Taekwondo', 'Squash', 'Trampolinturnen'],
         correctAnswer: 2,
@@ -4940,7 +4938,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '555',
         question: 'Wie viele Punkte bringt ein Touchdown im American Football?',
         options: ['3', '6', '7', '9'],
         correctAnswer: 1,
@@ -4948,7 +4946,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '556',
         question: 'Welcher dieser Sportler hat die meisten Olympischen Goldmedaillen gewonnen?',
         options: ['Usain Bolt', 'Michael Phelps', 'Carl Lewis', 'Larisa Latynina'],
         correctAnswer: 1,
@@ -4956,7 +4954,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '557',
         question: 'Welcher Sport wurde bei den Olympischen Spielen 2021 in Tokio neu eingeführt?',
         options: ['Breakdance', 'Skateboarding', 'Wakeboarding', 'eSports'],
         correctAnswer: 1,
@@ -4964,7 +4962,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '558',
         question: 'Wie lange dauert ein Boxkampf bei den Olympischen Spielen?',
         options: ['9 Minuten (3 Runden à 3 Minuten)', '12 Minuten (4 Runden à 3 Minuten)', '12 Minuten (6 Runden à 2 Minuten)', '15 Minuten (5 Runden à 3 Minuten)'],
         correctAnswer: 0,
@@ -4972,7 +4970,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '559',
         question: 'Welches ist die höchste Spielklasse im deutschen Eishockey?',
         options: ['DEL', 'Bundesliga', 'Oberliga', 'Regionalliga'],
         correctAnswer: 0,
@@ -4980,7 +4978,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '560',
         question: 'Wie weit ist ein Marathon?',
         options: ['40,195 km', '42,195 km', '44,195 km', '46,195 km'],
         correctAnswer: 1,
@@ -4988,7 +4986,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '561',
         question: 'In welchem Sport gibt es den Begriff "Salchow"?',
         options: ['Turnen', 'Skifahren', 'Eiskunstlauf', 'Synchronschwimmen'],
         correctAnswer: 2,
@@ -4996,7 +4994,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '562',
         question: 'Wie viele Spieler stehen bei einem Wasserball-Team gleichzeitig im Wasser?',
         options: ['5', '6', '7', '8'],
         correctAnswer: 2,
@@ -5004,7 +5002,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '563',
         question: 'Welcher dieser Sportler wurde NICHT in Deutschland geboren?',
         options: ['Dirk Nowitzki', 'Boris Becker', 'Sebastian Vettel', 'Roger Federer'],
         correctAnswer: 3,
@@ -5012,7 +5010,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '564',
         question: 'Welche Sportart wird auf einem "Pitch" gespielt?',
         options: ['Fußball', 'Cricket', 'Rugby', 'Hockey'],
         correctAnswer: 1,
@@ -5020,7 +5018,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '565',
         question: 'Wie wird ein Spielstand von 40:40 beim Tennis genannt?',
         options: ['Vorteil', 'Deuce', 'Remis', 'Gleichstand'],
         correctAnswer: 1,
@@ -5028,7 +5026,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '566',
         question: 'Welcher dieser Sportler hat KEINEN Weltrekord aufgestellt?',
         options: ['Usain Bolt', 'Michael Phelps', 'Roger Federer', 'Sergey Bubka'],
         correctAnswer: 2,
@@ -5036,7 +5034,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '567',
         question: 'In welchem Sport wird ein "Axel" ausgeführt?',
         options: ['Eiskunstlauf', 'Turnen', 'Stabhochsprung', 'Turmspringen'],
         correctAnswer: 0,
@@ -5044,7 +5042,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '568',
         question: 'Mit welchem Sport wird Wimbledon assoziiert?',
         options: ['Golf', 'Tennis', 'Pferderennen', 'Cricket'],
         correctAnswer: 1,
@@ -5052,7 +5050,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '569',
         question: 'Welches mathematische Symbol führte Gottfried Wilhelm Leibniz ein?',
         options: ['Das Gleichheitszeichen (=)', 'Das Integralzeichen (∫)', 'Die Zahl Pi (π)', 'Das Unendlichzeichen (∞)'],
         correctAnswer: 1,
@@ -5060,7 +5058,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '570',
         question: 'Wie viele Millimeter sind ein Kilometer?',
         options: ['10.000', '100.000', '1.000.000', '10.000.000'],
         correctAnswer: 2,
@@ -5068,7 +5066,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '571',
         question: 'Wie viele Ecken hat ein Würfel?',
         options: ['6', '8', '10', '12'],
         correctAnswer: 1,
@@ -5076,7 +5074,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '572',
         question: 'Wie nennt man einen Winkel mit 180 Grad?',
         options: ['Rechter Winkel', 'Spitzer Winkel', 'Stumpfer Winkel', 'Gestreckter Winkel'],
         correctAnswer: 3,
@@ -5085,7 +5083,7 @@ module.exports = [
     },
     // Hier beginnen die 48 neuen Fragen für Mathematik
     {
-        id: uuidv4(),
+        id: '573',
         question: 'Was ist die Wurzel aus 144?',
         options: ['10', '12', '14', '16'],
         correctAnswer: 1,
@@ -5093,7 +5091,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '574',
         question: 'Wie viele Seiten hat ein Oktagon?',
         options: ['6', '7', '8', '9'],
         correctAnswer: 2,
@@ -5101,7 +5099,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '575',
         question: 'Was ist das Ergebnis von 7 × 8?',
         options: ['54', '56', '58', '63'],
         correctAnswer: 1,
@@ -5109,7 +5107,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '576',
         question: 'Was ist die Summe der Innenwinkel eines Dreiecks?',
         options: ['90°', '180°', '270°', '360°'],
         correctAnswer: 1,
@@ -5117,7 +5115,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '577',
         question: 'Wie berechnet man den Flächeninhalt eines Rechtecks?',
         options: ['Länge + Breite', 'Länge × Breite', '2 × (Länge + Breite)', 'Länge² + Breite²'],
         correctAnswer: 1,
@@ -5125,7 +5123,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '578',
         question: 'Was ist der Wert von Pi (gerundet auf zwei Dezimalstellen)?',
         options: ['3,14', '3,41', '3,16', '3,12'],
         correctAnswer: 0,
@@ -5133,7 +5131,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '579',
         question: 'Was ist der Umfang eines Kreises mit Radius r?',
         options: ['πr', '2πr', 'πr²', '2πr²'],
         correctAnswer: 1,
@@ -5141,7 +5139,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '580',
         question: 'Was ist der Flächeninhalt eines Kreises mit Radius r?',
         options: ['πr', '2πr', 'πr²', '2πr²'],
         correctAnswer: 2,
@@ -5149,7 +5147,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '581',
         question: 'Was ist das Ergebnis von 5³?',
         options: ['15', '75', '125', '625'],
         correctAnswer: 2,
@@ -5157,7 +5155,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '582',
         question: 'Was ist die Quadratwurzel aus 25?',
         options: ['4', '5', '6', '7'],
         correctAnswer: 1,
@@ -5165,7 +5163,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '583',
         question: 'Was ist ein Primzahlzwilling?',
         options: [
             'Zwei aufeinanderfolgende Primzahlen',
@@ -5178,7 +5176,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '584',
         question: 'Wie lautet der Satz des Pythagoras?',
         options: [
             'a² + b² = c²',
@@ -5191,7 +5189,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '585',
         question: 'Was ist der Sinus von 0°?',
         options: ['0', '1', '-1', '0,5'],
         correctAnswer: 0,
@@ -5199,7 +5197,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '586',
         question: 'Was ist 20% von 80?',
         options: ['4', '8', '16', '20'],
         correctAnswer: 2,
@@ -5207,7 +5205,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '587',
         question: 'Wie viele Primzahlen kleiner als 10 gibt es?',
         options: ['2', '3', '4', '5'],
         correctAnswer: 2,
@@ -5215,7 +5213,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '588',
         question: 'Was ist das Ergebnis von (-3) × (-4)?',
         options: ['-7', '-12', '7', '12'],
         correctAnswer: 3,
@@ -5223,7 +5221,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '589',
         question: 'Welche Zahl kommt in der Fibonacci-Folge nach 8?',
         options: ['11', '12', '13', '15'],
         correctAnswer: 2,
@@ -5231,7 +5229,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '590',
         question: 'Was ist der Kosinus von 90°?',
         options: ['0', '1', '-1', '0,5'],
         correctAnswer: 0,
@@ -5239,7 +5237,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '591',
         question: 'Wie berechnet man das Volumen eines Würfels mit der Kantenlänge a?',
         options: ['a²', 'a³', '6a', '6a²'],
         correctAnswer: 1,
@@ -5247,7 +5245,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '592',
         question: 'Was ist der größte gemeinsame Teiler (ggT) von 24 und 36?',
         options: ['6', '9', '12', '18'],
         correctAnswer: 2,
@@ -5255,7 +5253,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '593',
         question: 'Was ist das kleinste gemeinsame Vielfache (kgV) von 4 und 6?',
         options: ['10', '12', '18', '24'],
         correctAnswer: 1,
@@ -5263,7 +5261,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '594',
         question: 'Wie viele Diagonalen hat ein regelmäßiges Sechseck?',
         options: ['6', '9', '12', '15'],
         correctAnswer: 2,
@@ -5271,7 +5269,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '595',
         question: 'Was ist die Summe der ersten 10 natürlichen Zahlen?',
         options: ['45', '50', '55', '60'],
         correctAnswer: 2,
@@ -5279,7 +5277,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '596',
         question: 'Was ist das Ergebnis von 2⁴?',
         options: ['8', '12', '16', '32'],
         correctAnswer: 2,
@@ -5287,7 +5285,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '597',
         question: 'Wie viele Seiten hat ein Dodekaeder?',
         options: ['8', '10', '12', '20'],
         correctAnswer: 2,
@@ -5295,7 +5293,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '598',
         question: 'Wie viele Grad hat ein rechter Winkel?',
         options: ['45°', '60°', '90°', '180°'],
         correctAnswer: 2,
@@ -5303,7 +5301,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '599',
         question: 'Was ist die Nullstelle der Funktion f(x) = 3x - 12?',
         options: ['3', '4', '6', '12'],
         correctAnswer: 1,
@@ -5311,7 +5309,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '600',
         question: 'Wie lautet die Kreiszahl Pi als Bruch angenähert?',
         options: ['22/7', '223/71', '333/106', '355/113'],
         correctAnswer: 3,
@@ -5319,7 +5317,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '601',
         question: 'Was ist ein Parallelogramm?',
         options: [
             'Ein Viereck mit vier gleich langen Seiten',
@@ -5332,7 +5330,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '602',
         question: 'Was bedeutet der Begriff "Fakultät" in der Mathematik?',
         options: [
             'Eine Hochschule für Mathematik',
@@ -5345,7 +5343,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '603',
         question: 'Wie viel ist 25% von 200?',
         options: ['25', '40', '50', '75'],
         correctAnswer: 2,
@@ -5353,7 +5351,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '604',
         question: 'Was ist der Umfang eines Quadrats mit der Seitenlänge a?',
         options: ['a', '2a', '4a', 'a²'],
         correctAnswer: 2,
@@ -5361,7 +5359,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '605',
         question: 'Was ist der Flächeninhalt eines Dreiecks mit Grundseite g und Höhe h?',
         options: ['g × h', '(g × h) / 2', '(g + h) / 2', 'g + h'],
         correctAnswer: 1,
@@ -5369,7 +5367,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '606',
         question: 'Wie viele Nullen hat eine Billion?',
         options: ['6', '9', '12', '15'],
         correctAnswer: 2,
@@ -5377,7 +5375,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '607',
         question: 'Wie viele Seiten hat ein Ikosaeder?',
         options: ['12', '16', '18', '20'],
         correctAnswer: 3,
@@ -5385,7 +5383,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '608',
         question: 'Was ist die Differenz zwischen 5² und 4²?',
         options: ['1', '5', '9', '41'],
         correctAnswer: 2,
@@ -5393,7 +5391,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '609',
         question: 'Welche ist die einzige gerade Primzahl?',
         options: ['0', '1', '2', '4'],
         correctAnswer: 2,
@@ -5401,7 +5399,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '610',
         question: 'Was ist die Summe der Innenwinkel eines Vierecks?',
         options: ['180°', '270°', '360°', '540°'],
         correctAnswer: 2,
@@ -5409,7 +5407,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '611',
         question: 'Wie berechnet man den Oberflächeninhalt eines Würfels mit der Kantenlänge a?',
         options: ['a²', '4a²', '6a²', '8a²'],
         correctAnswer: 2,
@@ -5417,7 +5415,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '612',
         question: 'Was ist der Tangens von 45°?',
         options: ['0', '0,5', '1', '2'],
         correctAnswer: 2,
@@ -5425,7 +5423,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '613',
         question: 'Was ist ein rechtwinkliges Dreieck?',
         options: [
             'Ein Dreieck mit drei gleichen Winkeln',
@@ -5438,7 +5436,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '614',
         question: 'Was ist die Kreiszahl Pi (π)?',
         options: [
             'Das Verhältnis zwischen Durchmesser und Umfang eines Kreises',
@@ -5451,7 +5449,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '615',
         question: 'Was ist das Ergebnis von 0,5²?',
         options: ['0,1', '0,25', '0,5', '1'],
         correctAnswer: 1,
@@ -5459,7 +5457,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '616',
         question: 'Wie viele Flächen hat ein Tetraeder?',
         options: ['3', '4', '5', '6'],
         correctAnswer: 1,
@@ -5467,7 +5465,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '617',
         question: 'Was sind die ersten drei Ziffern der Eulerschen Zahl e?',
         options: ['2,71', '2,78', '3,14', '3,16'],
         correctAnswer: 0,
@@ -5475,7 +5473,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '618',
         question: 'Wofür steht "ln" in der Mathematik?',
         options: ['Lineare Notation', 'Logarithmus naturalis', 'Latente Nummer', 'Lokales Niveau'],
         correctAnswer: 1,
@@ -5483,7 +5481,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '619',
         question: 'Was ist die Ableitung der Funktion f(x) = x²?',
         options: ['f\'(x) = x', 'f\'(x) = 2x', 'f\'(x) = 2', 'f\'(x) = x³'],
         correctAnswer: 1,
@@ -5491,7 +5489,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '620',
         question: 'Was ist der Kosinus von 0°?',
         options: ['0', '0,5', '1', '-1'],
         correctAnswer: 2,
@@ -5499,7 +5497,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '621',
         question: 'Welcher Mathematiker entwickelte die nichteuklidische Geometrie?',
         options: ['Bernhard Riemann', 'Carl Friedrich Gauß', 'Nikolai Lobatschewski', 'Alle genannten'],
         correctAnswer: 3,
@@ -5507,7 +5505,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '622',
         question: 'Wie viele Bundesländer hat Deutschland?',
         options: ['14', '15', '16', '17'],
         correctAnswer: 2,
@@ -5515,7 +5513,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '623',
         question: 'Welches dieser Länder besitzt keine Atombomben?',
         options: ['Deutschland', 'Indien', 'Israel', 'Pakistan'],
         correctAnswer: 0,
@@ -5523,7 +5521,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '624',
         question: 'Welches dieser Länder war kein Gründungsmitglied der EU?',
         options: ['Frankreich', 'Italien', 'Spanien', 'Niederlande'],
         correctAnswer: 2,
@@ -5532,7 +5530,7 @@ module.exports = [
     },
     // Hier beginnen die 49 neuen Fragen für Politik
     {
-        id: uuidv4(),
+        id: '625',
         question: 'Wie heißt der aktuelle Bundeskanzler von Deutschland (Stand 2024)?',
         options: ['Frank-Walter Steinmeier', 'Christian Lindner', 'Olaf Scholz', 'Robert Habeck'],
         correctAnswer: 2,
@@ -5540,7 +5538,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '626',
         question: 'Wer ist das Staatsoberhaupt der Bundesrepublik Deutschland?',
         options: ['Der Bundeskanzler', 'Der Bundespräsident', 'Der Bundestagspräsident', 'Der Bundesratspräsident'],
         correctAnswer: 1,
@@ -5548,7 +5546,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '627',
         question: 'Wie viele ständige Mitglieder hat der UN-Sicherheitsrat?',
         options: ['3', '5', '7', '10'],
         correctAnswer: 1,
@@ -5556,7 +5554,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '628',
         question: 'Welches Land ist kein ständiges Mitglied im UN-Sicherheitsrat?',
         options: ['China', 'Russland', 'Deutschland', 'Frankreich'],
         correctAnswer: 2,
@@ -5564,7 +5562,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '629',
         question: 'Wer hat in Deutschland das Recht, Gesetze vorzuschlagen?',
         options: [
             'Nur der Bundeskanzler',
@@ -5577,7 +5575,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '630',
         question: 'Wie oft findet die Wahl zum Deutschen Bundestag regulär statt?',
         options: ['Alle 3 Jahre', 'Alle 4 Jahre', 'Alle 5 Jahre', 'Alle 6 Jahre'],
         correctAnswer: 2,
@@ -5585,7 +5583,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '631',
         question: 'Welches war das erste Land, das Frauen das Wahlrecht einräumte?',
         options: ['USA', 'Deutschland', 'Großbritannien', 'Neuseeland'],
         correctAnswer: 3,
@@ -5593,7 +5591,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '632',
         question: 'Welche Farbe ist traditionell mit sozialdemokratischen Parteien verbunden?',
         options: ['Schwarz', 'Gelb', 'Grün', 'Rot'],
         correctAnswer: 3,
@@ -5601,7 +5599,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '633',
         question: 'In welchem Jahr fiel die Berliner Mauer?',
         options: ['1987', '1989', '1991', '1993'],
         correctAnswer: 1,
@@ -5609,7 +5607,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '634',
         question: 'Was ist die Hauptstadt der Europäischen Union?',
         options: ['Straßburg', 'Paris', 'Brüssel', 'Luxemburg'],
         correctAnswer: 2,
@@ -5617,7 +5615,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '635',
         question: 'Wie viele Mitgliedsstaaten hat die Europäische Union (Stand 2024)?',
         options: ['25', '27', '28', '30'],
         correctAnswer: 1,
@@ -5625,7 +5623,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '636',
         question: 'Welcher dieser Staaten gehörte NICHT zu den Gründungsmitgliedern der UNO?',
         options: ['USA', 'Sowjetunion', 'China', 'Deutschland'],
         correctAnswer: 3,
@@ -5633,7 +5631,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '637',
         question: 'Welches Amt hat Charles Michel in der EU (Stand 2024)?',
         options: ['Präsident des Europäischen Rates', 'Präsident der Europäischen Kommission', 'Präsident des Europäischen Parlaments', 'Hoher Vertreter der EU für Außen- und Sicherheitspolitik'],
         correctAnswer: 0,
@@ -5641,7 +5639,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '638',
         question: 'Wer ist der aktuelle Präsident der Vereinigten Staaten (Stand 2024)?',
         options: ['Joe Biden', 'Donald Trump', 'Kamala Harris', 'Mike Pence'],
         correctAnswer: 1,
@@ -5649,7 +5647,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '639',
         question: 'Wie lang ist die Amtszeit des deutschen Bundespräsidenten?',
         options: ['4 Jahre', '5 Jahre', '6 Jahre', '7 Jahre'],
         correctAnswer: 1,
@@ -5657,7 +5655,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '640',
         question: 'Mit welcher Mehrheit kann der Deutsche Bundestag einen Kanzler wählen?',
         options: ['Einfache Mehrheit', 'Absolute Mehrheit', 'Zweidrittelmehrheit', 'Dreiviertel-Mehrheit'],
         correctAnswer: 1,
@@ -5665,7 +5663,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '641',
         question: 'Welche Farbe repräsentiert traditionell konservative Parteien in Deutschland?',
         options: ['Rot', 'Grün', 'Gelb', 'Schwarz'],
         correctAnswer: 3,
@@ -5673,7 +5671,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '642',
         question: 'Welche Definition trifft auf einen Föderalstaat zu?',
         options: [
             'Ein Staat, der von einem Monarchen regiert wird',
@@ -5686,7 +5684,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '643',
         question: 'Wer wählt in Deutschland den Bundespräsidenten?',
         options: ['Der Bundestag', 'Die Bundesversammlung', 'Das Volk direkt', 'Der Bundesrat'],
         correctAnswer: 1,
@@ -5694,7 +5692,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '644',
         question: 'Welches dieser Länder hat keine republikanische Staatsform?',
         options: ['Frankreich', 'Schweden', 'Italien', 'Österreich'],
         correctAnswer: 1,
@@ -5702,7 +5700,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '645',
         question: 'Wer ist das aktuelle Staatsoberhaupt von Großbritannien (Stand 2024)?',
         options: ['Elizabeth II.', 'Charles III.', 'William V.', 'George VII.'],
         correctAnswer: 1,
@@ -5710,7 +5708,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '646',
         question: 'Was bedeutet NATO?',
         options: [
             'North Atlantic Trade Organization',
@@ -5723,7 +5721,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '647',
         question: 'In welchem Jahr wurde die Bundesrepublik Deutschland gegründet?',
         options: ['1945', '1949', '1953', '1955'],
         correctAnswer: 1,
@@ -5731,7 +5729,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '648',
         question: 'Welche dieser Parteien ist in Deutschland traditionell mit der Farbe Gelb assoziiert?',
         options: ['CDU', 'SPD', 'FDP', 'Die Linke'],
         correctAnswer: 2,
@@ -5739,7 +5737,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '649',
         question: 'Wie heißt das Parlament in Großbritannien?',
         options: ['Kongress', 'Bundestag', 'Nationalversammlung', 'Parlament'],
         correctAnswer: 3,
@@ -5747,7 +5745,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '650',
         question: 'Wie viele Stimmen hat jeder Wähler bei der Bundestagswahl?',
         options: ['Eine', 'Zwei', 'Drei', 'Vier'],
         correctAnswer: 1,
@@ -5755,7 +5753,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '651',
         question: 'Was bezeichnet man als "Fraktionszwang"?',
         options: [
             'Die Pflicht, einer Partei beizutreten',
@@ -5768,7 +5766,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '652',
         question: 'Welches Land ist aktuell KEIN Mitglied der Europäischen Union?',
         options: ['Norwegen', 'Schweden', 'Finnland', 'Dänemark'],
         correctAnswer: 0,
@@ -5776,7 +5774,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '653',
         question: 'Was ist eine Legislaturperiode?',
         options: [
             'Die Zeitspanne zwischen zwei Gesetzesänderungen',
@@ -5789,7 +5787,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '654',
         question: 'Was ist die "Exekutive"?',
         options: [
             'Die gesetzgebende Gewalt',
@@ -5802,7 +5800,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '655',
         question: 'Wer ist der Verfasser der US-amerikanischen Unabhängigkeitserklärung?',
         options: ['George Washington', 'Benjamin Franklin', 'Thomas Jefferson', 'John Adams'],
         correctAnswer: 2,
@@ -5810,7 +5808,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '656',
         question: 'In welchem Jahr trat Deutschland der NATO bei?',
         options: ['1949', '1955', '1961', '1967'],
         correctAnswer: 1,
@@ -5818,7 +5816,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '657',
         question: 'Was ist das Wappen der Bundesrepublik Deutschland?',
         options: ['Reichsadler', 'Bundesadler', 'Reichsapfel', 'Eisernes Kreuz'],
         correctAnswer: 1,
@@ -5826,7 +5824,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '658',
         question: 'Welche politische Funktion hat der "Whip" im britischen Parlament?',
         options: [
             'Der Vorsitzende einer Partei',
@@ -5839,7 +5837,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '659',
         question: 'Was ist ein Koalitionsvertrag?',
         options: [
             'Ein Vertrag zwischen verschiedenen Staaten',
@@ -5852,7 +5850,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '660',
         question: 'Was regelt das Grundgesetz in Deutschland?',
         options: [
             'Die Steuerhöhe',
@@ -5865,7 +5863,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '661',
         question: 'Welcher Politiker ist mit dem Begriff "Perestroika" verbunden?',
         options: ['Boris Jelzin', 'Wladimir Putin', 'Michail Gorbatschow', 'Josef Stalin'],
         correctAnswer: 2,
@@ -5873,7 +5871,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '662',
         question: 'Welches dieser Länder folgt NICHT dem Westminster-System?',
         options: ['Kanada', 'Australien', 'Deutschland', 'Neuseeland'],
         correctAnswer: 2,
@@ -5881,7 +5879,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '663',
         question: 'Welche Funktion hat das Bundesverfassungsgericht?',
         options: [
             'Es beschließt Gesetze',
@@ -5894,7 +5892,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '664',
         question: 'Wer ist der "Hohe Vertreter der EU für Außen- und Sicherheitspolitik" (Stand 2024)?',
         options: ['Ursula von der Leyen', 'Josep Borrell', 'Jens Stoltenberg', 'Roberta Metsola'],
         correctAnswer: 1,
@@ -5902,7 +5900,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '665',
         question: 'Welches dieser Länder hat KEINE Verfassung in Form eines einzelnen Dokuments?',
         options: ['Deutschland', 'Frankreich', 'Großbritannien', 'USA'],
         correctAnswer: 2,
@@ -5910,7 +5908,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '666',
         question: 'Was bezeichnet man in Deutschland als "Kanzlermehrheit"?',
         options: [
             'Eine 2/3-Mehrheit im Bundestag',
@@ -5923,7 +5921,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '667',
         question: 'Welche politische Ideologie wird mit der Farbe Rot assoziiert?',
         options: ['Konservatismus', 'Liberalismus', 'Sozialismus', 'Ökologismus'],
         correctAnswer: 2,
@@ -5931,7 +5929,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '668',
         question: 'Wo hat der Internationale Gerichtshof seinen Sitz?',
         options: ['Den Haag', 'Genf', 'Brüssel', 'New York'],
         correctAnswer: 0,
@@ -5939,7 +5937,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '669',
         question: 'Was ist die "Troika" im EU-Kontext?',
         options: [
             'Die drei Gründungsstaaten der EU',
@@ -5952,7 +5950,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '670',
         question: 'Was ist eine "Fraktion" im politischen Kontext?',
         options: [
             'Eine politische Partei',
@@ -5965,7 +5963,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '671',
         question: 'Was bedeutet "Gewaltenteilung"?',
         options: [
             'Die Trennung zwischen Militär und Politik',
@@ -5978,7 +5976,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '672',
         question: 'Welches dieser Länder hat kein Vetorecht im UN-Sicherheitsrat?',
         options: ['Frankreich', 'Russland', 'Japan', 'Großbritannien'],
         correctAnswer: 2,
@@ -5986,7 +5984,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '673',
         question: 'Was bedeutet "www" im Internet?',
         options: ['World Wide Web', 'Web World Wide', 'Wireless World Web', 'World Web Wireless'],
         correctAnswer: 0,
@@ -5994,7 +5992,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '674',
         question: 'Welche Programmiersprache ist nach einer Schlange benannt?',
         options: ['Java', 'Python', 'Ruby', 'C++'],
         correctAnswer: 1,
@@ -6002,7 +6000,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '675',
         question: 'Welches Bauteil eines Computers ist für die langfristige Datenspeicherung zuständig?',
         options: ['CPU', 'RAM', 'GPU', 'Festplatte'],
         correctAnswer: 3,
@@ -6010,7 +6008,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '676',
         question: 'Wofür steht die Abkürzung "HTML"?',
         options: ['Hypertext Markup Language', 'High Technology Modern Language', 'Hypertext Modern Layout', 'High Tech Markup Language'],
         correctAnswer: 0,
@@ -6018,7 +6016,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '677',
         question: 'Was ist ein Algorithmus?',
         options: ['Ein geometrisches Muster', 'Eine mathematische Formel', 'Eine schrittweise Anleitung zur Lösung eines Problems', 'Ein chemisches Element'],
         correctAnswer: 2,
@@ -6027,7 +6025,7 @@ module.exports = [
     },
     // Hier beginnen die 47 neuen Fragen für Technik
     {
-        id: uuidv4(),
+        id: '678',
         question: 'Wofür steht die Abkürzung "CPU"?',
         options: ['Central Processing Unit', 'Computer Processing Unit', 'Central Processor Unit', 'Central Power Usage'],
         correctAnswer: 0,
@@ -6035,7 +6033,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '679',
         question: 'Welche Komponente eines Computers wird oft als "Gehirn" bezeichnet?',
         options: ['Festplatte', 'Grafikkarte', 'CPU', 'Netzteil'],
         correctAnswer: 2,
@@ -6043,7 +6041,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '680',
         question: 'Was misst die Einheit "Byte"?',
         options: ['Geschwindigkeit', 'Speicherkapazität', 'Stromstärke', 'Temperatur'],
         correctAnswer: 1,
@@ -6051,7 +6049,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '681',
         question: 'Wofür steht die Abkürzung "WLAN"?',
         options: ['Wireless Local Area Network', 'Wide Local Area Network', 'Wireless Link Access Node', 'World Link Access Network'],
         correctAnswer: 0,
@@ -6059,7 +6057,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '682',
         question: 'Wer gilt als Erfinder des World Wide Web?',
         options: ['Steve Jobs', 'Bill Gates', 'Tim Berners-Lee', 'Mark Zuckerberg'],
         correctAnswer: 2,
@@ -6067,7 +6065,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '683',
         question: 'Was ist ein Browser?',
         options: [
             'Ein Programm zum Betrachten von Webseiten',
@@ -6080,7 +6078,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '684',
         question: 'Was ist der Unterschied zwischen Hardware und Software?',
         options: [
             'Hardware ist schneller, Software ist langsamer',
@@ -6093,7 +6091,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '685',
         question: 'Was ist ein Pixel?',
         options: [
             'Ein Bildpunkt auf einem Bildschirm',
@@ -6106,7 +6104,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '686',
         question: 'Welches dieser Geräte ist keine Eingabeeinheit?',
         options: ['Tastatur', 'Maus', 'Monitor', 'Mikrofon'],
         correctAnswer: 2,
@@ -6114,7 +6112,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '687',
         question: 'Was ist ein "Cookie" im Internet-Kontext?',
         options: [
             'Ein Virus',
@@ -6127,7 +6125,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '688',
         question: 'Welches Betriebssystem wird hauptsächlich auf Apple-Computern verwendet?',
         options: ['Windows', 'Linux', 'macOS', 'Android'],
         correctAnswer: 2,
@@ -6135,7 +6133,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '689',
         question: 'Was ist ein LAN?',
         options: [
             'Large Area Network',
@@ -6148,7 +6146,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '690',
         question: 'Welche Einheit wird für die Messung der Prozessorgeschwindigkeit verwendet?',
         options: ['Byte', 'Megapixel', 'Hertz', 'Ampere'],
         correctAnswer: 2,
@@ -6156,7 +6154,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '691',
         question: 'Was ist eine Firewall?',
         options: [
             'Eine physische Barriere zum Schutz vor Feuer',
@@ -6169,7 +6167,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '692',
         question: 'Was ist ein USB-Anschluss?',
         options: [
             'Universal Serial Bus',
@@ -6182,7 +6180,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '693',
         question: 'Was versteht man unter "Cloud Computing"?',
         options: [
             'Wetterdatenanalyse',
@@ -6195,7 +6193,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '694',
         question: 'Was ist ein QR-Code?',
         options: [
             'Ein zweidimensionaler Strichcode',
@@ -6208,7 +6206,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '695',
         question: 'Wofür steht die Abkürzung "GPS"?',
         options: ['General Positioning System', 'Global Positioning System', 'Geographic Point System', 'General Point Service'],
         correctAnswer: 1,
@@ -6216,7 +6214,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '696',
         question: 'Was ist ein "Mainframe"?',
         options: [
             'Der Hauptbildschirm eines Computers',
@@ -6229,7 +6227,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '697',
         question: 'Was ist ein "Bug" in der Computertechnik?',
         options: [
             'Ein Virus',
@@ -6242,7 +6240,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '698',
         question: 'Wofür wird ein "Router" verwendet?',
         options: [
             'Zur Verbindung verschiedener Netzwerke',
@@ -6255,7 +6253,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '699',
         question: 'Was ist "Open Source Software"?',
         options: [
             'Software, die nur online verwendet werden kann',
@@ -6268,7 +6266,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '700',
         question: 'Was ist ein "Touchscreen"?',
         options: [
             'Ein Bildschirm, der besonders schonend für die Augen ist',
@@ -6281,7 +6279,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '701',
         question: 'Was ist ein "Trojaner" im Computerkontext?',
         options: [
             'Ein nützliches Hilfsprogramm',
@@ -6294,7 +6292,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '702',
         question: 'Was ist ein "Patch" in der Softwaretechnik?',
         options: [
             'Ein Update zur Behebung von Fehlern',
@@ -6307,7 +6305,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '703',
         question: 'Wofür steht die Abkürzung "LTE" im Mobilfunk?',
         options: ['Long Term Evolution', 'Local Telephone Exchange', 'Limited Transmission Environment', 'Last Technology Extension'],
         correctAnswer: 0,
@@ -6315,7 +6313,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '704',
         question: 'Was ist "Augmented Reality"?',
         options: [
             'Eine virtuelle Welt, die komplett computererzeugt ist',
@@ -6328,7 +6326,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '705',
         question: 'Was ist ein "Motherboard"?',
         options: [
             'Die Hauptplatine eines Computers',
@@ -6341,7 +6339,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '706',
         question: 'Was ist "Bluetooth"?',
         options: [
             'Ein Übertragungsstandard für Daten über kurze Distanzen',
@@ -6354,7 +6352,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '707',
         question: 'Was ist ein "Backup"?',
         options: [
             'Ein spezieller Computer',
@@ -6367,7 +6365,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '708',
         question: 'Was ist eine "URL"?',
         options: [
             'Universal Resource Locator',
@@ -6380,7 +6378,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '709',
         question: 'Was versteht man unter "Hardware-Beschleunigung"?',
         options: [
             'Die Beschleunigung des Computers durch zusätzliche Hardware',
@@ -6393,7 +6391,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '710',
         question: 'Was ist eine "SSD"?',
         options: [
             'Solid State Drive',
@@ -6406,7 +6404,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '711',
         question: 'Was ist ein "Captcha"?',
         options: [
             'Ein Bildbearbeitungsprogramm',
@@ -6419,7 +6417,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '712',
         question: 'Was ist ein "Datenbank-Management-System" (DBMS)?',
         options: [
             'Ein System zur Sicherung von Daten',
@@ -6432,7 +6430,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '713',
         question: 'Was ist "Künstliche Intelligenz" (KI)?',
         options: [
             'Die Simulation menschlicher Intelligenz durch Maschinen',
@@ -6445,7 +6443,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '714',
         question: 'Was ist "Phishing"?',
         options: [
             'Ein Computerspiel',
@@ -6458,7 +6456,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '715',
         question: 'Was ist ein "Cache"?',
         options: [
             'Ein temporärer Speicher für häufig benötigte Daten',
@@ -6471,7 +6469,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '716',
         question: 'Wofür steht die Abkürzung "VPN"?',
         options: ['Virtual Private Network', 'Visual Processing Node', 'Verified Personal Navigation', 'Virtual Protocol Notation'],
         correctAnswer: 0,
@@ -6479,7 +6477,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '717',
         question: 'Was ist ein "QoS" in der Netzwerktechnik?',
         options: [
             'Query of Service',
@@ -6492,7 +6490,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '718',
         question: 'Was ist ein "Compiler"?',
         options: [
             'Ein Programm, das Programmcode in Maschinensprache übersetzt',
@@ -6505,7 +6503,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '719',
         question: 'Was ist ein "API"?',
         options: [
             'Advanced Programming Interface',
@@ -6518,7 +6516,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '720',
         question: 'Was ist "Unicode"?',
         options: [
             'Ein spezielles Programmierverfahren',
@@ -6531,7 +6529,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '721',
         question: 'Was ist ein "Kernel" in der Computertechnik?',
         options: [
             'Ein Programm zur Virenabwehr',
@@ -6544,7 +6542,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '722',
         question: 'Was ist ein "Ping" im Netzwerkbereich?',
         options: [
             'Ein Signal zur Überwachung der Netzwerkverbindung',
@@ -6557,7 +6555,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '723',
         question: 'Was versteht man unter "Blockchain-Technologie"?',
         options: [
             'Eine Technik zur Verschlüsselung von Festplatten',
@@ -6570,7 +6568,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '724',
         question: 'Was ist "NFC" (Near Field Communication)?',
         options: [
             'Ein Standard zur Datenübertragung über kurze Distanzen',
@@ -6583,7 +6581,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '725',
         question: 'Was ist ein "Bot" im Internetkontext?',
         options: [
             'Ein automatisiertes Programm, das bestimmte Aufgaben ausführt',
@@ -6596,7 +6594,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '726',
         question: 'Welches Grundnahrungsmittel wird aus Weizen hergestellt?',
         options: ['Reis', 'Brot', 'Kartoffeln', 'Nudeln'],
         correctAnswer: 1,
@@ -6604,7 +6602,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '727',
         question: 'Welche Frucht enthält das Enzym Bromelain?',
         options: ['Ananas', 'Kiwi', 'Mango', 'Banane'],
         correctAnswer: 0,
@@ -6612,7 +6610,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '728',
         question: 'Aus welchem Land stammt die Käsesorte Gouda?',
         options: ['Schweiz', 'Frankreich', 'Niederlande', 'Italien'],
         correctAnswer: 2,
@@ -6621,7 +6619,7 @@ module.exports = [
     },
     // Hier beginnen die 49 neuen Fragen für Essen & Trinken
     {
-        id: uuidv4(),
+        id: '729',
         question: 'Welche Rebsorte wird hauptsächlich für Rotwein verwendet?',
         options: ['Chardonnay', 'Riesling', 'Merlot', 'Sauvignon Blanc'],
         correctAnswer: 2,
@@ -6629,7 +6627,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '730',
         question: 'Welches Gewürz kommt vom Safran-Krokus?',
         options: ['Kurkuma', 'Vanille', 'Safran', 'Zimt'],
         correctAnswer: 2,
@@ -6637,7 +6635,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '731',
         question: 'Welches Getreide wird für die Herstellung von Whisky verwendet?',
         options: ['Gerste', 'Weizen', 'Roggen', 'Alle genannten können verwendet werden'],
         correctAnswer: 3,
@@ -6645,7 +6643,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '732',
         question: 'Aus welchem Land stammt das Gericht Paella?',
         options: ['Italien', 'Portugal', 'Spanien', 'Griechenland'],
         correctAnswer: 2,
@@ -6653,7 +6651,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '733',
         question: 'Welche Zutat wird für Tofu verwendet?',
         options: ['Reis', 'Sojabohnen', 'Weizen', 'Kartoffeln'],
         correctAnswer: 1,
@@ -6661,7 +6659,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '734',
         question: 'Aus welchem Land stammt das Gericht Sushi?',
         options: ['China', 'Korea', 'Thailand', 'Japan'],
         correctAnswer: 3,
@@ -6669,7 +6667,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '735',
         question: 'Was ist der Hauptbestandteil von Guacamole?',
         options: ['Tomaten', 'Avocado', 'Bohnen', 'Mais'],
         correctAnswer: 1,
@@ -6677,7 +6675,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '736',
         question: 'Aus welchem Land stammt der Parmesankäse?',
         options: ['Frankreich', 'Deutschland', 'Italien', 'Schweiz'],
         correctAnswer: 2,
@@ -6685,7 +6683,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '737',
         question: 'Was ist die Grundlage für die Sauce Béchamel?',
         options: ['Sahne', 'Mehlschwitze', 'Tomatenpüree', 'Eigelb'],
         correctAnswer: 1,
@@ -6693,7 +6691,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '738',
         question: 'Welche Frucht ist im Likör Cointreau enthalten?',
         options: ['Kirschen', 'Orangen', 'Pflaumen', 'Pfirsiche'],
         correctAnswer: 1,
@@ -6701,7 +6699,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '739',
         question: 'Welches Getränk ist ein Blend aus verschiedenen Weinen?',
         options: ['Champagner', 'Portwein', 'Sherry', 'Brandy'],
         correctAnswer: 1,
@@ -6709,7 +6707,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '740',
         question: 'Was ist der Hauptbestandteil von Tempura?',
         options: ['Frittierter Tofu', 'Frittiertes Gemüse oder Fisch', 'Geräucherter Fisch', 'Mariniertes Fleisch'],
         correctAnswer: 1,
@@ -6717,7 +6715,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '741',
         question: 'Aus welchem Land stammt der Gruyère-Käse?',
         options: ['Deutschland', 'Frankreich', 'Schweiz', 'Italien'],
         correctAnswer: 2,
@@ -6725,7 +6723,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '742',
         question: 'Was ist Bulgur?',
         options: ['Ein Gewürz', 'Ein Getränk', 'Ein Getreideprodukt', 'Eine Fleischsorte'],
         correctAnswer: 2,
@@ -6733,7 +6731,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '743',
         question: 'Welcher Käse wird traditionell für eine italienische Carbonara verwendet?',
         options: ['Mozzarella', 'Gorgonzola', 'Pecorino', 'Ricotta'],
         correctAnswer: 2,
@@ -6741,7 +6739,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '744',
         question: 'Welches Getränk ist ein Blend aus Rum, Limettensaft und Minze?',
         options: ['Margarita', 'Mojito', 'Mai Tai', 'Piña Colada'],
         correctAnswer: 1,
@@ -6749,7 +6747,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '745',
         question: 'Welches Gemüse ist ein Hauptbestandteil von Kimchi?',
         options: ['Karotten', 'Chinakohl', 'Kartoffeln', 'Tomaten'],
         correctAnswer: 1,
@@ -6757,7 +6755,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '746',
         question: 'Aus welchen Früchten wird Calvados hergestellt?',
         options: ['Birnen', 'Äpfel', 'Trauben', 'Pflaumen'],
         correctAnswer: 1,
@@ -6765,7 +6763,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '747',
         question: 'Welches dieser Gewürze ist NICHT im klassischen "Pumpkin Spice" enthalten?',
         options: ['Zimt', 'Muskatnuss', 'Nelken', 'Knoblauch'],
         correctAnswer: 3,
@@ -6773,7 +6771,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '748',
         question: 'Was ist "Gazpacho"?',
         options: ['Eine kalte Suppe', 'Ein Reisgericht', 'Ein Dessert', 'Ein Fleischgericht'],
         correctAnswer: 0,
@@ -6781,7 +6779,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '749',
         question: 'Woraus wird Tequila hergestellt?',
         options: ['Kartoffeln', 'Agave', 'Reis', 'Gerste'],
         correctAnswer: 1,
@@ -6789,7 +6787,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '750',
         question: 'Was ist ein "Ceviche"?',
         options: ['Ein Getränk aus Milch', 'Ein Fleischgericht', 'Ein Dessert', 'Ein Fischgericht mit Zitronensaft'],
         correctAnswer: 3,
@@ -6797,7 +6795,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '751',
         question: 'Aus welchem Land stammt das Baguette?',
         options: ['Italien', 'Spanien', 'Frankreich', 'Deutschland'],
         correctAnswer: 2,
@@ -6805,7 +6803,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '752',
         question: 'Was ist "Wasabi"?',
         options: ['Ein japanischer Tee', 'Ein scharfer Meerrettich', 'Eine Fischsauce', 'Eine Reis-Sorte'],
         correctAnswer: 1,
@@ -6813,7 +6811,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '753',
         question: 'Welche Frucht ist botanisch gesehen eine Beere?',
         options: ['Erdbeere', 'Himbeere', 'Brombeere', 'Banane'],
         correctAnswer: 3,
@@ -6821,7 +6819,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '754',
         question: 'Woraus wird traditionelles Pesto hauptsächlich hergestellt?',
         options: ['Basilikum, Knoblauch, Pinienkerne, Parmesan, Olivenöl', 'Tomaten, Knoblauch, Basilikum, Olivenöl', 'Petersilie, Knoblauch, Walnüsse, Olivenöl', 'Rucola, Knoblauch, Mandeln, Olivenöl'],
         correctAnswer: 0,
@@ -6829,7 +6827,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '755',
         question: 'Welches dieser Getränke enthält keinen Alkohol?',
         options: ['Ouzo', 'Mate', 'Sake', 'Amaretto'],
         correctAnswer: 1,
@@ -6837,7 +6835,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '756',
         question: 'Was ist "Aioli"?',
         options: ['Eine Nudelsorte', 'Eine Knoblauch-Mayonnaise', 'Ein Fleischgericht', 'Ein Gewürz'],
         correctAnswer: 1,
@@ -6845,7 +6843,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '757',
         question: 'Aus welchem Land stammt das Gericht "Coq au Vin"?',
         options: ['Italien', 'Spanien', 'Frankreich', 'Belgien'],
         correctAnswer: 2,
@@ -6853,7 +6851,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '758',
         question: 'Was ist ein "Macaron"?',
         options: ['Ein Gebäck aus zwei Mandelmehl-Baisers', 'Eine Teigtasche', 'Eine Nudelsorte', 'Ein Fleischgericht'],
         correctAnswer: 0,
@@ -6861,7 +6859,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '759',
         question: 'Aus welchem Land stammt der Wein "Rioja"?',
         options: ['Italien', 'Frankreich', 'Spanien', 'Portugal'],
         correctAnswer: 2,
@@ -6869,7 +6867,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '760',
         question: 'Was ist Kefir?',
         options: ['Ein fermentiertes Milchgetränk', 'Ein Brot', 'Ein Gewürz', 'Ein Kuchen'],
         correctAnswer: 0,
@@ -6877,7 +6875,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '761',
         question: 'Was ist "Chorizo"?',
         options: ['Ein Käse', 'Eine Wurst', 'Ein Gemüse', 'Ein Gewürz'],
         correctAnswer: 1,
@@ -6885,7 +6883,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '762',
         question: 'Aus welchem Land stammt das Bier "Guinness"?',
         options: ['Deutschland', 'Belgien', 'Irland', 'Großbritannien'],
         correctAnswer: 2,
@@ -6893,7 +6891,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '763',
         question: 'Was ist Quinoa?',
         options: ['Ein Obst', 'Ein Gemüse', 'Ein Getreide', 'Eine Nuss'],
         correctAnswer: 2,
@@ -6901,7 +6899,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '764',
         question: 'Was ist der Hauptbestandteil von Hummus?',
         options: ['Bohnen', 'Kichererbsen', 'Linsen', 'Erbsen'],
         correctAnswer: 1,
@@ -6909,7 +6907,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '765',
         question: 'Welches Getränk wird aus fermentiertem Reis hergestellt?',
         options: ['Whisky', 'Bier', 'Tequila', 'Sake'],
         correctAnswer: 3,
@@ -6917,7 +6915,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '766',
         question: 'Was ist "Gorgonzola"?',
         options: ['Ein Wein', 'Ein Käse', 'Ein Fleischgericht', 'Ein Gebäck'],
         correctAnswer: 1,
@@ -6925,7 +6923,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '767',
         question: 'Aus welchem Land stammt das Gericht "Moussaka"?',
         options: ['Türkei', 'Griechenland', 'Libanon', 'Ägypten'],
         correctAnswer: 1,
@@ -6933,7 +6931,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '768',
         question: 'Was ist die Grundlage für ein traditionelles Risotto?',
         options: ['Langkornreis', 'Wildreis', 'Rundkornreis', 'Basmatireis'],
         correctAnswer: 2,
@@ -6941,7 +6939,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '769',
         question: 'Was ist "Garam Masala"?',
         options: ['Ein indisches Fleischgericht', 'Eine Gewürzmischung', 'Eine Brotsorte', 'Ein Nachtisch'],
         correctAnswer: 1,
@@ -6949,7 +6947,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '770',
         question: 'Welches Getränk wird aus Agaven hergestellt?',
         options: ['Rum', 'Whisky', 'Tequila', 'Wodka'],
         correctAnswer: 2,
@@ -6957,7 +6955,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '771',
         question: 'Was ist ein "Carpaccio"?',
         options: ['Ein Nudelgericht', 'Dünn geschnittenes, rohes Fleisch', 'Eine Käsesorte', 'Ein italienischer Kuchen'],
         correctAnswer: 1,
@@ -6965,7 +6963,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '772',
         question: 'Was ist "Falafel"?',
         options: ['Ein Fleischgericht', 'Frittierte Bällchen aus Kichererbsen', 'Ein Brot', 'Ein Getränk'],
         correctAnswer: 1,
@@ -6973,7 +6971,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '773',
         question: 'Welcher Käse wird für einen originalen Schweizer Fondue verwendet?',
         options: ['Emmentaler und Gruyère', 'Gouda und Edamer', 'Camembert und Brie', 'Parmesan und Mozzarella'],
         correctAnswer: 0,
@@ -6981,7 +6979,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '774',
         question: 'Was ist "Gravlax"?',
         options: ['Ein schwedisches Dessert', 'Gebeizter Lachs', 'Ein Brot', 'Ein Getränk'],
         correctAnswer: 1,
@@ -6989,7 +6987,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '775',
         question: 'Was ist die Hauptzutat in einem "Ratatouille"?',
         options: ['Fleisch', 'Fisch', 'Gemüse', 'Reis'],
         correctAnswer: 2,
@@ -6997,7 +6995,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '776',
         question: 'Welches Fleisch wird traditionell für ein "Wiener Schnitzel" verwendet?',
         options: ['Schwein', 'Rind', 'Kalb', 'Huhn'],
         correctAnswer: 2,
@@ -7005,7 +7003,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '777',
         question: 'Aus welchem Land stammt der Käse "Feta"?',
         options: ['Italien', 'Frankreich', 'Griechenland', 'Spanien'],
         correctAnswer: 2,
@@ -7013,7 +7011,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '778',
         question: 'Was ist "Couscous"?',
         options: ['Ein Fleischgericht', 'Ein Getreideprodukt', 'Ein Gewürz', 'Ein Gemüse'],
         correctAnswer: 1,
@@ -7021,7 +7019,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '779',
         question: 'Welcher deutsche Philosoph schrieb "Kritik der reinen Vernunft"?',
         options: ['Friedrich Nietzsche', 'Immanuel Kant', 'Arthur Schopenhauer', 'Georg Wilhelm Friedrich Hegel'],
         correctAnswer: 1,
@@ -7030,7 +7028,7 @@ module.exports = [
     },
     // Hier beginnen die 51 neuen Fragen für Philosophie
     {
-        id: uuidv4(),
+        id: '780',
         question: 'Wer gilt als Begründer der westlichen Philosophie?',
         options: ['Aristoteles', 'Sokrates', 'Platon', 'Thales von Milet'],
         correctAnswer: 3,
@@ -7038,7 +7036,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '781',
         question: 'Welcher Philosoph ist bekannt für seinen Ausspruch "Ich denke, also bin ich"?',
         options: ['René Descartes', 'John Locke', 'David Hume', 'Baruch Spinoza'],
         correctAnswer: 0,
@@ -7046,7 +7044,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '782',
         question: 'Welche philosophische Strömung betont die Wichtigkeit der Erfahrung als Quelle der Erkenntnis?',
         options: ['Rationalismus', 'Empirismus', 'Idealismus', 'Existentialismus'],
         correctAnswer: 1,
@@ -7054,7 +7052,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '783',
         question: 'Wer schrieb das Werk "Sein und Zeit"?',
         options: ['Jean-Paul Sartre', 'Martin Heidegger', 'Edmund Husserl', 'Albert Camus'],
         correctAnswer: 1,
@@ -7062,7 +7060,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '784',
         question: 'Welche philosophische Strömung beschäftigt sich hauptsächlich mit Fragen der Existenz und der Freiheit?',
         options: ['Empirismus', 'Positivismus', 'Existentialismus', 'Pragmatismus'],
         correctAnswer: 2,
@@ -7070,7 +7068,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '785',
         question: 'Wer ist der Autor von "Die Welt als Wille und Vorstellung"?',
         options: ['Friedrich Nietzsche', 'Immanuel Kant', 'Arthur Schopenhauer', 'Georg Wilhelm Friedrich Hegel'],
         correctAnswer: 2,
@@ -7078,7 +7076,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '786',
         question: 'Welcher Philosoph prägte den Begriff "Übermensch"?',
         options: ['Friedrich Nietzsche', 'Karl Marx', 'Søren Kierkegaard', 'Jean-Jacques Rousseau'],
         correctAnswer: 0,
@@ -7086,7 +7084,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '787',
         question: 'Was ist der kategorische Imperativ nach Kant?',
         options: [
             'Handle nur nach derjenigen Maxime, durch die du zugleich wollen kannst, dass sie ein allgemeines Gesetz werde',
@@ -7099,7 +7097,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '788',
         question: 'Wer gilt als Begründer des Pragmatismus?',
         options: ['William James', 'John Dewey', 'Charles Sanders Peirce', 'Richard Rorty'],
         correctAnswer: 2,
@@ -7107,7 +7105,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '789',
         question: 'Welcher Philosoph beschrieb die "Ideenwelt"?',
         options: ['Aristoteles', 'Sokrates', 'Platon', 'Epikur'],
         correctAnswer: 2,
@@ -7115,7 +7113,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '790',
         question: 'Welcher Begriff wurde von Jean-Paul Sartre geprägt, um die Konfrontation mit der absoluten Freiheit zu beschreiben?',
         options: ['Angst', 'Verzweiflung', 'Absurdität', 'Ekel'],
         correctAnswer: 0,
@@ -7123,7 +7121,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '791',
         question: 'Wer verfasste "Das kommunistische Manifest"?',
         options: ['Lenin und Trotzki', 'Marx und Engels', 'Hegel und Feuerbach', 'Rousseau und Voltaire'],
         correctAnswer: 1,
@@ -7131,7 +7129,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '792',
         question: 'Welcher Philosoph entwickelte die Idee des "Gesellschaftsvertrags"?',
         options: ['Thomas Hobbes', 'Jean-Jacques Rousseau', 'John Locke', 'Alle genannten'],
         correctAnswer: 3,
@@ -7139,7 +7137,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '793',
         question: 'Was bedeutet das griechische Wort "Philosophia" wörtlich übersetzt?',
         options: ['Suche nach Wahrheit', 'Liebe zur Weisheit', 'Streben nach Erkenntnis', 'Kunst des Denkens'],
         correctAnswer: 1,
@@ -7147,7 +7145,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '794',
         question: 'Welcher Philosoph ist bekannt für seinen Ausspruch "Gott ist tot"?',
         options: ['Friedrich Nietzsche', 'Søren Kierkegaard', 'Jean-Paul Sartre', 'Albert Camus'],
         correctAnswer: 0,
@@ -7155,7 +7153,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '795',
         question: 'Welche philosophische Strömung betont die Wichtigkeit der logischen Analyse der Sprache?',
         options: ['Phänomenologie', 'Existentialismus', 'Analytische Philosophie', 'Hermeneutik'],
         correctAnswer: 2,
@@ -7163,7 +7161,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '796',
         question: 'Wer schrieb "Die fröhliche Wissenschaft"?',
         options: ['Friedrich Nietzsche', 'Karl Marx', 'Immanuel Kant', 'Georg Wilhelm Friedrich Hegel'],
         correctAnswer: 0,
@@ -7171,7 +7169,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '797',
         question: 'Welcher Philosoph entwickelte die Dialektik von These, Antithese und Synthese?',
         options: ['Immanuel Kant', 'Friedrich Nietzsche', 'Georg Wilhelm Friedrich Hegel', 'Karl Marx'],
         correctAnswer: 2,
@@ -7179,7 +7177,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '798',
         question: 'Welcher Philosoph ist bekannt für sein Werk "Leviathan"?',
         options: ['John Locke', 'Thomas Hobbes', 'Jean-Jacques Rousseau', 'Baruch Spinoza'],
         correctAnswer: 1,
@@ -7187,7 +7185,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '799',
         question: 'Was ist das zentrale Thema der Erkenntnistheorie?',
         options: [
             'Die Frage nach der Möglichkeit und den Grenzen der Erkenntnis',
@@ -7200,7 +7198,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '800',
         question: 'Welche philosophische Strömung wurde maßgeblich von Husserl begründet?',
         options: ['Existentialismus', 'Phänomenologie', 'Pragmatismus', 'Strukturalismus'],
         correctAnswer: 1,
@@ -7208,7 +7206,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '801',
         question: 'Wer schrieb "Der Mythos des Sisyphos"?',
         options: ['Jean-Paul Sartre', 'Albert Camus', 'Simone de Beauvoir', 'Maurice Merleau-Ponty'],
         correctAnswer: 1,
@@ -7216,7 +7214,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '802',
         question: 'Was ist Utilitarismus?',
         options: [
             'Eine Theorie, die besagt, dass nur das Nützliche wertvoll ist',
@@ -7229,7 +7227,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '803',
         question: 'Wer schrieb "Das Sein und das Nichts"?',
         options: ['Martin Heidegger', 'Jean-Paul Sartre', 'Albert Camus', 'Simone de Beauvoir'],
         correctAnswer: 1,
@@ -7237,7 +7235,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '804',
         question: 'Welcher Philosoph ist bekannt für sein Höhlengleichnis?',
         options: ['Aristoteles', 'Sokrates', 'Platon', 'Epikur'],
         correctAnswer: 2,
@@ -7245,7 +7243,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '805',
         question: 'Was ist nach Epikur das höchste Gut?',
         options: ['Tugend', 'Weisheit', 'Lust', 'Glück'],
         correctAnswer: 2,
@@ -7253,7 +7251,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '806',
         question: 'Wer gilt als Begründer des Skeptizismus?',
         options: ['Pyrrho von Elis', 'Zenon von Elea', 'Diogenes von Sinope', 'Protagoras'],
         correctAnswer: 0,
@@ -7261,7 +7259,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '807',
         question: 'Welcher Philosoph ist bekannt für sein Werk "Die Phänomenologie des Geistes"?',
         options: ['Immanuel Kant', 'Friedrich Nietzsche', 'Georg Wilhelm Friedrich Hegel', 'Arthur Schopenhauer'],
         correctAnswer: 2,
@@ -7269,7 +7267,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '808',
         question: 'Was ist die zentrale Frage der Ethik?',
         options: [
             'Was ist Realität?',
@@ -7282,7 +7280,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '809',
         question: 'Welcher Philosoph entwickelte die Idee des "Übermenschen" und des "Willens zur Macht"?',
         options: ['Friedrich Nietzsche', 'Karl Marx', 'Immanuel Kant', 'Martin Heidegger'],
         correctAnswer: 0,
@@ -7290,7 +7288,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '810',
         question: 'Was ist die "Tabula rasa" in der Philosophie von John Locke?',
         options: [
             'Eine metaphorische Bezeichnung für das Gewissen',
@@ -7303,7 +7301,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '811',
         question: 'Wer ist der Autor von "Jenseits von Gut und Böse"?',
         options: ['Friedrich Nietzsche', 'Immanuel Kant', 'Arthur Schopenhauer', 'Søren Kierkegaard'],
         correctAnswer: 0,
@@ -7311,7 +7309,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '812',
         question: 'Welcher Philosoph ist bekannt für sein "Sonnengleichnis"?',
         options: ['Aristoteles', 'Platon', 'Epikur', 'Sokrates'],
         correctAnswer: 1,
@@ -7319,7 +7317,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '813',
         question: 'Was ist der "Schleier des Nichtwissens" in der Gerechtigkeitstheorie von John Rawls?',
         options: [
             'Die Unfähigkeit, über moralische Fragen zu entscheiden',
@@ -7332,7 +7330,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '814',
         question: 'Welcher Philosoph wird oft als Begründer der modernen politischen Philosophie angesehen?',
         options: ['Niccolò Machiavelli', 'Thomas Hobbes', 'John Locke', 'Jean-Jacques Rousseau'],
         correctAnswer: 0,
@@ -7340,7 +7338,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '815',
         question: 'Was ist der "Weltentstehungsmythos" in Platons Dialog "Timaios"?',
         options: [
             'Eine Erklärung der Entstehung der Welt durch einen göttlichen Schöpfer',
@@ -7353,7 +7351,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '816',
         question: 'Welcher Philosoph entwickelte die Theorie der "ewigen Wiederkehr"?',
         options: ['Friedrich Nietzsche', 'Karl Marx', 'Immanuel Kant', 'Georg Wilhelm Friedrich Hegel'],
         correctAnswer: 0,
@@ -7361,7 +7359,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '817',
         question: 'Was ist "Heideggers Kehre"?',
         options: [
             'Seine Abwendung vom Nationalsozialismus',
@@ -7374,7 +7372,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '818',
         question: 'Welcher Philosoph entwickelte die Idee des "Panoptikum"?',
         options: ['Michel Foucault', 'Jeremy Bentham', 'Jacques Derrida', 'Gilles Deleuze'],
         correctAnswer: 1,
@@ -7382,7 +7380,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '819',
         question: 'Was ist die Kernaussage des Existentialismus?',
         options: [
             'Das Wesen des Menschen ist durch göttliche Vorsehung bestimmt',
@@ -7395,7 +7393,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '820',
         question: 'Wer ist der Autor von "Das Kapital"?',
         options: ['Friedrich Engels', 'Karl Marx', 'Vladimir Lenin', 'Leo Trotzki'],
         correctAnswer: 1,
@@ -7403,7 +7401,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '821',
         question: 'Was ist "Ockhams Rasiermesser"?',
         options: [
             'Ein mittelalterliches Folterinstrument',
@@ -7416,7 +7414,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '822',
         question: 'Welcher Philosoph ist bekannt für den Satz "Der Mensch ist dem Menschen ein Wolf"?',
         options: ['John Locke', 'Thomas Hobbes', 'Jean-Jacques Rousseau', 'Baruch Spinoza'],
         correctAnswer: 1,
@@ -7424,7 +7422,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '823',
         question: 'Was ist die "Dialektik der Aufklärung"?',
         options: [
             'Ein Werk von Kant',
@@ -7437,7 +7435,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '824',
         question: 'Welcher Philosoph ist bekannt für seine "Monadologie"?',
         options: ['Gottfried Wilhelm Leibniz', 'René Descartes', 'Baruch Spinoza', 'Blaise Pascal'],
         correctAnswer: 0,
@@ -7445,7 +7443,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '825',
         question: 'Was ist die zentrale Idee der Deontologie?',
         options: [
             'Der Zweck heiligt die Mittel',
@@ -7458,7 +7456,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '826',
         question: 'Wer ist der Autor von "Über die Freiheit"?',
         options: ['John Stuart Mill', 'Immanuel Kant', 'Jean-Jacques Rousseau', 'John Locke'],
         correctAnswer: 0,
@@ -7466,7 +7464,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '827',
         question: 'Was ist der "noumenale Bereich" in Kants Philosophie?',
         options: [
             'Die Welt der Erscheinungen',
@@ -7479,7 +7477,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '828',
         question: 'Welcher Philosoph prägte den Begriff "Gemeinwille" (Volonté générale)?',
         options: ['John Locke', 'Thomas Hobbes', 'Jean-Jacques Rousseau', 'Montesquieu'],
         correctAnswer: 2,
@@ -7487,7 +7485,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '829',
         question: 'Was ist die "ewige Wiederkehr des Gleichen" nach Nietzsche?',
         options: [
             'Eine Theorie über die zyklische Natur der Geschichte',
@@ -7500,7 +7498,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '830',
         question: 'Welche Krankheit wird durch Bakterien verursacht?',
         options: ['Grippe', 'AIDS', 'Tuberkulose', 'Masern'],
         correctAnswer: 2,
@@ -7509,7 +7507,7 @@ module.exports = [
     },
     // Hier beginnen die 51 neuen Fragen für Medizin
     {
-        id: uuidv4(),
+        id: '831',
         question: 'Wie viele Kammern hat das menschliche Herz?',
         options: ['2', '3', '4', '5'],
         correctAnswer: 2,
@@ -7517,7 +7515,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '832',
         question: 'Welches Organ produziert Insulin?',
         options: ['Leber', 'Niere', 'Bauchspeicheldrüse', 'Milz'],
         correctAnswer: 2,
@@ -7525,7 +7523,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '833',
         question: 'Was ist der häufigste Typ von Diabetes?',
         options: ['Typ 1', 'Typ 2', 'Typ 3', 'Typ 4'],
         correctAnswer: 1,
@@ -7533,7 +7531,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '834',
         question: 'Welches Vitamin wird mit Hilfe von Sonnenlicht in der Haut produziert?',
         options: ['Vitamin A', 'Vitamin C', 'Vitamin D', 'Vitamin E'],
         correctAnswer: 2,
@@ -7541,7 +7539,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '835',
         question: 'Was ist ein Antibiotikum?',
         options: [
             'Ein Medikament gegen Viren',
@@ -7554,7 +7552,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '836',
         question: 'Welches Blutgefäß transportiert sauerstoffreiches Blut vom Herzen weg?',
         options: ['Arterie', 'Vene', 'Kapillare', 'Lymphgefäß'],
         correctAnswer: 0,
@@ -7562,7 +7560,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '837',
         question: 'Was ist ein Myokardinfarkt?',
         options: ['Schlaganfall', 'Lungenembolie', 'Herzinfarkt', 'Hirnblutung'],
         correctAnswer: 2,
@@ -7570,7 +7568,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '838',
         question: 'Welches ist das größte Organ des menschlichen Körpers?',
         options: ['Leber', 'Gehirn', 'Lunge', 'Haut'],
         correctAnswer: 3,
@@ -7578,7 +7576,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '839',
         question: 'Was ist die Funktion der roten Blutkörperchen?',
         options: [
             'Blutgerinnung',
@@ -7591,7 +7589,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '840',
         question: 'Was ist ein Antigen?',
         options: [
             'Ein Antikörper',
@@ -7604,7 +7602,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '841',
         question: 'Was ist Hypertonie?',
         options: ['Niedrigdruck', 'Normaldruck', 'Bluthochdruck', 'Pulsstörung'],
         correctAnswer: 2,
@@ -7612,7 +7610,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '842',
         question: 'Was ist ein EKG?',
         options: [
             'Elektronische Körpergewichtsmessung',
@@ -7625,7 +7623,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '843',
         question: 'Welches Hormon wird oft als "Stresshormon" bezeichnet?',
         options: ['Insulin', 'Adrenalin', 'Cortisol', 'Melatonin'],
         correctAnswer: 2,
@@ -7633,7 +7631,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '844',
         question: 'Was versteht man unter Anämie?',
         options: ['Bluthochdruck', 'Blutarmut', 'Blutvergiftung', 'Blutgerinnung'],
         correctAnswer: 1,
@@ -7641,7 +7639,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '845',
         question: 'Was ist eine Pandemie?',
         options: [
             'Eine Krankheit, die nur in einem bestimmten Gebiet auftritt',
@@ -7654,7 +7652,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '846',
         question: 'Was ist ein Defibrillator?',
         options: [
             'Ein Gerät zur Messung des Blutzuckers',
@@ -7667,7 +7665,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '847',
         question: 'Welche Blutgruppe wird als "Universalspender" bezeichnet?',
         options: ['A', 'B', 'AB', '0'],
         correctAnswer: 3,
@@ -7675,7 +7673,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '848',
         question: 'Was ist ein Virus?',
         options: [
             'Ein einzelliger Organismus',
@@ -7688,7 +7686,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '849',
         question: 'Was ist eine Allergie?',
         options: [
             'Eine Infektionskrankheit',
@@ -7701,7 +7699,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '850',
         question: 'Was ist ADHS?',
         options: [
             'Autismus-Diagnose-Hilfe-System',
@@ -7714,7 +7712,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '851',
         question: 'Welches Organ filtert Abfallstoffe aus dem Blut?',
         options: ['Leber', 'Lunge', 'Niere', 'Herz'],
         correctAnswer: 2,
@@ -7722,7 +7720,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '852',
         question: 'Was ist Aphasie?',
         options: [
             'Eine Sprachstörung',
@@ -7735,7 +7733,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '853',
         question: 'Was ist ein Placebo?',
         options: [
             'Ein Medikament ohne Wirkstoff',
@@ -7748,7 +7746,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '854',
         question: 'Was ist Morbus Parkinson?',
         options: [
             'Eine Infektionskrankheit',
@@ -7761,7 +7759,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '855',
         question: 'Was ist ein Symptom?',
         options: [
             'Eine Krankheit',
@@ -7774,7 +7772,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '856',
         question: 'Was ist eine MRT?',
         options: [
             'Magnetische Resonanz-Therapie',
@@ -7787,7 +7785,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '857',
         question: 'Was ist ein Herzschrittmacher?',
         options: [
             'Ein Gerät zur Messung der Herzfrequenz',
@@ -7800,7 +7798,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '858',
         question: 'Was ist ein Pneumothorax?',
         options: [
             'Eine Lungenentzündung',
@@ -7813,7 +7811,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '859',
         question: 'Was ist eine Appendizitis?',
         options: [
             'Eine Entzündung der Bauchspeicheldrüse',
@@ -7826,7 +7824,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '860',
         question: 'Was ist ein Aneurysma?',
         options: [
             'Eine Blockade eines Blutgefäßes',
@@ -7839,7 +7837,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '861',
         question: 'Was ist die Funktion der Milz?',
         options: [
             'Produktion von Verdauungsenzymen',
@@ -7852,7 +7850,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '862',
         question: 'Was ist ein Bypass?',
         options: [
             'Eine Umleitung eines Blutgefäßes',
@@ -7865,7 +7863,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '863',
         question: 'Was ist Multiple Sklerose?',
         options: [
             'Eine Infektionskrankheit',
@@ -7878,7 +7876,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '864',
         question: 'Was ist Dysphagie?',
         options: [
             'Schluckstörung',
@@ -7891,7 +7889,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '865',
         question: 'Was ist eine Triage?',
         options: [
             'Eine Operationstechnik',
@@ -7904,7 +7902,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '866',
         question: 'Was ist ein Schlaganfall?',
         options: [
             'Eine plötzliche Durchblutungsstörung im Gehirn',
@@ -7917,7 +7915,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '867',
         question: 'Was ist Tinnitus?',
         options: [
             'Eine Hauterkrankung',
@@ -7930,7 +7928,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '868',
         question: 'Was ist eine Biopie?',
         options: [
             'Eine Untersuchung des Blutes',
@@ -7943,7 +7941,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '869',
         question: 'Was ist ein EEG?',
         options: [
             'Elektrokardiogramm',
@@ -7956,7 +7954,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '870',
         question: 'Was ist Anorexia nervosa?',
         options: [
             'Eine Essstörung',
@@ -7969,7 +7967,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '871',
         question: 'Was ist Karies?',
         options: [
             'Eine Knochenerkrankung',
@@ -7982,7 +7980,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '872',
         question: 'Was ist Arthrose?',
         options: [
             'Eine Erkrankung der Gelenke',
@@ -7995,7 +7993,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '873',
         question: 'Was ist Psoriasis?',
         options: [
             'Eine Lungenerkrankung',
@@ -8008,7 +8006,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '874',
         question: 'Was ist Sepsis?',
         options: [
             'Eine Vergiftung',
@@ -8021,7 +8019,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '875',
         question: 'Was ist eine CT?',
         options: [
             'Computertomographie',
@@ -8034,7 +8032,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '876',
         question: 'Was ist Hämophilie?',
         options: [
             'Eine Blutarmut',
@@ -8047,7 +8045,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '877',
         question: 'Was ist Mumps?',
         options: [
             'Eine bakterielle Infektion',
@@ -8060,7 +8058,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '878',
         question: 'Was ist ein Ulcus?',
         options: [
             'Ein Geschwür',
@@ -8073,7 +8071,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '879',
         question: 'Was ist COPD?',
         options: [
             'Eine Herzerkrankung',
@@ -8086,7 +8084,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '880',
         question: 'Was ist ein Prionenerkrankung?',
         options: [
             'Eine Erkrankung durch Viren',
@@ -8099,7 +8097,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '881',
         question: 'Was versteht man unter Adipositas?',
         options: [
             'Untergewicht',
@@ -8112,7 +8110,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '882',
         question: 'Welche Währung wird in Japan verwendet?',
         options: ['Won', 'Yuan', 'Yen', 'Ringgit'],
         correctAnswer: 2,
@@ -8121,7 +8119,7 @@ module.exports = [
     },
     // Hier beginnen die 51 neuen Fragen für Wirtschaft
     {
-        id: uuidv4(),
+        id: '883',
         question: 'Was ist Inflation?',
         options: [
             'Ein Anstieg des Preisniveaus',
@@ -8134,7 +8132,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '884',
         question: 'Was bezeichnet man als BIP?',
         options: [
             'Brutto-Investitions-Prozent',
@@ -8147,7 +8145,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '885',
         question: 'Was ist eine Aktie?',
         options: [
             'Ein Schuldschein',
@@ -8160,7 +8158,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '886',
         question: 'Was ist Angebot und Nachfrage?',
         options: [
             'Ein Werbekonzept',
@@ -8173,7 +8171,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '887',
         question: 'Was ist die EZB?',
         options: [
             'Europäische Zentrale Börse',
@@ -8186,7 +8184,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '888',
         question: 'Was versteht man unter dem Begriff "Rezession"?',
         options: [
             'Ein starkes Wirtschaftswachstum',
@@ -8199,7 +8197,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '889',
         question: 'Was ist ein Monopol?',
         options: [
             'Ein Unternehmen mit mehreren Anteilseignern',
@@ -8212,7 +8210,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '890',
         question: 'Was ist die Börse?',
         options: [
             'Eine Bank für internationale Überweisungen',
@@ -8225,7 +8223,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '891',
         question: 'Was ist eine Dividende?',
         options: [
             'Eine Sondersteuer für Unternehmen',
@@ -8238,7 +8236,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '892',
         question: 'Was bedeutet B2B im Geschäftsleben?',
         options: [
             'Back to Business',
@@ -8251,7 +8249,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '893',
         question: 'Was ist Deflation?',
         options: [
             'Ein Anstieg des Preisniveaus',
@@ -8264,7 +8262,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '894',
         question: 'Was ist eine GmbH?',
         options: [
             'Gesellschaft mit beschränkter Haftung',
@@ -8277,7 +8275,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '895',
         question: 'Was ist der DAX?',
         options: [
             'Deutsche Aktienindex',
@@ -8290,7 +8288,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '896',
         question: 'Was ist ein Embargo?',
         options: [
             'Eine Handelsbeschränkung oder ein Handelsverbot',
@@ -8303,7 +8301,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '897',
         question: 'Was versteht man unter Outsourcing?',
         options: [
             'Die Erschließung neuer Märkte',
@@ -8316,7 +8314,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '898',
         question: 'Was ist eine Bilanz?',
         options: [
             'Eine Übersicht über Einnahmen und Ausgaben',
@@ -8329,7 +8327,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '899',
         question: 'Was bedeutet ROI in der Wirtschaft?',
         options: [
             'Risk of Investment',
@@ -8342,7 +8340,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '900',
         question: 'Was ist ein Hedgefonds?',
         options: [
             'Ein Fonds, der nur in sichere Anlagen investiert',
@@ -8355,7 +8353,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '901',
         question: 'Was ist eine Holding-Gesellschaft?',
         options: [
             'Eine Gesellschaft, die andere Unternehmen hält und kontrolliert',
@@ -8368,7 +8366,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '902',
         question: 'Was ist ein Oligopol?',
         options: [
             'Ein Markt mit einem Anbieter',
@@ -8381,7 +8379,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '903',
         question: 'Was ist eine Fusion?',
         options: [
             'Der Zusammenschluss von mindestens zwei Unternehmen',
@@ -8394,7 +8392,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '904',
         question: 'Was ist ein Start-up?',
         options: [
             'Ein etabliertes Unternehmen, das expandiert',
@@ -8407,7 +8405,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '905',
         question: 'Was bedeutet die Abkürzung CEO?',
         options: [
             'Chief Economic Officer',
@@ -8420,7 +8418,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '906',
         question: 'Was versteht man unter Mikroökonomie?',
         options: [
             'Die Wirtschaftswissenschaft von kleinen Ländern',
@@ -8433,7 +8431,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '907',
         question: 'Was ist die OECD?',
         options: [
             'Organisation für wirtschaftliche Zusammenarbeit und Entwicklung',
@@ -8446,7 +8444,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '908',
         question: 'Was ist ein Handelsbilanzüberschuss?',
         options: [
             'Ein Land importiert mehr als es exportiert',
@@ -8459,7 +8457,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '909',
         question: 'Was ist Crowdfunding?',
         options: [
             'Eine Form der Unternehmensfinanzierung durch viele Kleinanleger',
@@ -8472,7 +8470,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '910',
         question: 'Was ist ein Bull Market?',
         options: [
             'Ein Markt mit fallenden Kursen',
@@ -8485,7 +8483,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '911',
         question: 'Was versteht man unter Compliance?',
         options: [
             'Die Einhaltung von Regeln und Gesetzen in Unternehmen',
@@ -8498,7 +8496,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '912',
         question: 'Was ist eine Due Diligence?',
         options: [
             'Eine rechtliche Verpflichtung',
@@ -8511,7 +8509,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '913',
         question: 'Was bedeutet "Blue Chip" an der Börse?',
         options: [
             'Eine riskante Aktie',
@@ -8524,7 +8522,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '914',
         question: 'Was ist ein IPO?',
         options: [
             'International Payment Option',
@@ -8537,7 +8535,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '915',
         question: 'Was ist ein Kartell?',
         options: [
             'Ein Zusammenschluss von Unternehmen zur Preisabsprache',
@@ -8550,7 +8548,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '916',
         question: 'Was ist die OPEC?',
         options: [
             'Organisation der Papier exportierenden Länder',
@@ -8563,7 +8561,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '917',
         question: 'Was ist ein Leitindex?',
         options: [
             'Ein Index, der die wichtigsten Unternehmen eines Landes abbildet',
@@ -8576,7 +8574,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '918',
         question: 'Was ist ein Franchise-System?',
         options: [
             'Ein System zur Steuerberechnung',
@@ -8589,7 +8587,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '919',
         question: 'Was ist ein Devisenmarkt?',
         options: [
             'Ein Markt für elektronische Geräte',
@@ -8602,7 +8600,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '920',
         question: 'Was ist ein Synergieeffekt?',
         options: [
             'Ein negativer Effekt bei der Zusammenlegung von Unternehmen',
@@ -8615,7 +8613,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '921',
         question: 'Was ist die IWF?',
         options: [
             'Internationale Wirtschaftsförderung',
@@ -8628,7 +8626,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '922',
         question: 'Was ist ein Bear Market?',
         options: [
             'Ein Markt mit steigenden Kursen',
@@ -8641,7 +8639,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '923',
         question: 'Was ist die WTO?',
         options: [
             'World Tax Organization',
@@ -8654,7 +8652,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '924',
         question: 'Was ist eine Rezession?',
         options: [
             'Eine Phase des wirtschaftlichen Aufschwungs',
@@ -8667,7 +8665,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '925',
         question: 'Was ist ein Duopol?',
         options: [
             'Ein Markt mit einem Anbieter',
@@ -8680,7 +8678,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '926',
         question: 'Was ist Corporate Social Responsibility (CSR)?',
         options: [
             'Die soziale Verantwortung von Unternehmen',
@@ -8693,7 +8691,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '927',
         question: 'Was ist eine hostile takeover?',
         options: [
             'Eine freundliche Übernahme eines Unternehmens',
@@ -8706,7 +8704,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '928',
         question: 'Was ist der FTSE 100?',
         options: [
             'Ein französischer Aktienindex',
@@ -8719,7 +8717,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '929',
         question: 'Was ist ein Embargo?',
         options: [
             'Ein Einfuhrverbot für bestimmte Waren oder Länder',
@@ -8732,7 +8730,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '930',
         question: 'Was ist die EIB?',
         options: [
             'Europäische Import-Behörde',
@@ -8745,7 +8743,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '931',
         question: 'Was ist eine AG?',
         options: [
             'Arbeitsgemeinschaft',
@@ -8758,7 +8756,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '932',
         question: 'Was ist ein Joint Venture?',
         options: [
             'Ein Abenteuerurlaub',
@@ -8771,7 +8769,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '933',
         question: 'Was bedeutet B2C im Geschäftsleben?',
         options: [
             'Business to Company',
@@ -8784,7 +8782,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '934',
         question: 'Was ist ein Algorithmus?',
         options: [
             'Ein spezieller Computer',
@@ -8797,7 +8795,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '935',
         question: 'Was bedeutet die Abkürzung "HTML"?',
         options: [
             'Hypertext Markup Language',
@@ -8810,7 +8808,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '936',
         question: 'Was ist ein Compiler?',
         options: [
             'Ein Programm, das Quellcode in Maschinencode übersetzt',
@@ -8823,7 +8821,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '937',
         question: 'Was ist ein Betriebssystem?',
         options: [
             'Eine Hardware-Komponente',
@@ -8836,7 +8834,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '938',
         question: 'Welche der folgenden ist keine Programmiersprache?',
         options: [
             'Java',
@@ -8849,7 +8847,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '939',
         question: 'Was ist ein Bit?',
         options: [
             'Ein Speichermedium',
@@ -8862,7 +8860,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '940',
         question: 'Was ist ein Byte?',
         options: [
             'Ein einzelnes Bit',
@@ -8875,7 +8873,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '941',
         question: 'Was ist eine Datenbank?',
         options: [
             'Ein Programm zur Datensicherung',
@@ -8888,7 +8886,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '942',
         question: 'Was bedeutet die Abkürzung "URL"?',
         options: [
             'Universal Resource Locator',
@@ -8901,7 +8899,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '943',
         question: 'Was ist RAM?',
         options: [
             'Eine spezielle Festplatte',
@@ -8914,7 +8912,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '944',
         question: 'Was ist eine IP-Adresse?',
         options: [
             'Eine eindeutige Kennzeichnung eines Geräts in einem Netzwerk',
@@ -8927,7 +8925,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '945',
         question: 'Was ist ein Algorithmus mit der Zeitkomplexität O(n²)?',
         options: [
             'Ein sehr schneller Algorithmus',
@@ -8940,7 +8938,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '946',
         question: 'Was ist SQL?',
         options: [
             'Eine Programmiersprache für Web-Anwendungen',
@@ -8953,7 +8951,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '947',
         question: 'Was ist ein Virus im informatischen Sinne?',
         options: [
             'Ein Fehler in der Hardware',
@@ -8966,7 +8964,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '948',
         question: 'Was ist eine Firewall?',
         options: [
             'Ein Virenschutzprogramm',
@@ -8979,7 +8977,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '949',
         question: 'Was ist ein Stack in der Informatik?',
         options: [
             'Ein Sortieralgorithmus',
@@ -8992,7 +8990,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '950',
         question: 'Was ist ein Queue in der Informatik?',
         options: [
             'Eine Datenstruktur nach dem FIFO-Prinzip (First In, First Out)',
@@ -9005,7 +9003,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '951',
         question: 'Was ist ein Binärbaum?',
         options: [
             'Ein Sortieralgorithmus',
@@ -9018,7 +9016,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '952',
         question: 'Was ist ein Compiler?',
         options: [
             'Ein Programm, das Quellcode in Maschinencode übersetzt',
@@ -9031,7 +9029,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '953',
         question: 'Was ist ein Interpreter?',
         options: [
             'Ein Programm, das Quellcode direkt ausführt ohne vorherige Kompilierung',
@@ -9044,7 +9042,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '954',
         question: 'Was bedeutet OOP?',
         options: [
             'Object Oriented Programming',
@@ -9057,7 +9055,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '955',
         question: 'Was ist ein Algorithmus zur Sortierung von Daten?',
         options: [
             'Quick Sort',
@@ -9070,7 +9068,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '956',
         question: 'Was ist eine API?',
         options: [
             'Advanced Programming Interface',
@@ -9083,7 +9081,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '957',
         question: 'Was ist ein Deadlock in der Informatik?',
         options: [
             'Ein nicht mehr reagierendes Programm',
@@ -9096,7 +9094,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '958',
         question: 'Was ist ein Hashwert?',
         options: [
             'Eine eindeutige Kennung, die aus Daten berechnet wird',
@@ -9109,7 +9107,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '959',
         question: 'Was ist ein Protokoll im Netzwerkbereich?',
         options: [
             'Ein Dokument zur Fehlerbehebung',
@@ -9122,7 +9120,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '960',
         question: 'Was ist ein Kernel in der Informatik?',
         options: [
             'Eine Hardwarekomponente',
@@ -9135,7 +9133,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '961',
         question: 'Was ist RAID?',
         options: [
             'Ein Virenschutzprogramm',
@@ -9148,7 +9146,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '962',
         question: 'Was ist ein Bug in der Softwareentwicklung?',
         options: [
             'Ein Programm zur Fehlersuche',
@@ -9161,7 +9159,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '963',
         question: 'Was ist die Komplexitätsklasse P in der Informatik?',
         options: [
             'Probleme, die in polynomieller Zeit lösbar sind',
@@ -9174,7 +9172,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '964',
         question: 'Was ist ein Thread in der Informatik?',
         options: [
             'Ein Sicherheitsprotokoll',
@@ -9187,7 +9185,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '965',
         question: 'Was ist ein Cache?',
         options: [
             'Ein temporärer, schneller Speicher für häufig benötigte Daten',
@@ -9200,7 +9198,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '966',
         question: 'Was bedeutet die Abkürzung "CSS"?',
         options: [
             'Computer Style Sheets',
@@ -9213,7 +9211,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '967',
         question: 'Was ist ein Array in der Programmierung?',
         options: [
             'Eine Datenstruktur zur Speicherung mehrerer Werte gleichen Typs',
@@ -9226,7 +9224,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '968',
         question: 'Was ist ein Pointer in der Programmierung?',
         options: [
             'Ein spezieller Datentyp für Zahlen',
@@ -9239,7 +9237,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '969',
         question: 'Was ist eine Rekursion in der Programmierung?',
         options: [
             'Ein Fehler, der wiederholt auftritt',
@@ -9252,7 +9250,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '970',
         question: 'Was ist ein DNS-Server?',
         options: [
             'Ein Server, der IP-Adressen zu Domainnamen zuordnet',
@@ -9265,7 +9263,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '971',
         question: 'Was ist ein Router?',
         options: [
             'Ein Programm zur Wegfindung',
@@ -9278,7 +9276,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '972',
         question: 'Was ist ein Pixel?',
         options: [
             'Ein Bildpunkt auf einem Bildschirm',
@@ -9291,7 +9289,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '973',
         question: 'Was ist ein Algorithmus zur Wegfindung in einem Graphen?',
         options: [
             'Quick Sort',
@@ -9304,7 +9302,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '974',
         question: 'Was ist ein Verschlüsselungsalgorithmus?',
         options: [
             'MD5',
@@ -9317,7 +9315,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '975',
         question: 'Was ist der Unterschied zwischen HTTP und HTTPS?',
         options: [
             'HTTPS ist schneller als HTTP',
@@ -9330,7 +9328,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '976',
         question: 'Was ist eine SQL-Injection?',
         options: [
             'Eine Methode zur Datenbankoptimierung',
@@ -9343,7 +9341,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '977',
         question: 'Was ist ein Interrupt in der Informatik?',
         options: [
             'Ein Signal, das die aktuelle Ausführung eines Prozessors unterbricht',
@@ -9356,7 +9354,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '978',
         question: 'Was ist ein Mutex in der Programmierung?',
         options: [
             'Ein Algorithmus zur Mutex-Sortierung',
@@ -9369,7 +9367,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '979',
         question: 'Was ist ein Framework in der Softwareentwicklung?',
         options: [
             'Ein Programm zur Codeanalyse',
@@ -9382,7 +9380,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '980',
         question: 'Was bedeutet CRUD in der Informatik?',
         options: [
             'Create, Read, Update, Delete - grundlegende Funktionen zur Datenverwaltung',
@@ -9395,7 +9393,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '981',
         question: 'Was ist ein Daemon in Unix-Systemen?',
         options: [
             'Ein Virus oder Schadprogramm',
@@ -9408,7 +9406,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '982',
         question: 'Was ist Virtualisierung in der Informatik?',
         options: [
             'Die Simulation virtueller Realität',
@@ -9421,7 +9419,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '983',
         question: 'Wofür steht die Abkürzung "IoT"?',
         options: [
             'Internet of Things',
@@ -9434,7 +9432,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '984',
         question: 'Was ist Machine Learning?',
         options: [
             'Die Programmierung von Robotern',
@@ -9447,7 +9445,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '985',
         question: 'Was ist ein Quantencomputer?',
         options: [
             'Ein sehr schneller Supercomputer',
@@ -9460,7 +9458,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '986',
         question: 'Was ist DevOps?',
         options: [
             'Eine Programmiersprache',
@@ -9473,7 +9471,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '987',
         question: 'Welches ist das höchste Gebäude der Welt (Stand 2024)?',
         options: ['Shanghai Tower', 'One World Trade Center', 'Mecca Royal Clock Tower', 'Burj Khalifa'],
         correctAnswer: 3,
@@ -9482,7 +9480,7 @@ module.exports = [
     },
     // Hier beginnen die 51 neuen Fragen für Architektur
     {
-        id: uuidv4(),
+        id: '988',
         question: 'Wer entwarf den Eiffelturm?',
         options: ['Gustave Eiffel', 'Antoni Gaudí', 'Frank Lloyd Wright', 'Le Corbusier'],
         correctAnswer: 0,
@@ -9490,7 +9488,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '989',
         question: 'Welcher Architekturstil ist charakteristisch für den Kölner Dom?',
         options: ['Romanik', 'Gotik', 'Barock', 'Renaissance'],
         correctAnswer: 1,
@@ -9498,7 +9496,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '990',
         question: 'Welcher berühmte Architekt entwarf das Guggenheim-Museum in Bilbao?',
         options: ['Zaha Hadid', 'Frank Gehry', 'Norman Foster', 'Renzo Piano'],
         correctAnswer: 1,
@@ -9506,7 +9504,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '991',
         question: 'In welcher Stadt befindet sich der schiefe Turm von Pisa?',
         options: ['Rom', 'Mailand', 'Florenz', 'Pisa'],
         correctAnswer: 3,
@@ -9514,7 +9512,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '992',
         question: 'Was ist ein Architrav?',
         options: ['Ein Schmuckornament', 'Ein waagerechter Trägerbalken', 'Ein gotischer Spitzbogen', 'Eine Art von Dachziegel'],
         correctAnswer: 1,
@@ -9522,7 +9520,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '993',
         question: 'Welcher Architekturstil dominierte in Europa von etwa 1760 bis 1830?',
         options: ['Barock', 'Rokoko', 'Klassizismus', 'Jugendstil'],
         correctAnswer: 2,
@@ -9530,7 +9528,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '994',
         question: 'Wer entwarf die Sagrada Familia in Barcelona?',
         options: ['Oscar Niemeyer', 'Antoni Gaudí', 'Frank Lloyd Wright', 'Santiago Calatrava'],
         correctAnswer: 1,
@@ -9538,7 +9536,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '995',
         question: 'Was ist ein charakteristisches Merkmal der Bauhaus-Architektur?',
         options: ['Üppige Verzierungen', 'Funktionalität und klare Formen', 'Verschnörkelte Fassaden', 'Gotische Bögen'],
         correctAnswer: 1,
@@ -9546,7 +9544,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '996',
         question: 'Welches berühmte Gebäude wurde von Ludwig Mies van der Rohe entworfen?',
         options: ['Seagram Building', 'Sydney Opera House', 'Taj Mahal', 'Colosseum'],
         correctAnswer: 0,
@@ -9554,7 +9552,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '997',
         question: 'Welches Material ist typisch für die gotische Architektur?',
         options: ['Beton', 'Stahl', 'Glas', 'Stein'],
         correctAnswer: 3,
@@ -9562,7 +9560,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '998',
         question: 'Wer gilt als Begründer der modernen Architektur?',
         options: ['Louis Sullivan', 'Frank Lloyd Wright', 'Le Corbusier', 'Walter Gropius'],
         correctAnswer: 2,
@@ -9570,7 +9568,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '999',
         question: 'Welcher Baustil ist durch Spitzbögen, Strebewerk und große Fensterflächen gekennzeichnet?',
         options: ['Romanik', 'Barock', 'Gotik', 'Renaissance'],
         correctAnswer: 2,
@@ -9578,7 +9576,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1000',
         question: 'In welcher Stadt befindet sich die Akropolis?',
         options: ['Rom', 'Athen', 'Kairo', 'Istanbul'],
         correctAnswer: 1,
@@ -9586,7 +9584,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1001',
         question: 'Was ist ein Architekt?',
         options: [
             'Ein Bauingenieur',
@@ -9599,7 +9597,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1002',
         question: 'Welches Gebäude entwarf Frank Lloyd Wright in Pennsylvania über einem Wasserfall?',
         options: ['Guggenheim Museum', 'Fallingwater', 'Robie House', 'Unity Temple'],
         correctAnswer: 1,
@@ -9607,7 +9605,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1003',
         question: 'Was ist eine Säulenordnung?',
         options: [
             'Die Anordnung von Säulen in einem Theater',
@@ -9620,7 +9618,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1004',
         question: 'Welches berühmte Bauwerk steht auf dem Tempelberg in Jerusalem?',
         options: ['Felsendom', 'Hagia Sophia', 'Petersdom', 'Blaue Moschee'],
         correctAnswer: 0,
@@ -9628,7 +9626,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1005',
         question: 'Wer entwarf die St. Pauls Cathedral in London?',
         options: ['Inigo Jones', 'Christopher Wren', 'John Nash', 'William Kent'],
         correctAnswer: 1,
@@ -9636,7 +9634,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '1006',
         question: 'Was ist ein Grundriss?',
         options: [
             'Die Fläche, auf der ein Gebäude steht',
@@ -9649,7 +9647,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1007',
         question: 'Welche Epoche folgte auf die Renaissance in der Architektur?',
         options: ['Gotik', 'Romantik', 'Barock', 'Jugendstil'],
         correctAnswer: 2,
@@ -9657,7 +9655,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1008',
         question: 'Welches dieser Gebäude steht NICHT in Rom?',
         options: ['Kolosseum', 'Pantheon', 'Petersdom', 'Sagrada Familia'],
         correctAnswer: 3,
@@ -9665,7 +9663,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1009',
         question: 'Was ist ein Erker?',
         options: [
             'Ein Vorsprung an der Fassade eines Gebäudes',
@@ -9678,7 +9676,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1010',
         question: 'Wer entwarf den Berliner Fernsehturm?',
         options: ['Walter Gropius', 'Hermann Henselmann', 'Hans Scharoun', 'Mies van der Rohe'],
         correctAnswer: 1,
@@ -9686,7 +9684,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '1011',
         question: 'Welcher Architekturstil ist durch Rundbögen und dicke Mauern gekennzeichnet?',
         options: ['Gotik', 'Barock', 'Romanik', 'Art Deco'],
         correctAnswer: 2,
@@ -9694,7 +9692,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1012',
         question: 'In welcher Stadt steht das Empire State Building?',
         options: ['Chicago', 'Los Angeles', 'New York', 'Boston'],
         correctAnswer: 2,
@@ -9702,7 +9700,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1013',
         question: 'Was ist Brutalismus in der Architektur?',
         options: [
             'Ein Baustil, der durch massive Betonkonstruktionen gekennzeichnet ist',
@@ -9715,7 +9713,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1014',
         question: 'Welcher dieser Architekten hat NICHT im 20. Jahrhundert gewirkt?',
         options: ['Frank Lloyd Wright', 'Le Corbusier', 'Andrea Palladio', 'Ludwig Mies van der Rohe'],
         correctAnswer: 2,
@@ -9723,7 +9721,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1015',
         question: 'Was ist ein Kapitell?',
         options: [
             'Der oberste Teil einer Säule',
@@ -9736,7 +9734,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1016',
         question: 'Welches berühmte Bauwerk wurde von Ieoh Ming Pei entworfen?',
         options: ['Centre Pompidou', 'Pyramide des Louvre', 'Guggenheim Museum Bilbao', 'Sydney Opera House'],
         correctAnswer: 1,
@@ -9744,7 +9742,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1017',
         question: 'Was ist eine Fassade?',
         options: [
             'Das Innere eines Gebäudes',
@@ -9757,7 +9755,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1018',
         question: 'Welcher Baustil wird oft als "Internationaler Stil" bezeichnet?',
         options: ['Jugendstil', 'Art Deco', 'Moderne', 'Postmoderne'],
         correctAnswer: 2,
@@ -9765,7 +9763,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1019',
         question: 'In welcher Stadt steht der "Schiefe Turm"?',
         options: ['Venedig', 'Florenz', 'Pisa', 'Rom'],
         correctAnswer: 2,
@@ -9773,7 +9771,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1020',
         question: 'Was ist ein Gesims?',
         options: [
             'Ein horizontales Profil an einer Wand',
@@ -9786,7 +9784,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1021',
         question: 'Wer entwarf das Centre Pompidou in Paris?',
         options: ['Renzo Piano und Richard Rogers', 'Norman Foster', 'Zaha Hadid', 'Santiago Calatrava'],
         correctAnswer: 0,
@@ -9794,7 +9792,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '1022',
         question: 'Was ist ein Atrium in der Architektur?',
         options: [
             'Ein offener Innenhof',
@@ -9807,7 +9805,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1023',
         question: 'Welcher Architekturstil ist durch geschwungene Linien und florale Ornamente gekennzeichnet?',
         options: ['Bauhaus', 'Jugendstil', 'Brutalismus', 'Konstruktivismus'],
         correctAnswer: 1,
@@ -9815,7 +9813,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1024',
         question: 'In welcher Stadt wurde das Bauhaus gegründet?',
         options: ['Berlin', 'München', 'Weimar', 'Hamburg'],
         correctAnswer: 2,
@@ -9823,7 +9821,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1025',
         question: 'Was ist eine Kuppel?',
         options: [
             'Ein runder oder vieleckiger Dachaufbau',
@@ -9836,7 +9834,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1026',
         question: 'Welcher Architekt entwarf das Sydney Opera House?',
         options: ['Frank Gehry', 'Jørn Utzon', 'Renzo Piano', 'Oscar Niemeyer'],
         correctAnswer: 1,
@@ -9844,7 +9842,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1027',
         question: 'Was ist ein Pfeiler?',
         options: [
             'Ein horizontaler Träger',
@@ -9857,7 +9855,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1028',
         question: 'Welcher architektonische Stil ist durch den Einsatz von Stahl, Glas und Beton gekennzeichnet?',
         options: ['Barock', 'Gotik', 'Renaissance', 'Moderne'],
         correctAnswer: 3,
@@ -9865,7 +9863,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1029',
         question: 'Wer entwarf die Villa Savoye?',
         options: ['Frank Lloyd Wright', 'Le Corbusier', 'Walter Gropius', 'Ludwig Mies van der Rohe'],
         correctAnswer: 1,
@@ -9873,7 +9871,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '1030',
         question: 'Was ist ein Gewölbe?',
         options: [
             'Eine bogenförmige Decke',
@@ -9886,7 +9884,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1031',
         question: 'In welchem Architekturstil wurde die Frauenkirche in Dresden erbaut?',
         options: ['Gotik', 'Barock', 'Rokoko', 'Klassizismus'],
         correctAnswer: 1,
@@ -9894,7 +9892,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1032',
         question: 'Was ist ein Tympanon?',
         options: [
             'Ein Säulenfuß',
@@ -9907,7 +9905,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '1033',
         question: 'Welcher Architekt entwarf das "Haus der Kunst" in München?',
         options: ['Albert Speer', 'Paul Ludwig Troost', 'Walter Gropius', 'Ludwig Mies van der Rohe'],
         correctAnswer: 1,
@@ -9915,7 +9913,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '1034',
         question: 'Was kennzeichnet den Dekonstruktivismus in der Architektur?',
         options: [
             'Klare, funktionale Formen',
@@ -9928,7 +9926,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '1035',
         question: 'Welches Gebäude in Barcelona ist ein berühmtes Beispiel für den Modernisme?',
         options: ['Casa Milà', 'Torre Agbar', 'Guggenheim Museum', 'Palau de la Música Catalana'],
         correctAnswer: 0,
@@ -9936,7 +9934,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1036',
         question: 'Was ist ein Gebäudeensemble?',
         options: [
             'Ein einzelnes großes Gebäude',
@@ -9949,7 +9947,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1037',
         question: 'Welche berühmte Architektin entwarf das MAXXI-Museum in Rom?',
         options: ['Zaha Hadid', 'Gae Aulenti', 'Kazuyo Sejima', 'Jeanne Gang'],
         correctAnswer: 0,
@@ -9957,7 +9955,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '1038',
         question: 'Was ist ein Architekturbüro?',
         options: [
             'Ein Amt zur Genehmigung von Bauplänen',
@@ -9970,7 +9968,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1039',
         question: 'Welcher Baustil ist charakteristisch für die Dresdner Frauenkirche?',
         options: ['Gotik', 'Renaissance', 'Barock', 'Klassizismus'],
         correctAnswer: 2,
@@ -9978,7 +9976,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1040',
         question: 'Wie viele Felder hat ein Schachbrett?',
         options: ['49', '64', '81', '100'],
         correctAnswer: 1,
@@ -9986,7 +9984,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1041',
         question: 'Welche dieser Figuren gibt es beim Schach nicht?',
         options: ['Turm', 'Läufer', 'Bauer', 'Krieger'],
         correctAnswer: 3,
@@ -9994,7 +9992,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1042',
         question: 'Mit wie vielen Karten wird Skat gespielt?',
         options: ['32', '36', '42', '52'],
         correctAnswer: 0,
@@ -10002,7 +10000,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1043',
         question: 'Wie heißt der Erfinder von Monopoly?',
         options: ['Charles Darrow', 'Richard Garfield', 'Elizabeth Magie', 'Alfred Butts'],
         correctAnswer: 2,
@@ -10010,7 +10008,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '1044',
         question: 'Wie viele Steine hat ein Mensch-ärgere-dich-nicht-Spiel standardmäßig?',
         options: ['12', '16', '20', '24'],
         correctAnswer: 1,
@@ -10018,7 +10016,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1045',
         question: 'Mit wie vielen Steinen beginnt jeder Spieler beim Backgammon?',
         options: ['10', '12', '15', '18'],
         correctAnswer: 2,
@@ -10026,7 +10024,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1046',
         question: 'Wer hat den "Zauberwürfel" (Rubik\'s Cube) erfunden?',
         options: ['Ernő Rubik', 'Arne Hasselquist', 'Larry Nichols', 'Frank Epperson'],
         correctAnswer: 0,
@@ -10034,7 +10032,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1047',
         question: 'Wie viele Spielsteine hat eine Partie Domino traditionell?',
         options: ['24', '28', '32', '36'],
         correctAnswer: 1,
@@ -10042,7 +10040,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1048',
         question: 'Welches Spiel wird traditionell mit 5 Würfeln gespielt?',
         options: ['Mensch ärgere dich nicht', 'Kniffel/Yahtzee', 'Monopoly', 'Risiko'],
         correctAnswer: 1,
@@ -10050,7 +10048,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1049',
         question: 'In welcher Stadt spielte die erste Version von Monopoly?',
         options: ['New York', 'London', 'Atlantic City', 'Chicago'],
         correctAnswer: 2,
@@ -10058,7 +10056,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1050',
         question: 'Was ist ein "Full House" beim Poker?',
         options: [
             'Fünf Karten derselben Farbe',
@@ -10071,7 +10069,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1051',
         question: 'Wie viele Spieler können maximal an einer Standard-Partie "Die Siedler von Catan" teilnehmen?',
         options: ['3', '4', '5', '6'],
         correctAnswer: 1,
@@ -10079,7 +10077,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1052',
         question: 'Welches dieser Spiele wurde NICHT von Nintendo entwickelt?',
         options: ['The Legend of Zelda', 'Sonic the Hedgehog', 'Super Mario', 'Pokémon'],
         correctAnswer: 1,
@@ -10087,7 +10085,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1053',
         question: 'Welches ist das meistverkaufte Videospiel aller Zeiten?',
         options: ['Tetris', 'Minecraft', 'Grand Theft Auto V', 'Super Mario Bros.'],
         correctAnswer: 1,
@@ -10095,7 +10093,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1054',
         question: 'Wer ist die Hauptfigur in der "The Legend of Zelda"-Reihe?',
         options: ['Zelda', 'Link', 'Ganondorf', 'Epona'],
         correctAnswer: 1,
@@ -10103,7 +10101,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1055',
         question: 'Welche dieser Konsolen wurde zuerst veröffentlicht?',
         options: ['Nintendo 64', 'PlayStation', 'Xbox', 'Sega Dreamcast'],
         correctAnswer: 1,
@@ -10111,7 +10109,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1056',
         question: 'Wer ist der Schöpfer der "Super Mario"-Reihe?',
         options: ['Hideo Kojima', 'Shigeru Miyamoto', 'Satoru Iwata', 'Gabe Newell'],
         correctAnswer: 1,
@@ -10119,7 +10117,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1057',
         question: 'In welchem Jahr wurde Tetris veröffentlicht?',
         options: ['1974', '1984', '1994', '2004'],
         correctAnswer: 1,
@@ -10127,7 +10125,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '1058',
         question: 'Welches ist die wertvollste Straße in der deutschen Version von Monopoly?',
         options: ['Schlossallee', 'Parkstraße', 'Rathausplatz', 'Goethestraße'],
         correctAnswer: 0,
@@ -10135,7 +10133,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1059',
         question: 'Wie viele verschiedene Tetrominos gibt es in Tetris?',
         options: ['5', '7', '9', '11'],
         correctAnswer: 1,
@@ -10143,7 +10141,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1060',
         question: 'Welche Farbe hat der "Geist" Inky in Pac-Man?',
         options: ['Rot', 'Rosa', 'Orange', 'Blau'],
         correctAnswer: 3,
@@ -10151,7 +10149,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1061',
         question: 'Welches dieser Spiele wurde zuerst veröffentlicht?',
         options: ['Doom', 'Wolfenstein 3D', 'Quake', 'Half-Life'],
         correctAnswer: 1,
@@ -10159,7 +10157,7 @@ module.exports = [
         difficulty: 'hard',
     },
     {
-        id: uuidv4(),
+        id: '1062',
         question: 'Welche Farbe wird beim Schach zuerst gezogen?',
         options: ['Schwarz', 'Weiß', 'Nach Vereinbarung', 'Nach Losentscheid'],
         correctAnswer: 1,
@@ -10167,7 +10165,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1063',
         question: 'Wie viele Karten hat ein Standard-Pokerdeck ohne Joker?',
         options: ['32', '36', '48', '52'],
         correctAnswer: 3,
@@ -10175,7 +10173,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1064',
         question: 'Wer ist der Protagonist in der "Assassin\'s Creed"-Reihe?',
         options: [
             'Es gibt keinen festen Protagonisten',
@@ -10188,7 +10186,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1065',
         question: 'Welches dieser Spiele ist KEIN MMORPG?',
         options: ['World of Warcraft', 'Guild Wars 2', 'The Elder Scrolls V: Skyrim', 'Final Fantasy XIV'],
         correctAnswer: 2,
@@ -10196,7 +10194,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1066',
         question: 'In welchem Brettspiel geht es darum, einen Mörder, einen Tatort und eine Tatwaffe zu finden?',
         options: ['Monopoly', 'Cluedo', 'Risiko', 'Scrabble'],
         correctAnswer: 1,
@@ -10204,7 +10202,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1067',
         question: 'Wie nennt man den "Spielleiter" in "Dungeons & Dragons"?',
         options: ['Game Master', 'Dungeon Master', 'Story Teller', 'Narrator'],
         correctAnswer: 1,
@@ -10212,7 +10210,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1068',
         question: 'Welches Unternehmen entwickelte das Spiel "Fortnite"?',
         options: ['Activision', 'Electronic Arts', 'Epic Games', 'Ubisoft'],
         correctAnswer: 2,
@@ -10220,7 +10218,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1069',
         question: 'Welches ist das Maskottchen von Sega?',
         options: ['Mario', 'Sonic', 'Crash Bandicoot', 'Spyro'],
         correctAnswer: 1,
@@ -10228,7 +10226,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1070',
         question: 'Wie viele Spielfiguren stehen zu Beginn einer Partie Schach auf dem Brett?',
         options: ['16', '24', '32', '36'],
         correctAnswer: 2,
@@ -10236,7 +10234,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1071',
         question: 'In welchem Spiel geht es darum, Wörter auf einem Brett zu bilden und Punkte zu sammeln?',
         options: ['Domino', 'Scrabble', 'Monopoly', 'Trivial Pursuit'],
         correctAnswer: 1,
@@ -10244,7 +10242,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1072',
         question: 'Welches dieser Spiele wurde von Markus "Notch" Persson entwickelt?',
         options: ['Terraria', 'Minecraft', 'Roblox', 'Stardew Valley'],
         correctAnswer: 1,
@@ -10252,7 +10250,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1073',
         question: 'In welchem Jahr wurde die erste PlayStation veröffentlicht?',
         options: ['1991', '1994', '1997', '2000'],
         correctAnswer: 1,
@@ -10260,7 +10258,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1074',
         question: 'Wie viele Spieler können maximal an einer Partie "Uno" teilnehmen?',
         options: ['4', '6', '8', '10'],
         correctAnswer: 3,
@@ -10268,7 +10266,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1075',
         question: 'Welches Spieleunternehmen entwickelte die "Fallout"-Reihe?',
         options: ['Bethesda', 'Electronic Arts', 'Ubisoft', 'Activision Blizzard'],
         correctAnswer: 0,
@@ -10276,7 +10274,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1076',
         question: 'In welchem Videospiel trägt der Protagonist eine HEV-Anzug und kämpft gegen Aliens?',
         options: ['Doom', 'Half-Life', 'Halo', 'Metroid'],
         correctAnswer: 1,
@@ -10284,7 +10282,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1077',
         question: 'Welches dieser Kartenspiele wurde für Kinder entwickelt?',
         options: ['Skat', 'Poker', 'Bridge', 'Uno'],
         correctAnswer: 3,
@@ -10292,7 +10290,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1078',
         question: 'Wie viele grundlegende Ressourcen gibt es in "Die Siedler von Catan"?',
         options: ['3', '4', '5', '6'],
         correctAnswer: 2,
@@ -10300,7 +10298,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1079',
         question: 'Welches ist das Ziel im Spiel "Go"?',
         options: [
             'Den König des Gegners schachmatt zu setzen',
@@ -10313,7 +10311,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1080',
         question: 'Welche Firma veröffentlichte das Spiel "The Witcher 3: Wild Hunt"?',
         options: ['Bethesda', 'CD Projekt Red', 'BioWare', 'Ubisoft'],
         correctAnswer: 1,
@@ -10321,7 +10319,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1081',
         question: 'Wie viele Würfel werden beim Yahtzee/Kniffel verwendet?',
         options: ['2', '3', '4', '5'],
         correctAnswer: 3,
@@ -10329,7 +10327,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1082',
         question: 'Welches war das erste Spiel mit Mario als Hauptfigur?',
         options: ['Super Mario Bros.', 'Donkey Kong', 'Mario Bros.', 'Mario\'s Cement Factory'],
         correctAnswer: 1,
@@ -10337,7 +10335,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1083',
         question: 'Welches dieser Spiele ist KEIN Rollenspiel?',
         options: ['Final Fantasy VII', 'The Elder Scrolls V: Skyrim', 'Tetris', 'Dragon Quest XI'],
         correctAnswer: 2,
@@ -10345,7 +10343,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1084',
         question: 'Welche dieser Spielfiguren existiert nicht im klassischen Monopoly?',
         options: ['Hut', 'Auto', 'Schuh', 'Katze'],
         correctAnswer: 3,
@@ -10353,7 +10351,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1085',
         question: 'Welches ist die höchste Spielkarte im Bridge?',
         options: ['Ass', 'König', 'Dame', 'Joker'],
         correctAnswer: 0,
@@ -10361,7 +10359,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1086',
         question: 'Wie nennt man den speziellen Spielzug im Schach, bei dem König und Turm gleichzeitig bewegt werden?',
         options: ['En Passant', 'Rochade', 'Promotion', 'Doppelzug'],
         correctAnswer: 1,
@@ -10369,7 +10367,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1087',
         question: 'Welches Spiel wurde von Richard Garfield entworfen und 1993 von Wizards of the Coast veröffentlicht?',
         options: ['Dungeons & Dragons', 'Magic: The Gathering', 'Pokémon Trading Card Game', 'Yu-Gi-Oh!'],
         correctAnswer: 1,
@@ -10377,7 +10375,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1088',
         question: 'In welchem Spiel versucht man, farbige Kugeln in einer Reihe anzuordnen?',
         options: ['Cluedo', 'Mastermind', 'Vier gewinnt', 'Scrabble'],
         correctAnswer: 2,
@@ -10385,7 +10383,7 @@ module.exports = [
         difficulty: 'easy',
     },
     {
-        id: uuidv4(),
+        id: '1089',
         question: 'Welches dieser Spiele war ursprünglich ein Mod für "Half-Life"?',
         options: ['Team Fortress', 'Counter-Strike', 'Left 4 Dead', 'Portal'],
         correctAnswer: 1,
@@ -10393,7 +10391,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1090',
         question: 'Welches Strategiespiel simuliert den Aufbau und die Entwicklung menschlicher Zivilisationen?',
         options: ['Age of Empires', 'Civilization', 'StarCraft', 'Command & Conquer'],
         correctAnswer: 1,
@@ -10401,7 +10399,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1091',
         question: 'Wie viele Karten werden beim Skat pro Spieler ausgeteilt?',
         options: ['8', '10', '12', '13'],
         correctAnswer: 1,
@@ -10409,7 +10407,7 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1092',
         question: 'In welchem Jahr wurde das erste kommerziell erfolgreiche Videospiel "Pong" veröffentlicht?',
         options: ['1962', '1972', '1982', '1992'],
         correctAnswer: 1,
@@ -10417,11 +10415,11 @@ module.exports = [
         difficulty: 'medium',
     },
     {
-        id: uuidv4(),
+        id: '1093',
         question: 'Welches dieser Spiele wurde NICHT von Blizzard Entertainment entwickelt?',
         options: ['World of Warcraft', 'Overwatch', 'League of Legends', 'Diablo'],
         correctAnswer: 2,
         category: 'Spiele',
         difficulty: 'medium',
-    },
-];
+    }
+]

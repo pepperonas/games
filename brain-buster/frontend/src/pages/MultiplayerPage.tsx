@@ -47,46 +47,80 @@ const MultiplayerPage = () => {
     useEffect(() => {
         // Socket-Verbindung nur einmal initialisieren
         if (!socket && !isConnecting) {
-            setIsConnecting(true)
+            setIsConnecting(true);
+
+            // Wichtig: Klare Logging für den Debugging-Prozess
+            console.log("Verbindungsaufbau zum WebSocket-Server gestartet...");
 
             // Pfad relativ zum Basis-URL der Anwendung
-            const socketUrl = window.location.protocol + '//' + window.location.host
+            const socketUrl = window.location.protocol + '//' + window.location.host;
+            console.log("Socket URL:", socketUrl);
+
             const newSocket = io(socketUrl, {
                 path: '/socket-api/socket.io',
-                transports: ['websocket'],
-                reconnectionAttempts: 5
-            })
+                transports: ['websocket', 'polling'], // Beide Transportmethoden erlauben
+                reconnection: true,
+                reconnectionAttempts: 5,
+                reconnectionDelay: 1000,
+                timeout: 20000 // Längeres Timeout
+            });
 
+            // Verbesserte Logging
             newSocket.onAny((event, ...args) => {
                 console.log('Socket Event:', event, args);
             });
 
-            // Socket-Ereignisse behandeln
+            // Socket-Ereignisse mit mehr Debugging-Informationen
             newSocket.on('connect', () => {
-                console.log('Verbunden mit dem Server!')
-                setConnectionError(null)
-                setSocket(newSocket)
-                setIsConnecting(false)
-                setMultiplayerStatus({connected: true})
-            })
+                console.log('Verbunden mit dem Server! Socket ID:', newSocket.id);
+                setConnectionError(null);
+                setSocket(newSocket);
+                setIsConnecting(false);
+                setMultiplayerStatus({connected: true});
+            });
 
             newSocket.on('connect_error', (err) => {
-                console.error('Verbindungsfehler:', err)
-                setConnectionError('Verbindung zum Server fehlgeschlagen. Bitte versuche es später erneut.')
-                setIsConnecting(false)
-                setMultiplayerStatus({connected: false})
-            })
+                console.error('Verbindungsfehler:', err);
+                setConnectionError(`Verbindung zum Server fehlgeschlagen: ${err.message || 'Unbekannter Fehler'}. Bitte versuche es später erneut.`);
+                setIsConnecting(false);
+                setMultiplayerStatus({connected: false});
+            });
 
-            newSocket.on('disconnect', () => {
-                console.log('Verbindung zum Server getrennt')
-                setMultiplayerStatus({connected: false})
-            })
+            newSocket.on('connect_timeout', (timeout) => {
+                console.error('Verbindungs-Timeout:', timeout);
+                setConnectionError('Zeitüberschreitung bei der Verbindung zum Server.');
+                setIsConnecting(false);
+            });
+
+            newSocket.on('error', (error) => {
+                console.error('Socket Fehler:', error);
+                setConnectionError(`Socket-Fehler: ${error.message || 'Unbekannter Fehler'}`);
+            });
+
+            newSocket.on('disconnect', (reason) => {
+                console.log('Verbindung zum Server getrennt. Grund:', reason);
+                setMultiplayerStatus({connected: false});
+                if (reason === 'io server disconnect') {
+                    // Der Server hat die Verbindung getrennt, versuchen wir erneut zu verbinden
+                    newSocket.connect();
+                }
+            });
+
+            newSocket.on('reconnect_attempt', (attemptNumber) => {
+                console.log(`Wiederverbindungsversuch ${attemptNumber}...`);
+            });
+
+            newSocket.on('reconnect', (attemptNumber) => {
+                console.log(`Erfolgreich wiederverbunden nach ${attemptNumber} Versuchen.`);
+                setConnectionError(null);
+            });
 
             return () => {
-                newSocket.disconnect()
-            }
+                console.log("Socket wird getrennt...");
+                newSocket.disconnect();
+            };
         }
-    }, [setMultiplayerStatus])
+    }, [setMultiplayerStatus]);
 
     useEffect(() => {
         // Wenn kein Spiel läuft, nichts tun

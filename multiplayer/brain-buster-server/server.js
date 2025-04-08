@@ -17,8 +17,10 @@ const io = new Server(server, {
     cors: {
         origin: '*',
         methods: ['GET', 'POST'],
+        credentials: true
     },
-    path: '/socket.io',
+    path: '/socket.io',  // Hier sollte es /socket.io bleiben, da Nginx das Umschreiben übernimmt
+    transports: ['websocket', 'polling']  // Beide Transportoptionen zulassen
 });
 
 // Game rooms
@@ -249,10 +251,49 @@ io.on('connection', (socket) => {
 
 // Helper functions
 function getRandomQuestions(count) {
-    // Shuffle and select random questions
-    return sampleQuestions
-        .sort(() => Math.random() - 0.5)
-        .slice(0, count);
+    try {
+        // Prüfen, ob überhaupt Fragen vorhanden sind
+        if (!sampleQuestions || !Array.isArray(sampleQuestions) || sampleQuestions.length === 0) {
+            console.error("Keine Fragen verfügbar!");
+            return generateFallbackQuestions(count);
+        }
+
+        // Sicherstellen, dass jede Frage eine ID hat
+        const validatedQuestions = sampleQuestions.map((q, index) => {
+            // Wenn keine ID oder eine dynamische ID (uuidv4) vorhanden ist, ersetzen wir sie
+            if (!q.id || typeof q.id !== 'string' || q.id.includes('-')) {
+                return { ...q, id: `q${index + 1}` };
+            }
+            return q;
+        });
+
+        // Shuffle und Auswahl
+        return validatedQuestions
+            .sort(() => Math.random() - 0.5)
+            .slice(0, Math.min(count, validatedQuestions.length));
+    } catch (error) {
+        console.error("Fehler beim Laden der zufälligen Fragen:", error);
+        return generateFallbackQuestions(count);
+    }
+}
+
+// Hilfsfunktion für Fallback-Fragen
+function generateFallbackQuestions(count) {
+    console.log("Generiere Fallback-Fragen...");
+    const fallbackQuestions = [];
+
+    for (let i = 0; i < count; i++) {
+        fallbackQuestions.push({
+            id: `fallback${i + 1}`,
+            question: `Fallback-Frage ${i + 1}`,
+            options: ["Option A", "Option B", "Option C", "Option D"],
+            correctAnswer: 0,
+            category: "Allgemein",
+            difficulty: "easy"
+        });
+    }
+
+    return fallbackQuestions;
 }
 
 function startRoundTimer(roomId) {
@@ -280,6 +321,15 @@ function startRoundTimer(roomId) {
 
             // Handle time up - calculate scores for current question
             const currentRound = room.currentRound;
+
+            // WICHTIG: Prüfen, ob die Frage existiert
+            if (!room.questions || currentRound >= room.questions.length || !room.questions[currentRound]) {
+                console.error(`Fehler: Keine gültige Frage für Runde ${currentRound} in Raum ${roomId}`);
+                // Wenn keine gültige Frage, Spiel beenden
+                endGame(roomId);
+                return;
+            }
+
             const question = room.questions[currentRound];
 
             // Auto-submit for players who didn't answer (-1 indicates timeout)
@@ -291,12 +341,14 @@ function startRoundTimer(roomId) {
                 room.guest.answers[currentRound] = -1;
             }
 
-            // Calculate scores
-            if (room.host.answers[currentRound] === question.correctAnswer) {
+            // Calculate scores - mit zusätzlicher Sicherheitsprüfung
+            if (typeof question.correctAnswer === 'number' &&
+                room.host.answers[currentRound] === question.correctAnswer) {
                 room.host.score += 1;
             }
 
-            if (room.guest.answers[currentRound] === question.correctAnswer) {
+            if (typeof question.correctAnswer === 'number' &&
+                room.guest.answers[currentRound] === question.correctAnswer) {
                 room.guest.score += 1;
             }
 
