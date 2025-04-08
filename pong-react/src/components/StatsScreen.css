@@ -1,19 +1,48 @@
 /* StatsScreen.css mit Scrolling-Fix */
 .stats-screen {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     overflow-y: auto;
     background-color: #2C2E3B;
-    padding: 20px;
+    padding: 0; /* Padding oben entfernt */
+    padding-top: 20px; /* Explizit kein Padding oben */
+    padding-bottom: 20px; /* Padding nur unten */
+    padding-left: 20px;
+    padding-right: 20px;
     box-sizing: border-box;
     color: white;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Der Stats-Screen setzt dynamisch Styles für HTML und Body */
+.stats-screen::before {
+    content: "";
+    position: fixed;
+    top: -100vh;
+    left: 0;
+    right: 0;
+    height: 100vh;
+    z-index: -1;
+}
+
+/* Die App-Container Position wird überschrieben, wenn Stats angezeigt wird */
+.stats-screen.app-container,
+.stats-screen .app-container {
+    position: static !important;
+    overflow: visible !important;
+    height: auto !important;
 }
 
 .stats-screen h2 {
     text-align: center;
+    margin-top: 10px;
     margin-bottom: 20px;
 }
 
@@ -24,6 +53,7 @@
     margin-bottom: 20px;
     flex-wrap: wrap;
     gap: 10px;
+    padding: 0 5px;
 }
 
 .player-select {
@@ -33,6 +63,8 @@
     border-radius: 5px;
     color: white;
     min-width: 150px;
+    font-size: 16px; /* Größer für Mobilgeräte */
+    -webkit-appearance: none; /* Entfernt den nativen Stil auf iOS */
 }
 
 .stats-actions {
@@ -51,6 +83,7 @@
     cursor: pointer;
     border-radius: 5px;
     transition: background-color 0.3s;
+    -webkit-tap-highlight-color: transparent; /* Entfernt das Highlight beim Tippen auf iOS */
 }
 
 .export-btn {
@@ -176,6 +209,87 @@
     position: relative;
 }
 
+/* Text-based Charts */
+.text-chart-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: auto;
+    min-height: 180px;
+    overflow-y: auto;
+    padding: 0 5px;
+}
+
+.text-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.text-chart-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.chart-label {
+    width: 80px;
+    font-size: 14px;
+    color: #ccc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chart-bar-container {
+    flex: 1;
+    height: 24px;
+    position: relative;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    margin-left: 10px;
+    overflow: hidden;
+}
+
+.chart-bar {
+    height: 100%;
+    background-color: #4CAF50;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.win-bar {
+    background-color: #4CAF50;
+}
+
+.loss-bar {
+    background-color: #f44336;
+}
+
+.exchange-bar {
+    background-color: #2196F3;
+}
+
+.time-bar {
+    background-color: #9C27B0;
+}
+
+.rate-bar {
+    background-color: #FF9800;
+}
+
+.chart-value {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
 .chart-placeholder {
     height: 200px;
     display: flex;
@@ -207,6 +321,7 @@
 
 .history-table-container {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Für besseres iOS Scrolling */
 }
 
 .history-table {
@@ -273,7 +388,12 @@
 /* Mobile Anpassungen */
 @media (max-width: 768px) {
     .stats-screen {
-        padding: 15px 10px;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .stats-screen h2 {
+        margin-top: 5px;
     }
 
     .player-selection {
@@ -299,10 +419,71 @@
 
     .stats-overview, .stats-details {
         grid-template-columns: 1fr 1fr;
+        gap: 10px;
     }
 
     .charts-container {
         grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .chart-card {
+        min-height: 220px;
+        padding: 10px;
+    }
+
+    .chart-container {
+        height: 180px;
+    }
+
+    .text-chart-container {
+        min-height: 150px;
+    }
+
+    .stat-value {
+        font-size: 24px;
+    }
+
+    .stat-card {
+        padding: 10px;
+    }
+
+    .stat-card h3, .chart-card h3 {
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .history-table td, .history-table th {
+        padding: 8px 5px;
+        font-size: 13px;
+    }
+
+    .chart-label {
+        width: 70px;
+        font-size: 12px;
+    }
+
+    .chart-bar-container {
+        height: 20px;
+    }
+
+    .chart-value {
+        font-size: 11px;
+        right: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-overview, .stats-details {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .stat-value {
+        font-size: 20px;
+    }
+
+    .stat-detail-value {
+        font-size: 16px;
     }
 
     .chart-card {
@@ -310,26 +491,79 @@
     }
 
     .chart-container {
-        height: 180px;
+        height: 160px;
     }
 
-    .stat-value {
-        font-size: 24px;
+    .text-chart-container {
+        min-height: 140px;
+    }
+
+    .text-chart {
+        gap: 8px;
+    }
+
+    .history-table-container {
+        margin: 0 -10px;
+        width: calc(100% + 20px);
+    }
+
+    .chart-label {
+        width: 60px;
+        font-size: 11px;
     }
 }
 
-@media (max-width: 480px) {
+/* Extra kleine Geräte */
+@media (max-width: 360px) {
     .stats-overview, .stats-details {
         grid-template-columns: 1fr;
     }
 
-    .history-table td, .history-table th {
-        padding: 8px 5px;
-        font-size: 13px;
+    .chart-card {
+        min-height: 180px;
+    }
+
+    .chart-container {
+        height: 140px;
+    }
+
+    .text-chart-container {
+        min-height: 120px;
+    }
+
+    .chart-label {
+        width: 50px;
+        font-size: 10px;
+    }
+
+    .chart-bar-container {
+        height: 18px;
     }
 }
 
-/* Farben zum Farbschema anpassen */
+/* iOS Safari Fix für Fixed-Elemente */
+@supports (-webkit-touch-callout: none) {
+    .stats-screen {
+        /* iOS specific scrolling fix */
+        position: absolute;
+        height: 100%;
+        transform: translateZ(0); /* Aktiviert Hardware-Beschleunigung */
+    }
+
+    .player-select {
+        border-radius: 0;
+    }
+
+    .text-chart-container {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .chart-bar {
+        transition: none; /* Vermeidet Rendering-Probleme auf iOS */
+    }
+}
+
+/* Farbschema anpassen */
 .stat-card, .chart-card, .game-history {
     background-color: rgba(44, 46, 59, 0.7);
     border: 1px solid rgba(60, 63, 80, 0.5);
@@ -346,4 +580,13 @@
 
 .back-btn {
     margin-bottom: 50px; /* Platz für den Footer */
+}
+
+/* Fix für Footer-Position im Stats-Screen */
+.footer {
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    z-index: 1001;
 }

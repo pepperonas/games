@@ -1,6 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
 import StatsService from '../services/StatsService';
-import StatsChart from './StatsChart';
 import './StatsScreen.css';
 
 const StatsScreen = ({playerName, onBack}) => {
@@ -9,6 +8,30 @@ const StatsScreen = ({playerName, onBack}) => {
     const [selectedPlayer, setSelectedPlayer] = useState(playerName);
     const [importError, setImportError] = useState('');
     const fileInputRef = useRef(null);
+    const [chartLibraryLoaded, setChartLibraryLoaded] = useState(false);
+
+    useEffect(() => {
+        // Lade Chart.js dynamisch, falls noch nicht vorhanden
+        if (window.Chart) {
+            setChartLibraryLoaded(true);
+        } else {
+            const chartScript = document.createElement('script');
+            chartScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+            chartScript.integrity = 'sha512-ElRFoEQdI5Ht6kZvyzXhkG0UXdEYc5TShbmr0wY5RTGULZToYQ9jUIKqu1GFcj9gu5EJGBU6swgR1Rd4mMOQkA==';
+            chartScript.crossOrigin = 'anonymous';
+            chartScript.referrerPolicy = 'no-referrer';
+
+            chartScript.onload = () => {
+                setChartLibraryLoaded(true);
+            };
+
+            document.body.appendChild(chartScript);
+
+            return () => {
+                document.body.removeChild(chartScript);
+            };
+        }
+    }, []);
 
     useEffect(() => {
         // Lade die Statistiken des aktuellen Spielers
@@ -17,10 +40,158 @@ const StatsScreen = ({playerName, onBack}) => {
             setStats(playerStats);
         }
 
-// Lade alle verfügbaren Spieler
+        // Lade alle verfügbaren Spieler
         const players = StatsService.getAllPlayers();
         setAllPlayers(players);
     }, [selectedPlayer]);
+
+    useEffect(() => {
+        // Chart-Objekte erstellen, nachdem die Bibliothek geladen wurde
+        if (chartLibraryLoaded && stats) {
+            renderCharts();
+        }
+    }, [chartLibraryLoaded, stats]);
+
+    const renderCharts = () => {
+        const chartCanvases = {
+            winLoss: document.getElementById('win-loss-chart'),
+            ballExchanges: document.getElementById('ball-exchanges-chart'),
+            playTime: document.getElementById('playtime-chart'),
+            winRate: document.getElementById('winrate-chart')
+        };
+
+        // Bereinige bestehende Charts
+        Object.values(chartCanvases).forEach(canvas => {
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        });
+
+        // Renderingprobleme auf Mobilgeräten vermeiden
+        const isMobile = window.innerWidth <= 768;
+
+        // Gewonnen/Verloren Chart
+        if (chartCanvases.winLoss && getWinLossData()) {
+            renderChart(chartCanvases.winLoss, 'bar', getWinLossData(), {
+                plugins: {
+                    legend: {
+                        display: !isMobile
+                    }
+                }
+            });
+        }
+
+        // Ballwechsel Chart
+        if (chartCanvases.ballExchanges && getBallExchangesData()) {
+            renderChart(chartCanvases.ballExchanges, 'line', getBallExchangesData(), {
+                plugins: {
+                    legend: {
+                        display: !isMobile
+                    }
+                }
+            });
+        }
+
+        // Spielzeit Chart
+        if (chartCanvases.playTime && getPlayTimeByModeData()) {
+            renderChart(chartCanvases.playTime, 'doughnut', getPlayTimeByModeData(), {
+                plugins: {
+                    legend: {
+                        position: isMobile ? 'bottom' : 'top',
+                        labels: {
+                            boxWidth: isMobile ? 10 : 15,
+                            font: {
+                                size: isMobile ? 10 : 12
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Gewinnrate Chart
+        if (chartCanvases.winRate && getWinRateOverTimeData()) {
+            renderChart(chartCanvases.winRate, 'line', getWinRateOverTimeData(), {
+                plugins: {
+                    legend: {
+                        display: !isMobile
+                    }
+                }
+            });
+        }
+    };
+
+    const renderChart = (canvas, type, data, additionalOptions = {}) => {
+        if (!canvas || !window.Chart) return;
+
+        // Bestehenden Chart zerstören, falls vorhanden
+        const chartInstance = canvas.chart;
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        // Farbschema anpassen auf #2C2E3B
+        const defaultOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'rgba(255, 255, 255, 0.8)',
+                        font: {
+                            size: 12
+                        }
+                    },
+                    position: 'top'
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(44, 46, 59, 0.9)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    },
+                    grid: {
+                        color: 'rgba(44, 46, 59, 0.5)'
+                    }
+                },
+                y: {
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    },
+                    grid: {
+                        color: 'rgba(44, 46, 59, 0.5)'
+                    }
+                }
+            }
+        };
+
+        // Spezifische Optionen für verschiedene Diagrammtypen
+        const typeSpecificOptions = {};
+
+        if (type === 'pie' || type === 'doughnut') {
+            // Entferne Achsen für Kreisdiagramme
+            typeSpecificOptions.scales = {};
+        }
+
+        // Chart erstellen
+        const ctx = canvas.getContext('2d');
+        const chartConfig = {
+            type: type,
+            data: data,
+            options: { ...defaultOptions, ...typeSpecificOptions, ...additionalOptions }
+        };
+
+        const newChart = new window.Chart(ctx, chartConfig);
+        canvas.chart = newChart;
+    };
 
     const handlePlayerChange = (e) => {
         setSelectedPlayer(e.target.value);
@@ -284,10 +455,10 @@ const StatsScreen = ({playerName, onBack}) => {
                         <div className="chart-card win-loss-chart">
                             <h3>Gewonnen/Verloren</h3>
                             <div className="chart-container">
-                                {getWinLossData() ? (
-                                    <StatsChart type="bar" data={getWinLossData()}/>
+                                {getWinLossData() && chartLibraryLoaded ? (
+                                    <canvas id="win-loss-chart"></canvas>
                                 ) : (
-                                    <div className="no-data">Keine Daten verfügbar</div>
+                                    <div className="no-data">{chartLibraryLoaded ? 'Keine Daten verfügbar' : 'Lade Chart...'}</div>
                                 )}
                             </div>
                         </div>
@@ -295,10 +466,10 @@ const StatsScreen = ({playerName, onBack}) => {
                         <div className="chart-card ball-exchanges-chart">
                             <h3>Ballwechsel der letzten Spiele</h3>
                             <div className="chart-container">
-                                {getBallExchangesData() ? (
-                                    <StatsChart type="line" data={getBallExchangesData()}/>
+                                {getBallExchangesData() && chartLibraryLoaded ? (
+                                    <canvas id="ball-exchanges-chart"></canvas>
                                 ) : (
-                                    <div className="no-data">Keine Daten verfügbar</div>
+                                    <div className="no-data">{chartLibraryLoaded ? 'Keine Daten verfügbar' : 'Lade Chart...'}</div>
                                 )}
                             </div>
                         </div>
@@ -306,10 +477,10 @@ const StatsScreen = ({playerName, onBack}) => {
                         <div className="chart-card playtime-chart">
                             <h3>Spielzeit nach Modus</h3>
                             <div className="chart-container">
-                                {getPlayTimeByModeData() ? (
-                                    <StatsChart type="doughnut" data={getPlayTimeByModeData()}/>
+                                {getPlayTimeByModeData() && chartLibraryLoaded ? (
+                                    <canvas id="playtime-chart"></canvas>
                                 ) : (
-                                    <div className="no-data">Keine Daten verfügbar</div>
+                                    <div className="no-data">{chartLibraryLoaded ? 'Keine Daten verfügbar' : 'Lade Chart...'}</div>
                                 )}
                             </div>
                         </div>
@@ -317,10 +488,10 @@ const StatsScreen = ({playerName, onBack}) => {
                         <div className="chart-card winrate-chart">
                             <h3>Gewinnrate-Entwicklung</h3>
                             <div className="chart-container">
-                                {getWinRateOverTimeData() ? (
-                                    <StatsChart type="line" data={getWinRateOverTimeData()}/>
+                                {getWinRateOverTimeData() && chartLibraryLoaded ? (
+                                    <canvas id="winrate-chart"></canvas>
                                 ) : (
-                                    <div className="no-data">Mindestens 3 Spiele benötigt</div>
+                                    <div className="no-data">{chartLibraryLoaded ? 'Mindestens 3 Spiele benötigt' : 'Lade Chart...'}</div>
                                 )}
                             </div>
                         </div>

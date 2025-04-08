@@ -11,7 +11,16 @@ const BALL_RADIUS = 10;
 const WINNING_SCORE = 5;
 const SIGNALING_SERVER = 'https://mrx3k1.de';
 
-const PongGame = ({gameMode, difficulty, isHost, onGameOver, onBallExchange, isMobile, isLandscape}) => {
+const PongGame = ({
+                      gameMode,
+                      difficulty,
+                      isHost,
+                      onGameOver,
+                      onBallExchange,
+                      isMobile,
+                      isLandscape,
+                      resetCount
+                  }) => {
     const canvasRef = useRef(null);
     const requestRef = useRef(null);
     const socketRef = useRef(null);
@@ -31,7 +40,7 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver, onBallExchange, isM
         ballSpeedY: 2,
         leftPaddleY: 200,
         rightPaddleY: 200,
-        scores: { left: 0, right: 0 },
+        scores: {left: 0, right: 0},
         keys: {
             wPressed: false,
             sPressed: false,
@@ -52,6 +61,7 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver, onBallExchange, isM
         winAnimationDuration: 3000,
         winningPlayer: '',
         isLocalPlayerWinner: false,
+        gameOver: false,
         raindrops: [],
         lastBallX: 400, // Für Ballwechsel-Tracking
         lastBallSpeedX: 5 // Für Ballwechsel-Tracking
@@ -59,6 +69,14 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver, onBallExchange, isM
 
     // Audio Element
     const audioRef = useRef(null);
+
+    useEffect(() => {
+        if (resetCount > 0) {
+            // Spiel zurücksetzen
+            resetGameState();
+            setGameRunning(true);
+        }
+    }, [resetCount]);
 
     // Erkennen, ob es sich um ein mobiles Gerät handelt
     useEffect(() => {
@@ -557,6 +575,9 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver, onBallExchange, isM
     // Funktion zum Zurücksetzen des Balls
     const resetBall = () => {
         const gameState = gameStateRef.current;
+        if (gameState.gameOver) {
+            return;
+        }
         gameState.ballX = 400;
         gameState.ballY = 250;
         gameState.ballInResetState = true;
@@ -568,6 +589,10 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver, onBallExchange, isM
     // Ball-Reset-Zustand aktualisieren
     const updateBallResetState = () => {
         const gameState = gameStateRef.current;
+        if (gameState.gameOver) {
+            gameState.ballInResetState = false;
+            return;
+        }
         if (gameState.ballInResetState) {
             if (Date.now() - gameState.ballResetStartTime >= gameState.ballResetDuration) {
                 gameState.ballInResetState = false;
@@ -656,6 +681,15 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver, onBallExchange, isM
             return;
         }
 
+        if (gameState.gameOver) {
+            return;
+        }
+
+        // Ball nicht bewegen, wenn ein Gewinner feststeht
+        if (gameState.scores.left >= WINNING_SCORE || gameState.scores.right >= WINNING_SCORE) {
+            return;
+        }
+
         // Nicht bewegen, wenn im Reset-Zustand
         if (gameState.ballInResetState) {
             return;
@@ -741,27 +775,52 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver, onBallExchange, isM
             return;
         }
 
+        if (gameState.gameOver) {
+            return;
+        }
+
+        // Prüfe auf Gewinner, bevor der Ball zurückgesetzt wird
+        if (gameState.scores.left >= WINNING_SCORE || gameState.scores.right >= WINNING_SCORE) {
+            // Wenn bereits ein Gewinner feststeht, den Ball nicht neu starten
+            return;
+        }
+
         if (gameState.ballX < 0) {
             // Aktualisiere den Score im gameStateRef
             gameState.scores.right += 1;
             // Aktualisiere den React-State für die Anzeige
             setScores({...gameState.scores});
-            resetBall();
-            checkWinner(gameState.scores);
+
+            // Überprüfe, ob nun ein Gewinner feststeht
+            if (gameState.scores.right >= WINNING_SCORE) {
+                checkWinner(gameState.scores);
+            } else {
+                // Nur zurücksetzen, wenn noch kein Gewinner feststeht
+                resetBall();
+            }
         } else if (gameState.ballX > 800) {
             // Aktualisiere den Score im gameStateRef
             gameState.scores.left += 1;
             // Aktualisiere den React-State für die Anzeige
             setScores({...gameState.scores});
-            resetBall();
-            checkWinner(gameState.scores);
+
+            // Überprüfe, ob nun ein Gewinner feststeht
+            if (gameState.scores.left >= WINNING_SCORE) {
+                checkWinner(gameState.scores);
+            } else {
+                // Nur zurücksetzen, wenn noch kein Gewinner feststeht
+                resetBall();
+            }
         }
     };
 
     // Gewinner überprüfen
     const checkWinner = (currentScores) => {
         if (currentScores.left >= WINNING_SCORE || currentScores.right >= WINNING_SCORE) {
+            const gameState = gameStateRef.current;
+            gameState.gameOver = true; // Markiere das Spiel als beendet
             setGameRunning(false);
+
             const winner = currentScores.left > currentScores.right ? 'left' : 'right';
 
             // Im Online-Multiplayer: informiere den Gegner über das Spielende
@@ -792,11 +851,18 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver, onBallExchange, isM
                 audioRef.current.play().catch(err => console.error('Fehler beim Abspielen des Sounds:', err));
             }
 
+            // Stoppe den Ball in der Mitte
+            gameState.ballX = 400;
+            gameState.ballY = 250;
+            gameState.ballSpeedX = 0;
+            gameState.ballSpeedY = 0;
+            gameState.ballInResetState = false; // Wichtig: Ball nicht im Reset-Zustand halten
+
             // Starte Animation
-            gameStateRef.current.showWinAnimation = true;
-            gameStateRef.current.winAnimationStartTime = Date.now();
-            gameStateRef.current.winningPlayer = winner;
-            gameStateRef.current.isLocalPlayerWinner = isLocalPlayerWinner;
+            gameState.showWinAnimation = true;
+            gameState.winAnimationStartTime = Date.now();
+            gameState.winningPlayer = winner;
+            gameState.isLocalPlayerWinner = isLocalPlayerWinner;
 
             // Initialisiere Regentropfen für Verlierer-Animation
             if (!isLocalPlayerWinner) {
@@ -805,9 +871,11 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver, onBallExchange, isM
 
             // Nach der Animation zum Game-Over-Screen
             setTimeout(() => {
-                gameStateRef.current.showWinAnimation = false;
-                onGameOver(winner, isLocalPlayerWinner);
-            }, gameStateRef.current.winAnimationDuration);
+                if (gameState) { // Sicherstellen, dass der Zustand noch existiert (Komponente nicht unmounted)
+                    gameState.showWinAnimation = false;
+                    onGameOver(winner, isLocalPlayerWinner);
+                }
+            }, gameState.winAnimationDuration);
         }
     };
 
@@ -1068,6 +1136,15 @@ const PongGame = ({gameMode, difficulty, isHost, onGameOver, onBallExchange, isM
             // Nächsten Frame anfordern
             requestRef.current = requestAnimationFrame(gameLoop);
         }
+    };
+
+    const resetGameState = () => {
+        const gameState = gameStateRef.current;
+        gameState.gameOver = false;
+        gameState.showWinAnimation = false;
+        gameState.scores.left = 0;
+        gameState.scores.right = 0;
+        resetBall();
     };
 
     // Hilfsfunktion zum Senden von Daten über den Datenkanal

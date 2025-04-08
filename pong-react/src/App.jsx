@@ -26,6 +26,7 @@ const App = () => {
     const [isLandscape, setIsLandscape] = useState(false);
     const [gameStartTime, setGameStartTime] = useState(null);
     const [ballExchanges, setBallExchanges] = useState(0);
+    const [resetCounter, setResetCounter] = useState(0); // Counter für den Neustart des Spiels
 
     // Erkennen, ob es sich um ein mobiles Gerät handelt und Orientation prüfen
     useEffect(() => {
@@ -169,6 +170,10 @@ const App = () => {
             scores: {left: 0, right: 0}
         });
 
+        // Erhöhe den Reset-Counter, um PongGame zu signalisieren,
+        // dass es den Spielstatus zurücksetzen soll
+        setResetCounter(prev => prev + 1);
+
         // Starte ein neues Spiel für das Statistik-Tracking
         if (statsService) {
             statsService.startNewGame(
@@ -201,7 +206,7 @@ const App = () => {
 
     return (
         <div
-            className={`app-container ${isMobile ? 'mobile-view' : ''} ${isLandscape ? 'landscape-view' : 'portrait-view'}`}>
+            className={`app-container ${isMobile ? 'mobile-view' : ''} ${isLandscape ? 'landscape-view' : 'portrait-view'} ${gameState.screen === 'stats' ? 'stats-visible' : ''}`}>
             {gameState.screen === 'profile' && (
                 <PlayerProfile onProfileSubmit={handleProfileSubmit} />
             )}
@@ -227,6 +232,7 @@ const App = () => {
                     onBallExchange={handleBallExchange}
                     isMobile={isMobile}
                     isLandscape={isLandscape}
+                    resetCount={resetCounter} // Der Reset-Counter als Prop
                 />
             )}
 
