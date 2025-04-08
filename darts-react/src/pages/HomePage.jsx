@@ -23,7 +23,6 @@ const HomePage = () => {
                     <nav className="app-navigation">
                         <Link to="/" className="nav-item active">Home</Link>
                         <Link to="/statistics" className="nav-item">Statistiken</Link>
-                        <a href="#" className="nav-item">Einstellungen</a>
                     </nav>
                 </header>
 
