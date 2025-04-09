@@ -114,9 +114,19 @@ const PongGame = ({
         };
     }, []);
 
+    const songs = [
+        'relight.m4a',
+        'old-thing.wav',
+        'welcome-to-st-tropez.wav'
+    ];
+
+
     useEffect(() => {
         // Audio initialisieren
-        audioRef.current = new Audio('relight.m4a');
+        const randomIndex = Math.floor(Math.random() * songs.length);
+
+        // Neues Audio-Objekt mit zufälligem Lied erstellen
+        audioRef.current = new Audio(songs[randomIndex]);
 
         // Canvas Context holen
         const canvas = canvasRef.current;
