@@ -1,1735 +1,316 @@
-// components/PongGame.jsx
-import React, {useEffect, useRef, useState} from 'react';
-import io from 'socket.io-client';
+// components/PongDebug.jsx
+import React, { useState } from 'react';
 import './PongGame.css';
-import './TouchControls.css';
-import TouchControls from './TouchControls';
+import { socketManager } from '../socket-connection';
 
-const PADDLE_HEIGHT = 100;
-const PADDLE_WIDTH = 15;
-const BALL_RADIUS = 10;
-const WINNING_SCORE = 5;
+const PongDebug = ({ onBack }) => {
+    const [logMessages, setLogMessages] = useState([]);
+    const [serverStatus, setServerStatus] = useState('Nicht verbunden');
+    const [roomInfo, setRoomInfo] = useState('-');
 
-// Korrekte Socket.io-Konfiguration
-const SIGNALING_SERVER = 'https://mrx3k1.de';
-const SOCKET_OPTIONS = {
-    path: '/socket.io/',
-    transports: ['websocket', 'polling'],
-    reconnection: true,
-    reconnectionAttempts: 5,
-    reconnectionDelay: 1000,
-    timeout: 10000
-};
+    const testSocketConnection = () => {
+        try {
+            const socket = socketManager.getSocket();
+            addLog('🔄 Socket-Verbindung wird getestet...');
 
-const ICE_SERVERS = [
-    {urls: 'stun:stun.l.google.com:19302'},
-    {urls: 'stun:stun1.l.google.com:19302'},
-    {urls: 'stun:stun2.l.google.com:19302'}
-];
-
-const PongGame = ({
-                      gameMode,
-                      difficulty,
-                      isHost: initialIsHost, // Umbenennen, um Verwechslung zu vermeiden
-                      onGameOver,
-                      onBallExchange,
-                      isMobile,
-                      isLandscape,
-                      resetCount,
-                      playerName,
-                      onMainMenu
-                  }) => {
-    const canvasRef = useRef(null);
-    const requestRef = useRef(null);
-    const socketRef = useRef(null);
-    const peerConnectionRef = useRef(null);
-    const dataChannelRef = useRef(null);
-    const pendingCandidatesRef = useRef([]); // Speicher für ICE-Kandidaten
-    const lastSendTimeRef = useRef(0); // Für Ratenbegrenzung
-    const isHostRef = useRef(initialIsHost); // Ref für sofortigen Zugriff auf Host-Status
-    const remoteDescriptionSetRef = useRef(false); // Flag für Remote-Description-Status
-    const peerConnectionEstablishedRef = useRef(false); // Flag für erfolgreiche Verbindung
-
-    // isHost als State statt als props
-    const [isHostState, setIsHostState] = useState(initialIsHost);
-    const [scores, setScores] = useState({left: 0, right: 0});
-    const [connectionStatus, setConnectionStatus] = useState('-');
-    const [ping, setPing] = useState('-');
-    const [gameRunning, setGameRunning] = useState(true);
-    const [isMobileDevice, setIsMobileDevice] = useState(false);
-    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-    const [showDebugInfo, setShowDebugInfo] = useState(true); // Debug-Info standardmäßig anzeigen
-
-    // Spielstatus
-    const gameStateRef = useRef({
-        ballX: 400,
-        ballY: 250,
-        ballSpeedX: 5,
-        ballSpeedY: 2,
-        leftPaddleY: 200,
-        rightPaddleY: 200,
-        scores: {left: 0, right: 0},
-        keys: {
-            wPressed: false,
-            sPressed: false,
-            upPressed: false,
-            downPressed: false
-        },
-        touchControls: {
-            leftUp: false,
-            leftDown: false,
-            rightUp: false,
-            rightDown: false
-        },
-        ballInResetState: false,
-        ballResetStartTime: 0,
-        ballResetDuration: 2000,
-        showWinAnimation: false,
-        winAnimationStartTime: 0,
-        winAnimationDuration: 3000,
-        winningPlayer: '',
-        isLocalPlayerWinner: false,
-        gameOver: false,
-        raindrops: [],
-        lastBallX: 400, // Für Ballwechsel-Tracking
-        lastBallSpeedX: 5 // Für Ballwechsel-Tracking
-    });
-
-    // Audio Element
-    const audioRef = useRef(null);
-
-    useEffect(() => {
-        if (resetCount > 0) {
-            // Spiel zurücksetzen
-            resetGameState();
-            setGameRunning(true);
-        }
-    }, [resetCount]);
-
-    // Erkennen, ob es sich um ein mobiles Gerät handelt
-    useEffect(() => {
-        const checkMobile = () => {
-            setIsMobileDevice(window.innerWidth <= 768 ||
-                ('ontouchstart' in window) ||
-                (navigator.maxTouchPoints > 0));
-        };
-
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
-    }, []);
-
-    // Tastaturhandler für Debug-Modus
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            // Debug-Modus mit Strg+D umschalten
-            if ((e.key === 'd' || e.key === 'D') && e.ctrlKey) {
-                setShowDebugInfo(prev => !prev);
-                console.log("Debug-Modus umgeschaltet:", !showDebugInfo);
-            }
-        };
-
-        document.addEventListener('keydown', handleKeyDown);
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [showDebugInfo]);
-
-    // Touch-End-Event-Handler
-    useEffect(() => {
-        // Touch-End-Event-Handler
-        const handleTouchEnd = () => {
-            // Alle Touch-Controls zurücksetzen
-            const gameState = gameStateRef.current;
-            gameState.touchControls.leftUp = false;
-            gameState.touchControls.leftDown = false;
-            gameState.touchControls.rightUp = false;
-            gameState.touchControls.rightDown = false;
-        };
-
-        // Event-Listener für das Ende des Touchs hinzufügen
-        document.addEventListener('touchend', handleTouchEnd);
-
-        return () => {
-            document.removeEventListener('touchend', handleTouchEnd);
-        };
-    }, []);
-
-    const songs = [
-        'assets/relight.m4a',
-        'assets/old-thing.wav',
-        'assets/welcome-to-st-tropez.wav',
-        'assets/i-want-your-soul.wav'
-    ];
-
-    useEffect(() => {
-        // Audio initialisieren
-        const randomIndex = Math.floor(Math.random() * songs.length);
-
-        // Neues Audio-Objekt mit zufälligem Lied erstellen
-        audioRef.current = new Audio(songs[randomIndex]);
-
-        // Canvas Context holen
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-
-        // Canvas für Touch Events responsive machen
-        const resizeCanvas = () => {
-            if (canvas) {
-                const container = canvas.parentElement;
-                const containerWidth = container.clientWidth;
-                const containerHeight = container.clientHeight;
-                const originalRatio = 800 / 500; // Original canvas ratio
-
-                // Setze die Größe des Canvas für CSS-Darstellung
-                if (window.innerWidth <= 915 || window.innerHeight <= 450) {
-                    if (window.matchMedia("(orientation: landscape)").matches) {
-                        // Landscape-Modus: Anpassen an die Höhe mit Berücksichtigung der Seitenverhältnisse
-                        const maxHeight = Math.min(containerHeight, window.innerHeight * 0.85);
-                        canvas.style.height = `${maxHeight}px`;
-                        canvas.style.width = `${maxHeight * originalRatio}px`;
-
-                        // Sicherstellen, dass die Breite nicht größer als die verfügbare Breite ist
-                        if (parseFloat(canvas.style.width) > containerWidth) {
-                            canvas.style.width = `${containerWidth}px`;
-                            canvas.style.height = `${containerWidth / originalRatio}px`;
-                        }
-                    } else {
-                        // Portrait-Modus: Anpassen an die Breite
-                        canvas.style.width = `${containerWidth}px`;
-                        canvas.style.height = `${containerWidth / originalRatio}px`;
-                    }
-
-                    // Sicherstellen, dass das Canvas im sichtbaren Bereich bleibt
-                    canvas.style.maxHeight = `${window.innerHeight * 0.85}px`;
-                    canvas.style.maxWidth = `${window.innerWidth * 0.95}px`;
-                } else {
-                    canvas.style.width = '';
-                    canvas.style.height = '';
-                }
-            }
-        };
-
-        // Initialisiere Canvas-Größe
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-
-        // Orientierungsänderung überwachen
-        window.addEventListener('orientationchange', () => {
-            setTimeout(resizeCanvas, 100); // Verzögerung für verlässlicheres Neuskalieren
-        });
-
-        // Tastatur-Event-Listener
-        const handleKeyDown = (e) => {
-            const gameState = gameStateRef.current;
-            if (e.key === 'ArrowUp' || e.key === 'Up') {
-                gameState.keys.upPressed = true;
-            } else if (e.key === 'ArrowDown' || e.key === 'Down') {
-                gameState.keys.downPressed = true;
-            } else if (e.key === 'w' || e.key === 'W') {
-                gameState.keys.wPressed = true;
-            } else if (e.key === 's' || e.key === 'S') {
-                gameState.keys.sPressed = true;
-            }
-        };
-
-        const handleKeyUp = (e) => {
-            const gameState = gameStateRef.current;
-            if (e.key === 'ArrowUp' || e.key === 'Up') {
-                gameState.keys.upPressed = false;
-            } else if (e.key === 'ArrowDown' || e.key === 'Down') {
-                gameState.keys.downPressed = false;
-            } else if (e.key === 'w' || e.key === 'W') {
-                gameState.keys.wPressed = false;
-            } else if (e.key === 's' || e.key === 'S') {
-                gameState.keys.sPressed = false;
-            }
-        };
-
-        document.addEventListener('keydown', handleKeyDown);
-        document.addEventListener('keyup', handleKeyUp);
-
-        // WebRTC-Setup für Online-Modus
-        if (gameMode === 'online-multiplayer') {
-            console.log('🎮 Initialisiere Online-Multiplayer mit initialIsHost =', initialIsHost);
-            isHostRef.current = initialIsHost;
-            setIsHostState(initialIsHost);
-            setupWebRTC();
-        }
-
-        // Hilfsfunktionen für WebRTC-Verbindung
-        function setupWebRTC() {
-            console.log('🎮 Starte Online-Multiplayer Setup');
-
-            // Socket.io-Verbindung initialisieren
-            socketRef.current = io(SIGNALING_SERVER, SOCKET_OPTIONS);
-
-            // Socket.io Event-Handler
-            socketRef.current.on('connect', () => {
-                console.log('🔌 Mit dem Signaling-Server verbunden. Socket ID: ' + socketRef.current.id);
-            });
-
-            socketRef.current.on('roomCreated', ({roomId}) => {
-                console.log(`🏠 Raum erstellt: ${roomId}`);
-            });
-
-            socketRef.current.on('gameReady', (data) => {
-                console.log('⭐ Spiel ist bereit! ' + JSON.stringify(data));
-            });
-
-            socketRef.current.on('playerRole', ({isHost: role}) => {
-                console.log(`👑 Spielerrolle erhalten: ${role ? 'Host' : 'Gast'}`);
-
-                // WICHTIG: Beide aktualisieren für konsistente Zugriffe
-                isHostRef.current = role;
-                setIsHostState(role);
-
-                // Warten bis die State-Aktualisierung erfolgt ist
-                setTimeout(() => {
-                    console.log("Initialisiere PeerConnection mit Host =", isHostRef.current);
-                    initializePeerConnection(isHostRef.current);
-                }, 500);
-            });
-
-            // Weitere Socket.io Event-Handler für WebRTC-Signalisierung
-            setupWebRTCEventHandlers();
-        }
-
-        function setupWebRTCEventHandlers() {
-            socketRef.current.on('offer', async (data) => {
-                console.log('📩 SDP-Angebot empfangen:', data);
-
-                try {
-                    // Überprüfen, ob die PeerConnection bereits existiert
-                    if (!peerConnectionRef.current) {
-                        // Falls die Role noch nicht gesetzt wurde, nutze eine temporäre Rolle
-                        // Der Empfänger eines Angebots ist immer der Gast
-                        console.log('⚠️ PeerConnection noch nicht initialisiert, erstelle sie jetzt');
-                        isHostRef.current = false; // Wenn wir ein Angebot erhalten, sind wir der Gast
-                        setIsHostState(false);
-                        await initializePeerConnection(false);
-                    }
-
-                    // Jetzt können wir das Remote-Angebot setzen
-                    await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data));
-                    console.log('📩 Remote-Beschreibung gesetzt, erstelle Antwort');
-                    remoteDescriptionSetRef.current = true;
-
-                    // Gepufferte ICE-Kandidaten hinzufügen
-                    await addPendingIceCandidates();
-
-                    const answer = await peerConnectionRef.current.createAnswer();
-                    console.log('📩 SDP-Antwort erstellt');
-
-                    await peerConnectionRef.current.setLocalDescription(answer);
-                    console.log('📩 Lokale Beschreibung gesetzt, sende Antwort');
-
-                    // Kurze Verzögerung für stabileres Signaling
-                    setTimeout(() => {
-                        socketRef.current.emit('answer', peerConnectionRef.current.localDescription);
-                    }, 300);
-                } catch (error) {
-                    console.error('📩 Fehler beim Verarbeiten des Angebots:', error);
-                }
-            });
-
-            socketRef.current.on('answer', async (data) => {
-                console.log('📩 SDP-Antwort empfangen:', data);
-                try {
-                    // Überprüfen, ob die PeerConnection bereits existiert
-                    if (!peerConnectionRef.current) {
-                        console.error('⚠️ Keine PeerConnection für die Antwort vorhanden');
-                        return;
-                    }
-
-                    await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data));
-                    remoteDescriptionSetRef.current = true;
-                    console.log('📩 Remote-Beschreibung gesetzt');
-
-                    // Gepufferte ICE-Kandidaten hinzufügen
-                    await addPendingIceCandidates();
-                } catch (error) {
-                    console.error('📩 Fehler beim Verarbeiten der Antwort:', error);
-                }
-            });
-
-            socketRef.current.on('iceCandidate', async (data) => {
-                console.log('🧊 ICE-Kandidat empfangen:', data);
-
-                // Kandidat zur Liste hinzufügen
-                pendingCandidatesRef.current.push(data);
-
-                // Nur hinzufügen, wenn RemoteDescription gesetzt ist
-                if (peerConnectionRef.current && remoteDescriptionSetRef.current) {
-                    await addPendingIceCandidates();
-                } else {
-                    console.log('⚠️ ICE-Kandidat für später gespeichert, warte auf Remote Description');
-                }
-            });
-
-            socketRef.current.on('error', ({message}) => {
-                console.error('❌ Server-Fehler:', message);
-            });
-
-            socketRef.current.on('peerDisconnected', () => {
-                console.log('👋 Gegner hat Verbindung getrennt');
-            });
-        }
-
-        // Gepufferte ICE-Kandidaten hinzufügen
-        async function addPendingIceCandidates() {
-            if (!peerConnectionRef.current) return;
-
-            const candidates = pendingCandidatesRef.current;
-            if (candidates.length > 0) {
-                console.log(`🧊 Füge ${candidates.length} gepufferte ICE-Kandidaten hinzu`);
-
-                for (const candidate of candidates) {
-                    try {
-                        await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
-                        console.log('🧊 ICE-Kandidat erfolgreich hinzugefügt');
-                    } catch (error) {
-                        console.error('🧊 Fehler beim Hinzufügen des ICE-Kandidaten:', error);
-                    }
-                }
-                // Liste leeren
-                pendingCandidatesRef.current = [];
-            }
-        }
-
-        function initializePeerConnection(isHost) {
-            console.log(`🔄 Initialisiere Peer Connection als ${isHost ? 'Host' : 'Gast'}`);
-
-            // Remote Description Status zurücksetzen
-            remoteDescriptionSetRef.current = false;
-
-            // Bestehende Verbindung aufräumen, falls vorhanden
-            if (peerConnectionRef.current) {
-                console.log('🧹 Bestehende Peer-Verbindung wird geschlossen');
-                try {
-                    peerConnectionRef.current.close();
-                } catch (e) {
-                    console.error('Fehler beim Schließen der bestehenden Verbindung', e);
-                }
-                peerConnectionRef.current = null;
-            }
-
-            try {
-                peerConnectionRef.current = new RTCPeerConnection({ iceServers: ICE_SERVERS });
-                console.log('✅ PeerConnection erfolgreich erstellt');
-            } catch (e) {
-                console.error('Fehler beim Erstellen der RTCPeerConnection:', e);
+            if (!socket) {
+                addLog('❌ Fehler: Keine Socket-Instanz verfügbar.');
+                setServerStatus('Fehler: Keine Socket-Instanz');
                 return;
             }
 
-            // Event Handler mit robusterer Fehlerbehandlung
-            peerConnectionRef.current.onicecandidate = (event) => {
-                if (event.candidate) {
-                    console.log('🧊 Neuer ICE-Kandidat gefunden:', event.candidate);
-                    // Überprüfe, ob socketRef.current existiert und verbunden ist
-                    if (socketRef.current && socketRef.current.connected) {
-                        socketRef.current.emit('iceCandidate', event.candidate);
-                    } else {
-                        console.warn('⚠️ Socket nicht verfügbar - ICE-Kandidat kann nicht gesendet werden');
-                    }
-                } else {
-                    console.log('🧊 ICE-Kandidatensammlung abgeschlossen');
-                }
-            };
+            addLog(`🔌 Socket-ID: ${socket.id || 'keine'}`);
+            addLog(`🔌 Verbunden: ${socket.connected ? 'Ja' : 'Nein'}`);
+            setServerStatus(socket.connected ? 'Verbunden' : 'Nicht verbunden');
 
-            peerConnectionRef.current.oniceconnectionstatechange = () => {
-                if (!peerConnectionRef.current) return;
+            if (socket.connected) {
+                socket.emit('ping');
+                addLog('📤 Ping-Anfrage gesendet');
 
-                const state = peerConnectionRef.current.iceConnectionState;
-                console.log('🧊 ICE-Status geändert:', state);
-                setConnectionStatus(state);
-
-                // Bei erfolgreicher Verbindung den Status setzen
-                if (state === 'connected' || state === 'completed') {
-                    peerConnectionEstablishedRef.current = true;
-                }
-
-                // Zusätzliche Informationen für Fehlersuche
-                if (state === 'failed' || state === 'disconnected' || state === 'closed') {
-                    peerConnectionEstablishedRef.current = false;
-                    console.warn('⚠️ ICE-Verbindung problematisch:', state);
-                }
-            };
-
-            peerConnectionRef.current.onconnectionstatechange = () => {
-                if (!peerConnectionRef.current) return;
-
-                const state = peerConnectionRef.current.connectionState;
-                console.log('🔄 Verbindungsstatus geändert:', state);
-
-                if (state === 'connected') {
-                    console.log('✅ WebRTC-Verbindung erfolgreich hergestellt!');
-                    peerConnectionEstablishedRef.current = true;
-                } else if (state === 'failed') {
-                    console.error('❌ WebRTC-Verbindung fehlgeschlagen!');
-                    peerConnectionEstablishedRef.current = false;
-                }
-            };
-
-            // Zusätzliches Ereignis für Fehlersuche
-            peerConnectionRef.current.onicecandidateerror = (event) => {
-                console.error('🧊 ICE-Kandidat Fehler:', event);
-            };
-
-            // Datenkanal einrichten mit verbesserter Fehlerbehandlung
-            try {
-                // KRITISCH: Beide Seiten erstellen einen eigenen Datenkanal mit gleicher ID
-                console.log(`📢 Erstelle Datenkanal mit negotiated: true und ID: 0`);
-                dataChannelRef.current = peerConnectionRef.current.createDataChannel('gameData', {
-                    ordered: true,
-                    negotiated: true, // WICHTIG: Direkt ausgehandelter Kanal
-                    id: 0 // Feste ID für beide Seiten
+                socket.once('pong', () => {
+                    addLog('📥 Pong-Antwort erhalten');
+                    setServerStatus('Verbunden (verifiziert)');
                 });
-                setupDataChannel();
 
-                // Nur der Host erstellt das Angebot
-                if (isHost) {
-                    // WICHTIG: Zeitverzögerung für das Angebot
-                    setTimeout(() => {
-                        createOffer();
-                    }, 1000);
-                }
-            } catch (error) {
-                console.error('📢 Fehler beim Einrichten des Datenkanals:', error);
+                // Nach 2 Sekunden überprüfen, ob wir eine Antwort erhalten haben
+                setTimeout(() => {
+                    if (socket.hasListeners('pong')) {
+                        addLog('⚠️ Timeout: Keine Pong-Antwort erhalten.');
+                    }
+                }, 2000);
             }
+        } catch (err) {
+            addLog(`❌ Fehler beim Testen der Socket-Verbindung: ${err.message}`);
+            setServerStatus(`Fehler: ${err.message}`);
         }
+    };
 
-        function setupDataChannel() {
-            if (!dataChannelRef.current) {
-                console.error('❌ Kein Datenkanal zum Einrichten vorhanden');
+    const testRoomCreation = () => {
+        try {
+            const socket = socketManager.getSocket();
+            addLog('🏠 Versuche, einen Testraum zu erstellen...');
+
+            if (!socket || !socket.connected) {
+                addLog('❌ Fehler: Socket nicht verbunden.');
                 return;
             }
 
-            console.log('📢 Richte Datenkanal ein. Aktueller Status:', dataChannelRef.current.readyState, 'Label:', dataChannelRef.current.label);
-
-            // Event-Listener registrieren
-            dataChannelRef.current.onopen = () => {
-                console.log('🎉 Datenkanal geöffnet!');
-                setConnectionStatus('connected');
-
-                // Ping-Messung starten
-                startPingMeasurement();
-
-                // Test-Nachricht senden
-                try {
-                    const testMsg = {
-                        type: 'hello',
-                        message: 'Verbindung hergestellt!',
-                        timestamp: Date.now()
-                    };
-                    console.log('Sende Test-Nachricht:', testMsg);
-                    dataChannelRef.current.send(JSON.stringify(testMsg));
-                } catch (e) {
-                    console.error('❌ Fehler beim Senden der Test-Nachricht:', e);
-                }
-            };
-
-            dataChannelRef.current.onclose = () => {
-                console.log('📢 Datenkanal geschlossen');
-                setConnectionStatus('disconnected');
-                setPing('-');
-            };
-
-            dataChannelRef.current.onerror = (error) => {
-                console.error('📢 Datenkanal-Fehler:', error);
-            };
-
-            dataChannelRef.current.onmessage = (event) => {
-                try {
-                    const data = JSON.parse(event.data);
-
-                    // Nicht alle Nachrichtentypen loggen (reduziert Spam)
-                    if (data.type !== 'gameState' && data.type !== 'ping' && data.type !== 'pong') {
-                        console.log('📩 Nachricht empfangen:', data);
-                    }
-
-                    switch (data.type) {
-                        case 'gameState':
-                            // Wenn Debug-Modus an, sporadisch loggen
-                            if (showDebugInfo && Math.random() < 0.05) {
-                                console.log('🎮 GameState-Update empfangen:',
-                                    isHostRef.current ? `Right Paddle: ${data.rightPaddleY}` :
-                                        `Left Paddle: ${data.leftPaddleY}, Ball: ${data.ballX},${data.ballY}`);
-                            }
-                            processGameStateUpdate(data);
-                            break;
-                        case 'ping':
-                            // Ping-Anfrage - sende sofort Antwort zurück
-                            sendData({type: 'pong', id: data.id});
-                            break;
-                        case 'pong':
-                            // Ping-Antwort - berechne Latenz
-                            const latency = Date.now() - data.id;
-                            setPing(latency.toString());
-                            break;
-                        case 'hello':
-                            console.log('👋 Begrüßungsnachricht vom Peer:', data.message);
-                            break;
-                        case 'syncCheck':
-                            console.log('🔄 Synchronisierungscheck vom Peer:', data);
-                            // Antworte mit deinem aktuellen Spielstatus
-                            sendData({
-                                type: 'syncResponse',
-                                ballX: gameStateRef.current.ballX,
-                                ballY: gameStateRef.current.ballY,
-                                leftPaddleY: gameStateRef.current.leftPaddleY,
-                                rightPaddleY: gameStateRef.current.rightPaddleY,
-                                scores: gameStateRef.current.scores,
-                                timestamp: Date.now()
-                            });
-                            break;
-                        case 'syncResponse':
-                            console.log('🔄 Synchronisierungsantwort vom Peer:', data);
-                            // Zeige die Differenz zwischen lokalem und Remote-Status
-                            const localBall = { x: gameStateRef.current.ballX, y: gameStateRef.current.ballY };
-                            console.log('Differenz: Ball lokal:', localBall, 'Ball remote:', { x: data.ballX, y: data.ballY });
-                            break;
-                        case 'gameOver':
-                            processGameOverMessage(data);
-                            break;
-                        default:
-                            console.log('❓ Unbekannter Nachrichtentyp:', data.type);
-                    }
-                } catch (error) {
-                    console.error('❌ Fehler beim Verarbeiten der Nachricht:', error, 'Raw data:', event.data);
-                }
-            };
-        }
-
-        function startPingMeasurement() {
-            console.log('📊 Starte Ping-Messung');
-
-            // Ping alle 2 Sekunden senden
-            const pingIntervalId = setInterval(() => {
-                if (dataChannelRef.current && dataChannelRef.current.readyState === 'open') {
-                    try {
-                        const pingId = Date.now();
-                        sendData({type: 'ping', id: pingId});
-                    } catch (e) {
-                        console.error('Fehler beim Senden des Pings:', e);
-                    }
-                } else {
-                    // Wenn der Datenkanal geschlossen wurde, Interval beenden
-                    clearInterval(pingIntervalId);
-                }
-            }, 2000);
-
-            // Beim Aufräumen den Interval löschen
-            return () => clearInterval(pingIntervalId);
-        }
-
-        async function createOffer() {
-            try {
-                console.log('📤 Erstelle SDP-Angebot');
-                if (!peerConnectionRef.current) {
-                    console.error('Keine PeerConnection vorhanden für createOffer');
-                    return;
-                }
-
-                const offer = await peerConnectionRef.current.createOffer();
-                console.log('📤 SDP-Angebot erstellt');
-
-                await peerConnectionRef.current.setLocalDescription(offer);
-                console.log('📤 Lokale Beschreibung gesetzt, sende an Signaling-Server');
-
-                // Kurze Verzögerung, um sicherzustellen, dass alles gesetzt ist
-                setTimeout(() => {
-                    if (socketRef.current && socketRef.current.connected) {
-                        socketRef.current.emit('offer', peerConnectionRef.current.localDescription);
-                    } else {
-                        console.error('Socket nicht verbunden - Angebot konnte nicht gesendet werden');
-                    }
-                }, 500);
-            } catch (error) {
-                console.error('📤 Fehler beim Erstellen des Angebots:', error);
-            }
-        }
-
-        function cleanupWebRTC() {
-            console.log('🧹 Räume WebRTC-Ressourcen auf');
-
-            // Datenkanal schließen
-            if (dataChannelRef.current) {
-                console.log('🧹 Schließe Datenkanal');
-                try {
-                    dataChannelRef.current.close();
-                } catch (e) {
-                    console.error('Fehler beim Schließen des Datenkanals:', e);
-                }
-                dataChannelRef.current = null;
-            }
-
-            // Peer Connection schließen
-            if (peerConnectionRef.current) {
-                console.log('🧹 Schließe Peer-Verbindung');
-                try {
-                    peerConnectionRef.current.close();
-                } catch (e) {
-                    console.error('Fehler beim Schließen der Peer-Verbindung:', e);
-                }
-                peerConnectionRef.current = null;
-            }
-
-            // Socket.io-Verbindung trennen
-            if (socketRef.current) {
-                console.log('🧹 Trenne Socket.io-Verbindung');
-                try {
-                    socketRef.current.disconnect();
-                } catch (e) {
-                    console.error('Fehler beim Trennen der Socket.io-Verbindung:', e);
-                }
-                socketRef.current = null;
-            }
-        }
-
-        // Spielschleife starten
-        resetBall();
-        gameLoop();
-
-        // Aufräumen beim Unmount
-        return () => {
-            document.removeEventListener('keydown', handleKeyDown);
-            document.removeEventListener('keyup', handleKeyUp);
-            window.removeEventListener('resize', resizeCanvas);
-
-            // Animation-Frame abbrechen
-            if (requestRef.current) {
-                cancelAnimationFrame(requestRef.current);
-                requestRef.current = null;
-            }
-
-            // WebRTC aufräumen
-            if (gameMode === 'online-multiplayer') {
-                cleanupWebRTC();
-            }
-        };
-    }, []);
-
-    // Hilfsfunktion zum Senden von Daten über den Datenkanal
-    const sendData = (data) => {
-        if (!dataChannelRef.current || dataChannelRef.current.readyState !== 'open') {
-            // Nicht einmal versuchen zu senden, wenn der Kanal nicht offen ist
-            return false;
-        }
-
-        try {
-            // Nur bestimmte Nachrichtentypen loggen, um die Konsole nicht zu überfluten
-            if (data.type !== 'gameState' && data.type !== 'ping' && data.type !== 'pong') {
-                console.log(`📤 Sende ${data.type}-Nachricht:`, data);
-            }
-
-            const jsonData = JSON.stringify(data);
-            dataChannelRef.current.send(jsonData);
-            return true;
-        } catch (error) {
-            console.error('❌ Fehler beim Senden von Daten:', error);
-            return false;
-        }
-    };
-
-    // Debug-Hilfsfunktion zur Prüfung der Datenkanal-Verbindung
-    const checkDataChannelState = () => {
-        if (!dataChannelRef.current) {
-            console.log('❌ Datenkanal existiert nicht');
-            return;
-        }
-
-        console.log(`Datenkanal-Status: ${dataChannelRef.current.readyState}`);
-        console.log(`Datenkanal-Label: ${dataChannelRef.current.label}`);
-        console.log(`Datenkanal-ID: ${dataChannelRef.current.id}`);
-        console.log(`Buffered Amount: ${dataChannelRef.current.bufferedAmount}`);
-
-        // Test-Nachricht senden
-        if (dataChannelRef.current.readyState === 'open') {
-            sendData({
-                type: 'test',
-                message: 'Test-Nachricht',
-                timestamp: Date.now()
+            // roomCreated-Event einmal hören
+            socket.once('roomCreated', ({ roomId }) => {
+                addLog(`🏠 Raum erstellt: ${roomId}`);
+                setRoomInfo(`Raum-ID: ${roomId}`);
+                socketManager.setRoomId(roomId);
             });
-        }
-    };
 
-    // Funktion zum Zurücksetzen des Balls
-    const resetBall = () => {
-        const gameState = gameStateRef.current;
-        if (gameState.gameOver) {
-            return;
-        }
-        gameState.ballX = 400;
-        gameState.ballY = 250;
-        gameState.ballInResetState = true;
-        gameState.ballResetStartTime = Date.now();
-        gameState.ballSpeedX = 0;
-        gameState.ballSpeedY = 0;
-    };
+            // Fehler-Event einmal hören
+            socket.once('error', ({ message }) => {
+                addLog(`❌ Server-Fehler: ${message}`);
+                setRoomInfo(`Fehler: ${message}`);
+            });
 
-    // Ball-Reset-Zustand aktualisieren
-    const updateBallResetState = () => {
-        const gameState = gameStateRef.current;
-        if (gameState.gameOver) {
-            gameState.ballInResetState = false;
-            return;
-        }
-        if (gameState.ballInResetState) {
-            if (Date.now() - gameState.ballResetStartTime >= gameState.ballResetDuration) {
-                gameState.ballInResetState = false;
-                gameState.ballSpeedX = Math.random() > 0.5 ? 5 : -5;
-                gameState.ballSpeedY = Math.random() * 4 - 2;
+            // Testraum erstellen
+            socket.emit('createRoom');
+            addLog('📤 createRoom-Anfrage gesendet');
 
-                // Speichere aktuelle Richtung für Ballwechsel-Tracking
-                gameState.lastBallSpeedX = gameState.ballSpeedX;
-
-                console.log('🚀 Ball-Reset beendet, neue Geschwindigkeit:', gameState.ballSpeedX, gameState.ballSpeedY);
-            }
-        }
-    };
-
-    // Schläger aktualisieren
-    const updatePaddles = () => {
-        const gameState = gameStateRef.current;
-        const {keys, touchControls} = gameState;
-        let newLeftPaddleY = gameState.leftPaddleY;
-        let newRightPaddleY = gameState.rightPaddleY;
-
-        // Touch-Steuerung wird jetzt gleichwertig zur Tastatur behandelt
-        if (gameMode === 'singleplayer') {
-            // Spieler: Linker Schläger (Tasten oder Touch)
-            if ((keys.upPressed || keys.wPressed || touchControls.leftUp) && newLeftPaddleY > 0) {
-                newLeftPaddleY -= 8;
-            } else if ((keys.downPressed || keys.sPressed || touchControls.leftDown) && newLeftPaddleY < 500 - PADDLE_HEIGHT) {
-                newLeftPaddleY += 8;
-            }
-
-            // Computer: Rechter Schläger KI
-            const computerPaddleCenter = newRightPaddleY + PADDLE_HEIGHT / 2;
-            const distanceToMove = gameState.ballY - computerPaddleCenter;
-
-            if (Math.abs(distanceToMove) > PADDLE_HEIGHT / 4) {
-                if (distanceToMove > 0) {
-                    newRightPaddleY += difficulty;
-                } else {
-                    newRightPaddleY -= difficulty;
-                }
-            }
-        } else if (gameMode === 'local-multiplayer') {
-            // Spieler 1: Linker Schläger mit W/S oder Touch
-            if ((keys.wPressed || touchControls.leftUp) && newLeftPaddleY > 0) {
-                newLeftPaddleY -= 8;
-            } else if ((keys.sPressed || touchControls.leftDown) && newLeftPaddleY < 500 - PADDLE_HEIGHT) {
-                newLeftPaddleY += 8;
-            }
-
-            // Spieler 2: Rechter Schläger mit Pfeiltasten oder Touch
-            if ((keys.upPressed || touchControls.rightUp) && newRightPaddleY > 0) {
-                newRightPaddleY -= 8;
-            } else if ((keys.downPressed || touchControls.rightDown) && newRightPaddleY < 500 - PADDLE_HEIGHT) {
-                newRightPaddleY += 8;
-            }
-        } else if (gameMode === 'online-multiplayer') {
-            // Verwende isHostRef für sofortigen Zugriff
-            if (isHostRef.current) {
-                // Host steuert den linken Schläger mit beliebigen Tasten oder Touch
-                if ((keys.wPressed || keys.upPressed || touchControls.leftUp) && newLeftPaddleY > 0) {
-                    newLeftPaddleY -= 8;
-                } else if ((keys.sPressed || keys.downPressed || touchControls.leftDown) && newLeftPaddleY < 500 - PADDLE_HEIGHT) {
-                    newLeftPaddleY += 8;
-                }
-            } else {
-                // Gast steuert den rechten Schläger mit beliebigen Tasten oder Touch
-                if ((keys.wPressed || keys.upPressed || touchControls.rightUp) && newRightPaddleY > 0) {
-                    newRightPaddleY -= 8;
-                } else if ((keys.sPressed || keys.downPressed || touchControls.rightDown) && newRightPaddleY < 500 - PADDLE_HEIGHT) {
-                    newRightPaddleY += 8;
-                }
-            }
-        }
-
-        // Begrenzung der Schläger
-        gameState.leftPaddleY = Math.max(0, Math.min(newLeftPaddleY, 500 - PADDLE_HEIGHT));
-        gameState.rightPaddleY = Math.max(0, Math.min(newRightPaddleY, 500 - PADDLE_HEIGHT));
-    };
-
-    // Ball aktualisieren
-    const updateBall = () => {
-        const gameState = gameStateRef.current;
-
-        // Speichern der vorherigen Position für Ballwechsel-Tracking
-        gameState.lastBallX = gameState.ballX;
-
-        // Im Online-Modus aktualisiert nur der Host den Ball
-        if (gameMode === 'online-multiplayer' && !isHostRef.current) {
-            return;
-        }
-
-        if (gameState.gameOver) {
-            return;
-        }
-
-        // Ball nicht bewegen, wenn ein Gewinner feststeht
-        if (gameState.scores.left >= WINNING_SCORE || gameState.scores.right >= WINNING_SCORE) {
-            return;
-        }
-
-        // Nicht bewegen, wenn im Reset-Zustand
-        if (gameState.ballInResetState) {
-            return;
-        }
-
-        gameState.ballX += gameState.ballSpeedX;
-        gameState.ballY += gameState.ballSpeedY;
-
-        // Kollision mit oberer/unterer Wand
-        if (gameState.ballY < BALL_RADIUS || gameState.ballY > 500 - BALL_RADIUS) {
-            gameState.ballSpeedY = -gameState.ballSpeedY;
-        }
-    };
-
-    // Kollisionsprüfung
-    const checkCollisions = () => {
-        const gameState = gameStateRef.current;
-
-        // Im Online-Modus prüft nur der Host auf Kollisionen
-        if (gameMode === 'online-multiplayer' && !isHostRef.current) {
-            return;
-        }
-
-        // Kollision mit linkem Schläger
-        if (gameState.ballX < PADDLE_WIDTH + BALL_RADIUS) {
-            if (gameState.ballY > gameState.leftPaddleY &&
-                gameState.ballY < gameState.leftPaddleY + PADDLE_HEIGHT) {
-                // Prüfe, ob sich die Richtung des Balls ändert (für Ballwechsel-Zählung)
-                const directionChanged = gameState.ballSpeedX < 0;
-
-                gameState.ballSpeedX = -gameState.ballSpeedX;
-
-                // Abprallwinkel basierend auf Trefferpunkt
-                const deltaY = gameState.ballY - (gameState.leftPaddleY + PADDLE_HEIGHT / 2);
-                gameState.ballSpeedY = deltaY * 0.2;
-
-                // Erhöhung der Geschwindigkeit
-                gameState.ballSpeedX *= 1.05;
-                if (Math.abs(gameState.ballSpeedX) > 12) {
-                    gameState.ballSpeedX = gameState.ballSpeedX > 0 ? 12 : -12;
-                }
-
-                // Wenn die Richtung geändert wurde, zähle einen Ballwechsel
-                if (directionChanged && onBallExchange) {
-                    onBallExchange();
-                }
-            }
-        }
-
-        // Kollision mit rechtem Schläger
-        if (gameState.ballX > 800 - PADDLE_WIDTH - BALL_RADIUS) {
-            if (gameState.ballY > gameState.rightPaddleY &&
-                gameState.ballY < gameState.rightPaddleY + PADDLE_HEIGHT) {
-                // Prüfe, ob sich die Richtung des Balls ändert (für Ballwechsel-Zählung)
-                const directionChanged = gameState.ballSpeedX > 0;
-
-                gameState.ballSpeedX = -gameState.ballSpeedX;
-
-                // Abprallwinkel basierend auf Trefferpunkt
-                const deltaY = gameState.ballY - (gameState.rightPaddleY + PADDLE_HEIGHT / 2);
-                gameState.ballSpeedY = deltaY * 0.2;
-
-                // Erhöhung der Geschwindigkeit
-                gameState.ballSpeedX *= 1.05;
-                if (Math.abs(gameState.ballSpeedX) > 12) {
-                    gameState.ballSpeedX = gameState.ballSpeedX > 0 ? 12 : -12;
-                }
-
-                // Wenn die Richtung geändert wurde, zähle einen Ballwechsel
-                if (directionChanged && onBallExchange) {
-                    onBallExchange();
-                }
-            }
-        }
-    };
-
-    // Punktestand überprüfen
-    const checkScore = () => {
-        const gameState = gameStateRef.current;
-
-        // Im Online-Modus aktualisiert nur der Host den Punktestand
-        if (gameMode === 'online-multiplayer' && !isHostRef.current) {
-            return;
-        }
-
-        if (gameState.gameOver) {
-            return;
-        }
-
-        // Prüfe auf Gewinner, bevor der Ball zurückgesetzt wird
-        if (gameState.scores.left >= WINNING_SCORE || gameState.scores.right >= WINNING_SCORE) {
-            // Wenn bereits ein Gewinner feststeht, den Ball nicht neu starten
-            return;
-        }
-
-        if (gameState.ballX < 0) {
-            // Aktualisiere den Score im gameStateRef
-            gameState.scores.right += 1;
-            // Aktualisiere den React-State für die Anzeige
-            setScores({...gameState.scores});
-            console.log('🏆 Punkt für rechts! Neuer Punktestand:', gameState.scores.left, ':', gameState.scores.right);
-
-            // Überprüfe, ob nun ein Gewinner feststeht
-            if (gameState.scores.right >= WINNING_SCORE) {
-                checkWinner(gameState.scores);
-            } else {
-                // Nur zurücksetzen, wenn noch kein Gewinner feststeht
-                resetBall();
-            }
-        } else if (gameState.ballX > 800) {
-            // Aktualisiere den Score im gameStateRef
-            gameState.scores.left += 1;
-            // Aktualisiere den React-State für die Anzeige
-            setScores({...gameState.scores});
-            console.log('🏆 Punkt für links! Neuer Punktestand:', gameState.scores.left, ':', gameState.scores.right);
-
-            // Überprüfe, ob nun ein Gewinner feststeht
-            if (gameState.scores.left >= WINNING_SCORE) {
-                checkWinner(gameState.scores);
-            } else {
-                // Nur zurücksetzen, wenn noch kein Gewinner feststeht
-                resetBall();
-            }
-        }
-    };
-
-    // Spieldaten synchronisieren - Korrigierte Version
-    function sendGameState() {
-        const gameState = gameStateRef.current;
-
-        // Vorzeitig beenden, wenn der Datenkanal nicht bereit ist
-        if (!dataChannelRef.current || dataChannelRef.current.readyState !== 'open') {
-            return;
-        }
-
-        // Basisinformationen für alle Spieler - Explizite Benennung!
-        const state = {
-            type: 'gameState',
-            leftPaddleY: isHostRef.current ? gameState.leftPaddleY : null,
-            rightPaddleY: !isHostRef.current ? gameState.rightPaddleY : null,
-            timestamp: Date.now()
-        };
-
-        // Host sendet zusätzliche Informationen
-        if (isHostRef.current) {
-            state.ballX = gameState.ballX;
-            state.ballY = gameState.ballY;
-            state.ballSpeedX = gameState.ballSpeedX;
-            state.ballSpeedY = gameState.ballSpeedY;
-            state.leftScore = gameState.scores.left;
-            state.rightScore = gameState.scores.right;
-            state.ballInResetState = gameState.ballInResetState;
-            state.ballResetStartTime = gameState.ballResetStartTime;
-        }
-
-        // Senden mit Fehlerbehandlung
-        try {
-            dataChannelRef.current.send(JSON.stringify(state));
-        } catch (error) {
-            console.error('Fehler beim Senden des Spielstatus:', error);
-        }
-    }
-
-    // Verarbeite Spielstatus-Updates - Korrigierte Version
-    function processGameStateUpdate(data) {
-        // Beide Paddle-Positionen aktualisieren, wenn sie empfangen wurden
-        if (data.leftPaddleY !== null) {
-            gameStateRef.current.leftPaddleY = data.leftPaddleY;
-        }
-
-        if (data.rightPaddleY !== null) {
-            gameStateRef.current.rightPaddleY = data.rightPaddleY;
-        }
-
-        // Als Gast die Ballposition und Spielstand-Updates vom Host übernehmen
-        if (!isHostRef.current && data.ballX !== undefined) {
-            // Explizite Log-Ausgabe bei Ballpositionsänderungen (nur sporadisch)
-            const now = Date.now();
-            if ((now % 60) === 0) { // Nur etwa jede Sekunde loggen
-                console.log('Ball-Update:', data.ballX, data.ballY, 'Reset:', data.ballInResetState);
-            }
-
-            // Ball-Position und -Geschwindigkeit übernehmen
-            gameStateRef.current.ballX = data.ballX;
-            gameStateRef.current.ballY = data.ballY;
-            gameStateRef.current.ballSpeedX = data.ballSpeedX;
-            gameStateRef.current.ballSpeedY = data.ballSpeedY;
-
-            // Spielstand aktualisieren
-            if (data.leftScore !== undefined && data.rightScore !== undefined &&
-                (gameStateRef.current.scores.left !== data.leftScore ||
-                    gameStateRef.current.scores.right !== data.rightScore)) {
-
-                console.log('Punktestand aktualisiert:', data.leftScore, ':', data.rightScore);
-                gameStateRef.current.scores.left = data.leftScore;
-                gameStateRef.current.scores.right = data.rightScore;
-
-                // React-State für die UI aktualisieren
-                setScores({
-                    left: data.leftScore,
-                    right: data.rightScore
-                });
-            }
-
-            // Ball-Reset-Status synchronisieren
-            gameStateRef.current.ballInResetState = data.ballInResetState;
-            gameStateRef.current.ballResetStartTime = data.ballResetStartTime;
-        }
-    }
-
-    // Verarbeite Spielende-Nachricht - Korrigierte Version
-    function processGameOverMessage(data) {
-        console.log('🏁 Spielende-Nachricht empfangen:', data);
-
-        const gameState = gameStateRef.current;
-        gameState.gameOver = true; // Markiere das Spiel als beendet
-        setGameRunning(false);
-
-        // Korrigierte Sieger-Ermittlung
-        gameState.isLocalPlayerWinner = (isHostRef.current && data.winner === 'left') ||
-            (!isHostRef.current && data.winner === 'right');
-
-        // Sieger-Animation starten
-        gameState.showWinAnimation = true;
-        gameState.winAnimationStartTime = Date.now();
-        gameState.winningPlayer = data.winner;
-
-        // Initialisiere Regentropfen für Verlierer-Animation
-        if (!gameState.isLocalPlayerWinner) {
-            initializeRaindrops();
-        }
-
-        // Nach der Animation zum Game-Over-Screen
-        setTimeout(() => {
-            if (gameState) { // Sicherstellen, dass der Zustand noch existiert
-                gameState.showWinAnimation = false;
-                onGameOver(data.winner, gameState.isLocalPlayerWinner);
-            }
-        }, gameState.winAnimationDuration);
-    }
-
-    // Gewinner überprüfen
-    const checkWinner = (currentScores) => {
-        if (currentScores.left >= WINNING_SCORE || currentScores.right >= WINNING_SCORE) {
-            const gameState = gameStateRef.current;
-            gameState.gameOver = true; // Markiere das Spiel als beendet
-            setGameRunning(false);
-
-            const winner = currentScores.left > currentScores.right ? 'left' : 'right';
-            console.log('🏁 Spiel beendet! Gewinner:', winner);
-
-            // Im Online-Multiplayer: informiere den Gegner über das Spielende
-            if (gameMode === 'online-multiplayer' && isHostRef.current && dataChannelRef.current?.readyState === 'open') {
-                sendData({
-                    type: 'gameOver',
-                    winner: winner
-                });
-            }
-
-            // Bestimme, ob der lokale Spieler gewonnen hat
-            let isLocalPlayerWinner = false;
-            if (gameMode === 'singleplayer') {
-                isLocalPlayerWinner = (currentScores.left > currentScores.right);
-            } else if (gameMode === 'local-multiplayer') {
-                isLocalPlayerWinner = true;
-            } else if (gameMode === 'online-multiplayer') {
-                if (isHostRef.current) {
-                    isLocalPlayerWinner = (currentScores.left > currentScores.right);
-                } else {
-                    isLocalPlayerWinner = (currentScores.right > currentScores.left);
-                }
-            }
-
-            // Spiele den Gewinner-Sound ab
-            if (isLocalPlayerWinner && audioRef.current) {
-                audioRef.current.currentTime = 0;
-                audioRef.current.play().catch(err => console.error('Fehler beim Abspielen des Sounds:', err));
-            }
-
-            // Stoppe den Ball in der Mitte
-            gameState.ballX = 400;
-            gameState.ballY = 250;
-            gameState.ballSpeedX = 0;
-            gameState.ballSpeedY = 0;
-            gameState.ballInResetState = false; // Wichtig: Ball nicht im Reset-Zustand halten
-
-            // Starte Animation
-            gameState.showWinAnimation = true;
-            gameState.winAnimationStartTime = Date.now();
-            gameState.winningPlayer = winner;
-            gameState.isLocalPlayerWinner = isLocalPlayerWinner;
-
-            // Initialisiere Regentropfen für Verlierer-Animation
-            if (!isLocalPlayerWinner) {
-                initializeRaindrops();
-            }
-
-            // Nach der Animation zum Game-Over-Screen
+            // Nach 3 Sekunden überprüfen, ob wir eine Antwort erhalten haben
             setTimeout(() => {
-                if (gameState) { // Sicherstellen, dass der Zustand noch existiert (Komponente nicht unmounted)
-                    gameState.showWinAnimation = false;
-                    onGameOver(winner, isLocalPlayerWinner);
+                if (socket.hasListeners('roomCreated')) {
+                    addLog('⚠️ Timeout: Keine roomCreated-Antwort erhalten.');
+                    socket.off('roomCreated');
+                    socket.off('error');
                 }
-            }, gameState.winAnimationDuration);
+            }, 3000);
+        } catch (err) {
+            addLog(`❌ Fehler beim Erstellen des Testraums: ${err.message}`);
         }
     };
 
-    // Regentropfen initialisieren
-    const initializeRaindrops = () => {
-        const raindrops = [];
-        const RAINDROP_COUNT = 100;
-
-        for (let i = 0; i < RAINDROP_COUNT; i++) {
-            raindrops.push({
-                x: Math.random() * 800,
-                y: Math.random() * 500 - 500, // Start über dem Canvas
-                length: 10 + Math.random() * 20,
-                speed: 5 + Math.random() * 10
-            });
+    const cleanupConnection = () => {
+        try {
+            addLog('🧹 Räume Socket-Verbindung auf...');
+            socketManager.cleanup();
+            addLog('✅ Socket-Verbindung getrennt und zurückgesetzt.');
+            setServerStatus('Getrennt');
+            setRoomInfo('-');
+        } catch (err) {
+            addLog(`❌ Fehler beim Aufräumen der Verbindung: ${err.message}`);
         }
-
-        gameStateRef.current.raindrops = raindrops;
     };
 
-    // Gewinner-Animation zeichnen
-    const drawWinAnimation = (ctx) => {
-        const gameState = gameStateRef.current;
-        if (!gameState.showWinAnimation) return;
-
-        const elapsed = Date.now() - gameState.winAnimationStartTime;
-        const progress = Math.min(elapsed / gameState.winAnimationDuration, 1);
-
-        // Hintergrund-Flash-Effekt
-        const flashIntensity = (Math.sin(elapsed * 0.01) + 1) / 2;
-        ctx.fillStyle = `rgba(100, 100, 255, ${flashIntensity * 0.3})`;
-        ctx.fillRect(0, 0, 800, 500);
-
-        // Textanimation
-        ctx.save();
-        ctx.font = "bold 48px Arial";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-
-        // Pulsierender Effekt für den Text
-        const scale = 1 + Math.sin(elapsed * 0.01) * 0.1;
-        ctx.translate(800 / 2, 500 / 2);
-        ctx.scale(scale, scale);
-
-        // Text basierend auf Spielmodus und Gewinner
-        let winText = '';
-        if (gameState.winningPlayer === 'left') {
-            if (gameMode === 'singleplayer') {
-                winText = 'Du hast gewonnen!';
-                ctx.fillStyle = `rgba(50, 255, 50, ${0.7 + flashIntensity * 0.3})`;
-            } else if (gameMode === 'local-multiplayer') {
-                winText = 'Spieler 1 gewinnt!';
-                ctx.fillStyle = `rgba(50, 255, 50, ${0.7 + flashIntensity * 0.3})`;
-            } else if (gameMode === 'online-multiplayer') {
-                winText = isHostRef.current ? 'Du hast gewonnen!' : 'Gegner gewinnt!';
-                ctx.fillStyle = isHostRef.current
-                    ? `rgba(50, 255, 50, ${0.7 + flashIntensity * 0.3})`
-                    : `rgba(255, 50, 50, ${0.7 + flashIntensity * 0.3})`;
+    const getConnectionInfo = () => {
+        try {
+            addLog('ℹ️ Hole Verbindungsinformationen...');
+            socketManager.logStatus();
+            addLog(`🔌 Socket-Verbindung: ${socketManager.socket ? 'Aktiv' : 'Inaktiv'}`);
+            if (socketManager.socket) {
+                addLog(`🔌 Socket-ID: ${socketManager.socket.id}`);
+                addLog(`🔌 Verbunden: ${socketManager.socket.connected ? 'Ja' : 'Nein'}`);
             }
-        } else {
-            if (gameMode === 'singleplayer') {
-                winText = 'Computer gewinnt!';
-                ctx.fillStyle = `rgba(255, 50, 50, ${0.7 + flashIntensity * 0.3})`;
-            } else if (gameMode === 'local-multiplayer') {
-                winText = 'Spieler 2 gewinnt!';
-                ctx.fillStyle = `rgba(50, 50, 255, ${0.7 + flashIntensity * 0.3})`;
-            } else if (gameMode === 'online-multiplayer') {
-                winText = isHostRef.current ? 'Gegner gewinnt!' : 'Du hast gewonnen!';
-                ctx.fillStyle = isHostRef.current
-                    ? `rgba(255, 50, 50, ${0.7 + flashIntensity * 0.3})`
-                    : `rgba(50, 255, 50, ${0.7 + flashIntensity * 0.3})`;
-            }
-        }
+            addLog(`🏠 Aktuelle Raum-ID: ${socketManager.roomId || 'keine'}`);
+            addLog(`👑 Host-Status: ${socketManager.isHost ? 'Host' : 'Gast'}`);
+            addLog(`🔢 Verbindungszähler: ${socketManager.connectionCount}`);
 
-        // Schatten für bessere Lesbarkeit
-        ctx.shadowColor = "black";
-        ctx.shadowBlur = 10;
-        ctx.fillText(winText, 0, 0);
-
-        // Zeichne Sterneneffekt um den Text
-        for (let i = 0; i < 20; i++) {
-            const angle = progress * 10 + i * Math.PI / 10;
-            const distance = 80 + Math.sin(elapsed * 0.005 + i) * 20;
-            const x = Math.cos(angle) * distance;
-            const y = Math.sin(angle) * distance;
-            const size = 5 + Math.sin(elapsed * 0.01 + i) * 3;
-
-            ctx.beginPath();
-            ctx.arc(x, y, size, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 50, ${0.7 + flashIntensity * 0.3})`;
-            ctx.fill();
-        }
-
-        ctx.restore();
-    };
-
-    // Verlierer-Animation zeichnen
-    const drawLoserAnimation = (ctx) => {
-        const gameState = gameStateRef.current;
-        if (!gameState.showWinAnimation) return;
-
-        const elapsed = Date.now() - gameState.winAnimationStartTime;
-        const progress = Math.min(elapsed / gameState.winAnimationDuration, 1);
-
-        // Dunkler Hintergrund-Effekt
-        ctx.fillStyle = `rgba(0, 0, 0, 0.3)`;
-        ctx.fillRect(0, 0, 800, 500);
-
-        // Wackeleffekt für die gesamte Szene
-        ctx.save();
-        const shakeAmount = Math.sin(elapsed * 0.02) * 5;
-        ctx.translate(shakeAmount, 0);
-
-        // Regentropfen zeichnen
-        if (gameState.raindrops.length === 0) {
-            initializeRaindrops();
-        }
-
-        ctx.strokeStyle = 'rgba(70, 130, 180, 0.7)'; // Bläuliche Regentropfen
-        ctx.lineWidth = 2;
-
-        for (let i = 0; i < gameState.raindrops.length; i++) {
-            const drop = gameState.raindrops[i];
-
-            ctx.beginPath();
-            ctx.moveTo(drop.x, drop.y);
-            ctx.lineTo(drop.x, drop.y + drop.length);
-            ctx.stroke();
-
-            // Regentropfen bewegen
-            drop.y += drop.speed;
-
-            // Regentropfen zurücksetzen, wenn sie unten rausfallen
-            if (drop.y > 500) {
-                drop.y = -drop.length;
-                drop.x = Math.random() * 800;
-            }
-        }
-
-        // "Verloren" Text zeichnen
-        ctx.font = "bold 48px Arial";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-
-        // Text mit Wackeleffekt
-        const textShakeX = Math.sin(elapsed * 0.02) * 3;
-        const textShakeY = Math.cos(elapsed * 0.02) * 3;
-
-        // Text basierend auf Spielmodus
-        let loseText = '';
-        if (gameMode === 'singleplayer') {
-            loseText = 'Verloren!';
-        } else if (gameMode === 'local-multiplayer') {
-            loseText = (gameState.winningPlayer === 'left') ? 'Spieler 2 verliert!' : 'Spieler 1 verliert!';
-        } else if (gameMode === 'online-multiplayer') {
-            loseText = 'Verloren!';
-        }
-
-        // Schatten für bessere Lesbarkeit
-        ctx.shadowColor = "black";
-        ctx.shadowBlur = 15;
-        ctx.fillStyle = 'rgba(220, 20, 60, 0.8)'; // Rötlicher Text für Verlierer
-        ctx.fillText(loseText, 800 / 2 + textShakeX, 500 / 2 + textShakeY);
-
-        // "Game Over" Text mit Fade-In-Effekt
-        ctx.font = "bold 28px Arial";
-        ctx.fillStyle = `rgba(150, 150, 150, ${progress * 0.8})`;
-        ctx.fillText('Game Over', 800 / 2, 500 / 2 + 60);
-
-        ctx.restore();
-    };
-
-    // Debug-Informationen zeichnen
-    const drawDebugInfo = (ctx) => {
-        if (!showDebugInfo) return;
-
-        const gameState = gameStateRef.current;
-
-        // Hintergrund für Debug-Informationen
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillRect(10, 10, 380, 200);
-
-        // Text-Styling
-        ctx.font = '12px monospace';
-        ctx.fillStyle = 'white';
-        ctx.textAlign = 'left';
-
-        // Verschiedene Debug-Informationen anzeigen
-        const info = [
-            `Host: ${isHostRef.current ? 'Ja' : 'Nein'}`,
-            `Ball-Position: ${Math.round(gameState.ballX)}, ${Math.round(gameState.ballY)}`,
-            `Ball-Geschwindigkeit: ${gameState.ballSpeedX.toFixed(2)}, ${gameState.ballSpeedY.toFixed(2)}`,
-            `Reset-Zustand: ${gameState.ballInResetState ? 'Ja' : 'Nein'}`,
-            `Reset-Zeit: ${gameState.ballInResetState ? ((Date.now() - gameState.ballResetStartTime) / 1000).toFixed(1) + 's' : 'N/A'}`,
-            `Punktestand: ${gameState.scores.left} : ${gameState.scores.right}`,
-            `Datenkanal: ${dataChannelRef.current ? dataChannelRef.current.readyState : 'nicht initialisiert'}`,
-            `Verbindungsstatus: ${connectionStatus}`,
-            `Ping: ${ping} ms`,
-            `Frame-Rate: ${Math.round(1000 / (Date.now() - lastFrameTimeRef.current || 16))} FPS`,
-            `Anhängige ICE-Kandidaten: ${pendingCandidatesRef.current.length}`,
-            `Remote Description Set: ${remoteDescriptionSetRef.current ? 'Ja' : 'Nein'}`
-        ];
-
-        // Informationen anzeigen
-        info.forEach((text, index) => {
-            ctx.fillText(text, 20, 30 + (index * 18));
-        });
-    };
-
-    // Referenz für die letzte Frame-Zeit (für FPS-Berechnung)
-    const lastFrameTimeRef = useRef(Date.now());
-
-    // Alles zeichnen
-    const drawEverything = () => {
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        const gameState = gameStateRef.current;
-
-        // FPS-Berechnung aktualisieren
-        lastFrameTimeRef.current = Date.now();
-
-        // Canvas löschen
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Mittellinie zeichnen
-        ctx.beginPath();
-        ctx.setLineDash([10, 10]);
-        ctx.moveTo(canvas.width / 2, 0);
-        ctx.lineTo(canvas.width / 2, canvas.height);
-        ctx.strokeStyle = "white";
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Linker Schläger zeichnen
-        ctx.fillStyle = "white";
-        ctx.fillRect(0, gameState.leftPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT);
-
-        // Rechter Schläger zeichnen
-        ctx.fillRect(canvas.width - PADDLE_WIDTH, gameState.rightPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT);
-
-        // Ball zeichnen
-        ctx.beginPath();
-        ctx.arc(gameState.ballX, gameState.ballY, BALL_RADIUS, 0, Math.PI * 2);
-        ctx.fillStyle = "white";
-        ctx.fill();
-        ctx.closePath();
-
-        // Countdown während Reset-Zustand anzeigen
-        if (gameState.ballInResetState) {
-            ctx.font = "30px Arial";
-            ctx.fillStyle = "white";
-            ctx.textAlign = "center";
-
-            // Berechne verbleibende Zeit
-            const timeElapsed = Date.now() - gameState.ballResetStartTime;
-            const timeLeft = Math.ceil((gameState.ballResetDuration - timeElapsed) / 1000);
-
-            // Zeige Countdown nur, wenn noch Zeit übrig ist
-            if (timeLeft > 0) {
-                ctx.fillText(`${timeLeft}`, canvas.width / 2, canvas.height / 2 - 50);
-            }
-        }
-
-        // Wenn die Animation aktiv ist, zeichne die entsprechende Animation
-        if (gameState.showWinAnimation) {
-            if (gameState.isLocalPlayerWinner) {
-                drawWinAnimation(ctx);
-            } else {
-                drawLoserAnimation(ctx);
-            }
-        }
-
-        // Debug-Informationen anzeigen
-        drawDebugInfo(ctx);
-    };
-
-    const resetGameState = () => {
-        const gameState = gameStateRef.current;
-        gameState.gameOver = false;
-        gameState.showWinAnimation = false;
-        gameState.scores.left = 0;
-        gameState.scores.right = 0;
-        setScores({left: 0, right: 0}); // React-State aktualisieren
-        resetBall();
-        console.log('🔄 Spielstatus zurückgesetzt');
-    };
-
-    // Synchronisations-Check für das Debuggen
-    const checkGameSync = () => {
-        if (gameMode === 'online-multiplayer' && dataChannelRef.current?.readyState === 'open') {
-            console.log('🔄 Starte Synchronisationscheck...');
-            sendData({
-                type: 'syncCheck',
-                ballX: gameStateRef.current.ballX,
-                ballY: gameStateRef.current.ballY,
-                leftPaddleY: gameStateRef.current.leftPaddleY,
-                rightPaddleY: gameStateRef.current.rightPaddleY,
-                scores: gameStateRef.current.scores,
-                isHost: isHostRef.current,
-                ballInResetState: gameStateRef.current.ballInResetState,
-                timestamp: Date.now()
-            });
-        } else {
-            console.log('⚠️ Synchronisationscheck nicht möglich - keine Verbindung');
-            // Zusätzliche Datenkanal-Infos anzeigen
-            checkDataChannelState();
+            setServerStatus(socketManager.socket?.connected ? 'Verbunden' : 'Nicht verbunden');
+            setRoomInfo(socketManager.roomId ? `Raum-ID: ${socketManager.roomId}` : 'Kein Raum');
+        } catch (err) {
+            addLog(`❌ Fehler beim Abrufen der Verbindungsinformationen: ${err.message}`);
         }
     };
 
-    // WebRTC-Verbindung Rekonnection-Versuch
-    const retryWebRtcConnection = () => {
-        if (gameMode !== 'online-multiplayer') return;
-
-        console.log('🔄 Versuche WebRTC-Verbindung wiederherzustellen...');
-
-        // Datenkanal neu erstellen, wenn noch nicht vorhanden
-        if (!dataChannelRef.current && peerConnectionRef.current) {
-            try {
-                dataChannelRef.current = peerConnectionRef.current.createDataChannel('gameData', {
-                    ordered: true,
-                    negotiated: true,
-                    id: 0
-                });
-                console.log('📢 Datenkanal neu erstellt');
-                setupDataChannel();
-            } catch (e) {
-                console.error('❌ Fehler beim Neuerstellen des Datenkanals:', e);
-            }
-        }
-
-        // Neues Angebot erstellen, wenn Host
-        if (isHostRef.current && peerConnectionRef.current) {
-            createOffer();
-        }
+    const addLog = (message) => {
+        const timestamp = new Date().toLocaleTimeString();
+        setLogMessages(prev => [...prev, `[${timestamp}] ${message}`].slice(-50)); // Nur die letzten 50 Nachrichten behalten
     };
-
-    // Spielschleife
-    const gameLoop = () => {
-        if (gameRunning || gameStateRef.current.showWinAnimation) {
-            if (gameRunning) {
-                // Nur Host oder lokale Spieler aktualisieren den Ball-Reset-Zustand
-                if (gameMode !== 'online-multiplayer' || isHostRef.current) {
-                    updateBallResetState();
-                }
-
-                updatePaddles();
-                updateBall();
-                checkCollisions();
-
-                // Im Online-Modus aktualisiert nur der Host den Punktestand
-                if (gameMode !== 'online-multiplayer' || isHostRef.current) {
-                    checkScore();
-                }
-
-                // Im Online-Modus senden wir den Spielstatus mit Ratenbegrenzung
-                if (gameMode === 'online-multiplayer' && dataChannelRef.current?.readyState === 'open') {
-                    const now = Date.now();
-                    if (now - lastSendTimeRef.current > 30) { // ~33fps
-                        sendGameState();
-                        lastSendTimeRef.current = now;
-                    }
-                }
-            }
-
-            // Zeichnen immer ausführen
-            drawEverything();
-
-            // Explizites requestAnimationFrame für bessere Leistung
-            requestRef.current = window.requestAnimationFrame(gameLoop);
-        }
-    };
-
-    // Punktestand-Anzeige
-    let scoreText = '';
-    if (gameMode === 'singleplayer') {
-        scoreText = `${playerName}: ${scores.left} | Computer: ${scores.right}`;
-    } else if (gameMode === 'local-multiplayer') {
-        scoreText = `${playerName}: ${scores.left} | Spieler 2: ${scores.right}`;
-    } else if (gameMode === 'online-multiplayer') {
-        if (isHostRef.current) {
-            scoreText = `${playerName} (links): ${scores.left} | Gegner: ${scores.right}`;
-        } else {
-            scoreText = `Gegner: ${scores.left} | ${playerName} (rechts): ${scores.right}`;
-        }
-    }
 
     return (
-        <div className="game-container">
-            <canvas ref={canvasRef} width={800} height={500}/>
+        <div className="debug-screen">
+            <h2>WebRTC Debug</h2>
 
-            {/* Zurück-Button */}
-            <button
-                className="back-to-menu-btn"
-                onClick={() => setShowConfirmDialog(true)}
-                title="Zurück zum Hauptmenü"
-            >
-                ⮜ Menü
-            </button>
-
-            {/* Debug-Button (nur im Online-Modus) */}
-            {gameMode === 'online-multiplayer' && (
-                <button
-                    className="debug-btn"
-                    onClick={() => setShowDebugInfo(!showDebugInfo)}
-                    style={{
-                        position: 'absolute',
-                        top: 10,
-                        right: 10,
-                        padding: '5px 10px',
-                        background: '#333',
-                        color: 'white',
-                        border: '1px solid #555',
-                        borderRadius: '3px',
-                        cursor: 'pointer',
-                        zIndex: 100
-                    }}
-                    title="Debug-Infos anzeigen (Strg+D)"
-                >
-                    {showDebugInfo ? 'Debug aus' : 'Debug an'}
-                </button>
-            )}
-
-            {/* Sync-Check-Button (nur im Online-Modus und wenn Debug aktiv) */}
-            {gameMode === 'online-multiplayer' && showDebugInfo && (
-                <>
-                    <button
-                        className="sync-btn"
-                        onClick={checkGameSync}
-                        style={{
-                            position: 'absolute',
-                            top: 10,
-                            right: 100,
-                            padding: '5px 10px',
-                            background: '#553388',
-                            color: 'white',
-                            border: '1px solid #7744AA',
-                            borderRadius: '3px',
-                            cursor: 'pointer',
-                            zIndex: 100
-                        }}
-                        title="Synchronisation überprüfen"
-                    >
-                        Sync-Check
-                    </button>
-                    <button
-                        className="retry-btn"
-                        onClick={retryWebRtcConnection}
-                        style={{
-                            position: 'absolute',
-                            top: 10,
-                            right: 190,
-                            padding: '5px 10px',
-                            background: '#AA3333',
-                            color: 'white',
-                            border: '1px solid #CC4444',
-                            borderRadius: '3px',
-                            cursor: 'pointer',
-                            zIndex: 100
-                        }}
-                        title="WebRTC-Verbindung erneut aufbauen"
-                    >
-                        Verbindung neu aufbauen
-                    </button>
-                </>
-            )}
-
-            {showConfirmDialog && (
-                <div className="confirm-dialog">
-                    <div className="confirm-dialog-content">
-                        <p>Spiel wirklich beenden?</p>
-                        <div className="confirm-buttons">
-                            <button
-                                className="confirm-yes"
-                                onClick={onMainMenu}
-                            >
-                                Ja
-                            </button>
-                            <button
-                                className="confirm-no"
-                                onClick={() => setShowConfirmDialog(false)}
-                            >
-                                Nein
-                            </button>
-                        </div>
-                    </div>
+            <div className="status-panel">
+                <div className="status-item">
+                    <span className="status-label">Server-Status:</span>
+                    <span className={`status-value ${serverStatus.includes('Verbunden') ? 'connected' : 'disconnected'}`}>
+                        {serverStatus}
+                    </span>
                 </div>
-            )}
-
-            <div className="score-display">
-                {scoreText}
+                <div className="status-item">
+                    <span className="status-label">Raum:</span>
+                    <span className="status-value">{roomInfo}</span>
+                </div>
             </div>
 
-            {gameMode === 'online-multiplayer' && (
-                <>
-                    <div className="connection-info">
-                        Verbindung: <span
-                        style={{color: connectionStatus === 'connected' ? '#4CAF50' : '#f44336'}}>
-                        {connectionStatus}
-                    </span>
-                    </div>
-                    <div className="ping-display">
-                        Ping: <span>{ping}</span> ms
-                    </div>
-                    <div className="host-display" style={{
-                        position: 'absolute',
-                        top: 100,
-                        right: 20,
-                        color: 'white',
-                        fontSize: '14px',
-                        backgroundColor: 'rgba(0,0,0,0.5)',
-                        padding: '2px 5px',
-                        borderRadius: '3px'
-                    }}>
-                        {isHostRef.current ? 'Host (Links)' : 'Gast (Rechts)'}
-                    </div>
-                </>
-            )}
+            <div className="debug-actions">
+                <button onClick={testSocketConnection} className="debug-btn socket-test-btn">
+                    Socket-Verbindung testen
+                </button>
+                <button onClick={testRoomCreation} className="debug-btn room-test-btn">
+                    Raumerstellung testen
+                </button>
+                <button onClick={getConnectionInfo} className="debug-btn info-btn">
+                    Verbindungsinfo
+                </button>
+                <button onClick={cleanupConnection} className="debug-btn cleanup-btn">
+                    Verbindung trennen
+                </button>
+            </div>
 
-            {/* Vereinfachte Touch-Steuerung für alle Modi */}
-            {isMobileDevice && (
-                <TouchControls
-                    onMoveUp={() => {
-                        if (gameMode === 'singleplayer' ||
-                            (gameMode === 'online-multiplayer' && isHostRef.current) ||
-                            gameMode === 'local-multiplayer') {
-                            gameStateRef.current.touchControls.leftUp = true;
-                            gameStateRef.current.touchControls.leftDown = false;
-                        }
+            <div className="debug-log">
+                <h3>Debug-Protokoll</h3>
+                <div className="log-content">
+                    {logMessages.length === 0 ? (
+                        <p className="no-logs">Keine Protokolleinträge vorhanden.</p>
+                    ) : (
+                        logMessages.map((msg, index) => (
+                            <div key={index} className="log-entry">{msg}</div>
+                        ))
+                    )}
+                </div>
+            </div>
 
-                        if (gameMode === 'local-multiplayer' ||
-                            (gameMode === 'online-multiplayer' && !isHostRef.current)) {
-                            gameStateRef.current.touchControls.rightUp = true;
-                            gameStateRef.current.touchControls.rightDown = false;
-                        }
-                    }}
-                    onMoveDown={() => {
-                        if (gameMode === 'singleplayer' ||
-                            (gameMode === 'online-multiplayer' && isHostRef.current) ||
-                            gameMode === 'local-multiplayer') {
-                            gameStateRef.current.touchControls.leftDown = true;
-                            gameStateRef.current.touchControls.leftUp = false;
-                        }
+            <button onClick={onBack} className="debug-back-btn">
+                Zurück zum Hauptmenü
+            </button>
 
-                        if (gameMode === 'local-multiplayer' ||
-                            (gameMode === 'online-multiplayer' && !isHostRef.current)) {
-                            gameStateRef.current.touchControls.rightDown = true;
-                            gameStateRef.current.touchControls.rightUp = false;
-                        }
-                    }}
-                />
-            )}
+            <style jsx>{`
+                .debug-screen {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: #2C2E3B;
+                    color: white;
+                    padding: 20px;
+                    box-sizing: border-box;
+                    overflow-y: auto;
+                    z-index: 1000;
+                }
+                
+                h2 {
+                    text-align: center;
+                    margin-bottom: 20px;
+                }
+                
+                .status-panel {
+                    background-color: rgba(0, 0, 0, 0.2);
+                    border-radius: 5px;
+                    padding: 15px;
+                    margin-bottom: 20px;
+                }
+                
+                .status-item {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 10px;
+                }
+                
+                .status-label {
+                    font-weight: bold;
+                }
+                
+                .status-value {
+                    font-family: monospace;
+                }
+                
+                .connected {
+                    color: #4CAF50;
+                }
+                
+                .disconnected {
+                    color: #f44336;
+                }
+                
+                .debug-actions {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 10px;
+                    margin-bottom: 20px;
+                }
+                
+                .debug-btn {
+                    background-color: #3a3c4e;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    padding: 10px;
+                    cursor: pointer;
+                    font-size: 14px;
+                }
+                
+                .socket-test-btn {
+                    background-color: #2196F3;
+                }
+                
+                .room-test-btn {
+                    background-color: #9C27B0;
+                }
+                
+                .info-btn {
+                    background-color: #FF9800;
+                }
+                
+                .cleanup-btn {
+                    background-color: #f44336;
+                }
+                
+                .debug-log {
+                    background-color: rgba(0, 0, 0, 0.2);
+                    border-radius: 5px;
+                    padding: 15px;
+                    margin-bottom: 20px;
+                }
+                
+                .debug-log h3 {
+                    margin-top: 0;
+                    margin-bottom: 10px;
+                    font-size: 16px;
+                }
+                
+                .log-content {
+                    height: 300px;
+                    overflow-y: auto;
+                    background-color: rgba(0, 0, 0, 0.3);
+                    border-radius: 5px;
+                    padding: 10px;
+                    font-family: monospace;
+                    font-size: 12px;
+                }
+                
+                .log-entry {
+                    margin-bottom: 5px;
+                    line-height: 1.4;
+                }
+                
+                .no-logs {
+                    text-align: center;
+                    color: #888;
+                    font-style: italic;
+                }
+                
+                .debug-back-btn {
+                    display: block;
+                    width: 100%;
+                    background-color: #757575;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    padding: 12px;
+                    cursor: pointer;
+                    font-size: 16px;
+                }
+                
+                @media (max-width: 768px) {
+                    .debug-actions {
+                        grid-template-columns: 1fr;
+                    }
+                    
+                    .log-content {
+                        height: 200px;
+                    }
+                }
+            `}</style>
         </div>
     );
 };
 
-export default PongGame;
+export default PongDebug;

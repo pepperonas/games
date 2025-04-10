@@ -3,12 +3,19 @@ import React, {useEffect, useState} from 'react';
 import './StartScreen.css';
 
 const StartScreen = ({
+                         // Original-Props
+                         onStartGame,
+                         onViewStats,
+                         onEditProfile,
+                         onDebug,
+                         playerName,
+
+                         // Alternativ-Props (für Kompatibilität)
                          onStartSinglePlayer,
                          onStartLocalMultiplayer,
                          onSetupOnlineMultiplayer,
                          onShowStats,
-                         onShowDebug, // Neuer Prop für den Debug-Button
-                         playerName,
+                         onShowDebug,
                          isMobile,
                          isLandscape,
                          onSwitchPlayer
@@ -34,13 +41,62 @@ const StartScreen = ({
         loadSavedPlayers();
     }, []);
 
+    // Kompatibilitätsfunktionen: Verwendung der verfügbaren Funktionen
+    const startSinglePlayer = (difficulty) => {
+        if (onStartSinglePlayer) {
+            onStartSinglePlayer(difficulty);
+        } else if (onStartGame) {
+            onStartGame('singleplayer', difficulty);
+        }
+    };
+
+    const startLocalMultiplayer = () => {
+        if (onStartLocalMultiplayer) {
+            onStartLocalMultiplayer();
+        } else if (onStartGame) {
+            onStartGame('local-multiplayer', null);
+        }
+    };
+
+    const setupOnlineMultiplayer = () => {
+        if (onSetupOnlineMultiplayer) {
+            onSetupOnlineMultiplayer();
+        } else if (onStartGame) {
+            onStartGame('online-multiplayer', null);
+        }
+    };
+
+    const showStats = () => {
+        if (onShowStats) {
+            onShowStats();
+        } else if (onViewStats) {
+            onViewStats();
+        }
+    };
+
+    const showDebug = () => {
+        if (onShowDebug) {
+            onShowDebug();
+        } else if (onDebug) {
+            onDebug();
+        }
+    };
+
     const handlePlayerSelect = (playerName) => {
-        onSwitchPlayer(playerName);
+        if (onSwitchPlayer) {
+            onSwitchPlayer(playerName);
+        } else if (onEditProfile) {
+            onEditProfile();
+        }
         setShowPlayerMenu(false);
     };
 
     const handleNewPlayer = () => {
-        onSwitchPlayer(); // Ohne Parameter, um zum Profile-Screen zu wechseln
+        if (onSwitchPlayer) {
+            onSwitchPlayer();
+        } else if (onEditProfile) {
+            onEditProfile();
+        }
         setShowPlayerMenu(false);
     };
 
@@ -78,25 +134,25 @@ const StartScreen = ({
                 <div className="mode-section">
                     <h3>Einzelspieler</h3>
                     <div className="difficulty-buttons">
-                        <button onClick={() => onStartSinglePlayer(2)}>Einfach</button>
-                        <button onClick={() => onStartSinglePlayer(3)}>Mittel</button>
-                        <button onClick={() => onStartSinglePlayer(5)}>Schwer</button>
+                        <button onClick={() => startSinglePlayer(2)}>Einfach</button>
+                        <button onClick={() => startSinglePlayer(3)}>Mittel</button>
+                        <button onClick={() => startSinglePlayer(5)}>Schwer</button>
                     </div>
                 </div>
 
                 <div className="mode-section">
                     <h3>Mehrspieler</h3>
                     <div className="multiplayer-buttons">
-                        <button onClick={onStartLocalMultiplayer}>Lokal (2 Spieler)</button>
-                        <button onClick={onSetupOnlineMultiplayer}>Online-Multiplayer</button>
+                        <button onClick={startLocalMultiplayer}>Lokal (2 Spieler)</button>
+                        <button onClick={setupOnlineMultiplayer}>Online-Multiplayer</button>
                     </div>
                 </div>
             </div>
 
             <div className="bottom-buttons">
-                <button className="stats-button" onClick={onShowStats}>Statistiken</button>
+                <button className="stats-button" onClick={showStats}>Statistiken</button>
                 {/* Debug-Button hinzufügen */}
-                <button className="debug-button" onClick={onShowDebug}>WebRTC Debug</button>
+                <button className="debug-button" onClick={showDebug}>WebRTC Debug</button>
             </div>
 
             {isMobile && !isLandscape && (

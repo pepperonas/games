@@ -3,6 +3,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import './PongGame.css';
 import './TouchControls.css';
 import TouchControls from './TouchControls';
+import { socketManager } from '../socket-connection';
 
 const PADDLE_HEIGHT = 100;
 const PADDLE_WIDTH = 15;
@@ -32,7 +33,7 @@ const PongGame = ({
                   }) => {
     const canvasRef = useRef(null);
     const requestRef = useRef(null);
-    const socketRef = useRef(socket); // Socket-Referenz mit übergebener Socket initialisieren
+    const socketRef = useRef(null); // Socket-Referenz initialisieren
     const peerConnectionRef = useRef(null);
     const dataChannelRef = useRef(null);
     const pendingCandidatesRef = useRef([]); // Speicher für ICE-Kandidaten
@@ -40,7 +41,7 @@ const PongGame = ({
     const isHostRef = useRef(initialIsHost); // Ref für sofortigen Zugriff auf Host-Status
     const remoteDescriptionSetRef = useRef(false); // Flag für Remote-Description-Status
     const peerConnectionEstablishedRef = useRef(false); // Flag für erfolgreiche Verbindung
-    const currentRoomIdRef = useRef(roomId); // Raum-ID speichern
+    const currentRoomIdRef = useRef(null); // Raum-ID speichern
     const lastFrameTimeRef = useRef(Date.now()); // Für FPS-Berechnung
 
     // isHost als State statt als props
@@ -97,6 +98,215 @@ const PongGame = ({
         'assets/welcome-to-st-tropez.wav',
         'assets/i-want-your-soul.wav'
     ];
+
+    // Initialisieren von Socket und RoomId, entweder aus Props oder aus dem SocketManager
+    useEffect(() => {
+        // Socket initialisieren, entweder aus props oder aus socketManager
+        if (socket) {
+            socketRef.current = socket;
+        } else if (gameMode === 'online-multiplayer') {
+            try {
+                socketRef.current = socketManager.getSocket();
+            } catch (err) {
+                console.error('Fehler beim Abrufen des Sockets:', err);
+            }
+        }
+
+        // RoomId initialisieren
+        if (roomId) {
+            currentRoomIdRef.current = roomId;
+        } else if (gameMode === 'online-multiplayer' && socketManager.roomId) {
+            currentRoomIdRef.current = socketManager.roomId;
+        }
+
+        console.log('🔌 Socket und RoomId initialisiert:',
+            socketRef.current?.id || 'kein Socket',
+            currentRoomIdRef.current || 'keine RoomId');
+
+    }, [gameMode, socket, roomId]);
+
+    // Effekt für Game Reset
+    useEffect(() => {
+        if (resetCount > 0) {
+            // Spiel zurücksetzen
+            resetGameState();
+            setGameRunning(true);
+        }
+    }, [resetCount]);
+
+    // Erkennen, ob es sich um ein mobiles Gerät handelt
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobileDevice(window.innerWidth <= 768 ||
+                ('ontouchstart' in window) ||
+                (navigator.maxTouchPoints > 0));
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    // Tastaturhandler für Debug-Modus
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            // Debug-Modus mit Strg+D umschalten
+            if ((e.key === 'd' || e.key === 'D') && e.ctrlKey) {
+                setShowDebugInfo(prev => !prev);
+                console.log("Debug-Modus umgeschaltet:", !showDebugInfo);
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [showDebugInfo]);
+
+    // Touch-End-Event-Handler
+    useEffect(() => {
+        // Touch-End-Event-Handler
+        const handleTouchEnd = () => {
+            // Alle Touch-Controls zurücksetzen
+            const gameState = gameStateRef.current;
+            gameState.touchControls.leftUp = false;
+            gameState.touchControls.leftDown = false;
+            gameState.touchControls.rightUp = false;
+            gameState.touchControls.rightDown = false;
+        };
+
+        // Event-Listener für das Ende des Touchs hinzufügen
+        document.addEventListener('touchend', handleTouchEnd);
+
+        return () => {
+            document.removeEventListener('touchend', handleTouchEnd);
+        };
+    }, []);
+
+    // WebRTC-Setup für Online-Modus
+    useEffect(() => {
+        if (gameMode === 'online-multiplayer') {
+            console.log('🎮 Initialisiere Online-Multiplayer mit initialIsHost =', initialIsHost);
+            isHostRef.current = initialIsHost;
+            setIsHostState(initialIsHost);
+
+            // Verzögerung für sicherere Initialisierung
+            setTimeout(() => {
+                setupWebRTC();
+            }, 100);
+        }
+
+        return () => {
+            // Aufräumen, wenn die Komponente unmountet wird
+            if (gameMode === 'online-multiplayer') {
+                cleanupWebRTC();
+            }
+        };
+    }, [gameMode, initialIsHost]);
+
+    // Haupt-Setup Effekt
+    useEffect(() => {
+        // Audio initialisieren
+        const randomIndex = Math.floor(Math.random() * songs.length);
+
+        // Neues Audio-Objekt mit zufälligem Lied erstellen
+        audioRef.current = new Audio(songs[randomIndex]);
+
+        // Canvas Context holen
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+
+        // Canvas für Touch Events responsive machen
+        const resizeCanvas = () => {
+            if (canvas) {
+                const container = canvas.parentElement;
+                const containerWidth = container.clientWidth;
+                const containerHeight = container.clientHeight;
+                const originalRatio = 800 / 500; // Original canvas ratio
+
+                // Setze die Größe des Canvas für CSS-Darstellung
+                if (window.innerWidth <= 915 || window.innerHeight <= 450) {
+                    if (window.matchMedia("(orientation: landscape)").matches) {
+                        // Landscape-Modus: Anpassen an die Höhe mit Berücksichtigung der Seitenverhältnisse
+                        const maxHeight = Math.min(containerHeight, window.innerHeight * 0.85);
+                        canvas.style.height = `${maxHeight}px`;
+                        canvas.style.width = `${maxHeight * originalRatio}px`;
+
+                        // Sicherstellen, dass die Breite nicht größer als die verfügbare Breite ist
+                        if (parseFloat(canvas.style.width) > containerWidth) {
+                            canvas.style.width = `${containerWidth}px`;
+                            canvas.style.height = `${containerWidth / originalRatio}px`;
+                        }
+                    } else {
+                        // Portrait-Modus: Anpassen an die Breite
+                        canvas.style.width = `${containerWidth}px`;
+                        canvas.style.height = `${containerWidth / originalRatio}px`;
+                    }
+
+                    // Sicherstellen, dass das Canvas im sichtbaren Bereich bleibt
+                    canvas.style.maxHeight = `${window.innerHeight * 0.85}px`;
+                    canvas.style.maxWidth = `${window.innerWidth * 0.95}px`;
+                } else {
+                    canvas.style.width = '';
+                    canvas.style.height = '';
+                }
+            }
+        };
+
+        // Initialisiere Canvas-Größe
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Orientierungsänderung überwachen
+        window.addEventListener('orientationchange', () => {
+            setTimeout(resizeCanvas, 100); // Verzögerung für verlässlicheres Neuskalieren
+        });
+
+        // Tastatur-Event-Listener
+        const handleKeyDown = (e) => {
+            const gameState = gameStateRef.current;
+            if (e.key === 'ArrowUp' || e.key === 'Up') {
+                gameState.keys.upPressed = true;
+            } else if (e.key === 'ArrowDown' || e.key === 'Down') {
+                gameState.keys.downPressed = true;
+            } else if (e.key === 'w' || e.key === 'W') {
+                gameState.keys.wPressed = true;
+            } else if (e.key === 's' || e.key === 'S') {
+                gameState.keys.sPressed = true;
+            }
+        };
+
+        const handleKeyUp = (e) => {
+            const gameState = gameStateRef.current;
+            if (e.key === 'ArrowUp' || e.key === 'Up') {
+                gameState.keys.upPressed = false;
+            } else if (e.key === 'ArrowDown' || e.key === 'Down') {
+                gameState.keys.downPressed = false;
+            } else if (e.key === 'w' || e.key === 'W') {
+                gameState.keys.wPressed = false;
+            } else if (e.key === 's' || e.key === 'S') {
+                gameState.keys.sPressed = false;
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('keyup', handleKeyUp);
+
+        // Spielschleife starten
+        resetBall();
+        gameLoop();
+
+        // Aufräumen beim Unmount
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('keyup', handleKeyUp);
+            window.removeEventListener('resize', resizeCanvas);
+
+            // Animation-Frame abbrechen
+            if (requestRef.current) {
+                cancelAnimationFrame(requestRef.current);
+                requestRef.current = null;
+            }
+        };
+    }, []);
 
     // Hilfsfunktion zum Senden von Daten über den Datenkanal
     const sendData = (data) => {
@@ -317,7 +527,158 @@ const PongGame = ({
         }
     };
 
-    // Funktion, die außerhalb des useEffect definiert wird, damit sie von retryWebRtcConnection aufgerufen werden kann
+    // Hilfsfunktionen für WebRTC-Verbindung
+    const setupWebRTC = () => {
+        console.log('🎮 Starte Online-Multiplayer Setup');
+
+        // Überprüfen, ob wir einen Socket haben oder bekommen können
+        if (!socketRef.current) {
+            try {
+                socketRef.current = socketManager.getSocket();
+            } catch (err) {
+                console.error('⚠️ Kein Socket verfügbar!', err);
+                return;
+            }
+        }
+
+        // Überprüfe Socket-Status
+        if (socketRef.current && !socketRef.current.connected) {
+            console.warn('⚠️ Socket ist nicht verbunden. Versuchen Sie neu zu verbinden...');
+            try {
+                socketRef.current.connect();
+            } catch (err) {
+                console.error('⚠️ Socket-Verbindung fehlgeschlagen:', err);
+            }
+        }
+
+        console.log('🔌 Verwende Socket mit ID:', socketRef.current?.id || 'unbekannt');
+        console.log('🏠 Raumverbindung:', currentRoomIdRef.current || 'keine');
+
+        // Bestehende Event-Handler entfernen, um Duplikate zu vermeiden
+        if (socketRef.current) {
+            try {
+                socketRef.current.off('offer');
+                socketRef.current.off('answer');
+                socketRef.current.off('iceCandidate');
+                socketRef.current.off('error');
+                socketRef.current.off('peerDisconnected');
+            } catch (err) {
+                console.warn('⚠️ Fehler beim Entfernen von Event-Listenern:', err);
+            }
+        }
+
+        // Weitere Socket.io Event-Handler für WebRTC-Signalisierung
+        setupWebRTCEventHandlers();
+
+        // PeerConnection mit Verzögerung initialisieren
+        setTimeout(() => {
+            try {
+                initializePeerConnection(isHostRef.current);
+            } catch (err) {
+                console.error('⚠️ Fehler bei PeerConnection-Initialisierung:', err);
+            }
+        }, 500);
+    };
+
+    const setupWebRTCEventHandlers = () => {
+        // Sicherstellen, dass socketRef.current existiert
+        if (!socketRef.current) {
+            console.error('⚠️ Socket-Referenz fehlt bei Event-Handler-Setup');
+            return;
+        }
+
+        socketRef.current.on('offer', async (data) => {
+            console.log('📩 SDP-Angebot empfangen:', data);
+
+            try {
+                // Überprüfen, ob die PeerConnection bereits existiert
+                if (!peerConnectionRef.current) {
+                    console.log('⚠️ PeerConnection noch nicht initialisiert, erstelle sie jetzt');
+                    isHostRef.current = false; // Wenn wir ein Angebot erhalten, sind wir der Gast
+                    setIsHostState(false);
+
+                    // PeerConnection initialisieren
+                    initializePeerConnection(false);
+
+                    // Kurze Verzögerung, um sicherzustellen, dass die PeerConnection initialisiert ist
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                }
+
+                // Sicherheitsprüfung
+                if (!peerConnectionRef.current) {
+                    throw new Error('PeerConnection konnte nicht initialisiert werden');
+                }
+
+                // Jetzt können wir das Remote-Angebot setzen
+                await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data));
+                console.log('📩 Remote-Beschreibung gesetzt, erstelle Antwort');
+                remoteDescriptionSetRef.current = true;
+
+                // Gepufferte ICE-Kandidaten hinzufügen
+                await addPendingIceCandidates();
+
+                const answer = await peerConnectionRef.current.createAnswer();
+                console.log('📩 SDP-Antwort erstellt');
+
+                await peerConnectionRef.current.setLocalDescription(answer);
+                console.log('📩 Lokale Beschreibung gesetzt, sende Antwort');
+
+                // Kurze Verzögerung für stabileres Signaling
+                setTimeout(() => {
+                    if (socketRef.current && socketRef.current.connected) {
+                        socketRef.current.emit('answer', peerConnectionRef.current.localDescription);
+                    } else {
+                        console.error('⚠️ Socket nicht verbunden - Antwort konnte nicht gesendet werden');
+                    }
+                }, 300);
+            } catch (error) {
+                console.error('📩 Fehler beim Verarbeiten des Angebots:', error);
+            }
+        });
+
+        socketRef.current.on('answer', async (data) => {
+            console.log('📩 SDP-Antwort empfangen:', data);
+            try {
+                // Überprüfen, ob die PeerConnection bereits existiert
+                if (!peerConnectionRef.current) {
+                    console.error('⚠️ Keine PeerConnection für die Antwort vorhanden');
+                    return;
+                }
+
+                await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data));
+                remoteDescriptionSetRef.current = true;
+                console.log('📩 Remote-Beschreibung gesetzt');
+
+                // Gepufferte ICE-Kandidaten hinzufügen
+                await addPendingIceCandidates();
+            } catch (error) {
+                console.error('📩 Fehler beim Verarbeiten der Antwort:', error);
+            }
+        });
+
+        socketRef.current.on('iceCandidate', async (data) => {
+            console.log('🧊 ICE-Kandidat empfangen:', data);
+
+            // Kandidat zur Liste hinzufügen
+            pendingCandidatesRef.current.push(data);
+
+            // Nur hinzufügen, wenn RemoteDescription gesetzt ist
+            if (peerConnectionRef.current && remoteDescriptionSetRef.current) {
+                await addPendingIceCandidates();
+            } else {
+                console.log('⚠️ ICE-Kandidat für später gespeichert, warte auf Remote Description');
+            }
+        });
+
+        socketRef.current.on('error', ({message}) => {
+            console.error('❌ Server-Fehler:', message);
+        });
+
+        socketRef.current.on('peerDisconnected', () => {
+            console.log('👋 Gegner hat Verbindung getrennt');
+        });
+    };
+
     const initializePeerConnection = (isHost) => {
         console.log(`🔄 Initialisiere Peer Connection als ${isHost ? 'Host' : 'Gast'}`);
 
@@ -335,88 +696,142 @@ const PongGame = ({
             peerConnectionRef.current = null;
         }
 
+        // Versuche, eine neue PeerConnection zu erstellen
         try {
-            peerConnectionRef.current = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+            // Verwende eine lokale Variable für die neue PeerConnection
+            const peerConnection = new RTCPeerConnection({ iceServers: ICE_SERVERS });
             console.log('✅ PeerConnection erfolgreich erstellt');
-        } catch (e) {
-            console.error('Fehler beim Erstellen der RTCPeerConnection:', e);
-            return;
-        }
 
-        // Event Handler mit robusterer Fehlerbehandlung
-        peerConnectionRef.current.onicecandidate = (event) => {
-            if (event.candidate) {
-                console.log('🧊 Neuer ICE-Kandidat gefunden:', event.candidate);
-                // Überprüfe, ob socketRef.current existiert und verbunden ist
-                if (socketRef.current && socketRef.current.connected) {
-                    socketRef.current.emit('iceCandidate', event.candidate);
+            // Erst nach erfolgreicher Erstellung die Referenz setzen
+            peerConnectionRef.current = peerConnection;
+
+            // Event Handler mit robusterer Fehlerbehandlung
+            peerConnection.onicecandidate = (event) => {
+                if (!event || !socketRef.current) return;
+
+                if (event.candidate) {
+                    console.log('🧊 Neuer ICE-Kandidat gefunden:', event.candidate);
+                    // Überprüfe, ob socketRef.current existiert und verbunden ist
+                    if (socketRef.current && socketRef.current.connected) {
+                        socketRef.current.emit('iceCandidate', event.candidate);
+                    } else {
+                        console.warn('⚠️ Socket nicht verfügbar - ICE-Kandidat kann nicht gesendet werden');
+                        // Kandidaten zur Liste hinzufügen, um sie später zu senden
+                        pendingCandidatesRef.current.push(event.candidate);
+                    }
                 } else {
-                    console.warn('⚠️ Socket nicht verfügbar - ICE-Kandidat kann nicht gesendet werden');
+                    console.log('🧊 ICE-Kandidatensammlung abgeschlossen');
                 }
-            } else {
-                console.log('🧊 ICE-Kandidatensammlung abgeschlossen');
-            }
-        };
+            };
 
-        peerConnectionRef.current.oniceconnectionstatechange = () => {
-            if (!peerConnectionRef.current) return;
+            peerConnection.oniceconnectionstatechange = () => {
+                if (!peerConnectionRef.current) return;
 
-            const state = peerConnectionRef.current.iceConnectionState;
-            console.log('🧊 ICE-Status geändert:', state);
-            setConnectionStatus(state);
+                const state = peerConnectionRef.current.iceConnectionState;
+                console.log('🧊 ICE-Status geändert:', state);
+                setConnectionStatus(state);
 
-            // Bei erfolgreicher Verbindung den Status setzen
-            if (state === 'connected' || state === 'completed') {
-                peerConnectionEstablishedRef.current = true;
-            }
+                // Bei erfolgreicher Verbindung den Status setzen
+                if (state === 'connected' || state === 'completed') {
+                    peerConnectionEstablishedRef.current = true;
+                }
 
-            // Zusätzliche Informationen für Fehlersuche
-            if (state === 'failed' || state === 'disconnected' || state === 'closed') {
-                peerConnectionEstablishedRef.current = false;
-                console.warn('⚠️ ICE-Verbindung problematisch:', state);
-            }
-        };
+                // Zusätzliche Informationen für Fehlersuche
+                if (state === 'failed' || state === 'disconnected' || state === 'closed') {
+                    peerConnectionEstablishedRef.current = false;
+                    console.warn('⚠️ ICE-Verbindung problematisch:', state);
+                }
+            };
 
-        peerConnectionRef.current.onconnectionstatechange = () => {
-            if (!peerConnectionRef.current) return;
+            peerConnection.onconnectionstatechange = () => {
+                if (!peerConnectionRef.current) return;
 
-            const state = peerConnectionRef.current.connectionState;
-            console.log('🔄 Verbindungsstatus geändert:', state);
+                const state = peerConnectionRef.current.connectionState;
+                console.log('🔄 Verbindungsstatus geändert:', state);
 
-            if (state === 'connected') {
-                console.log('✅ WebRTC-Verbindung erfolgreich hergestellt!');
-                peerConnectionEstablishedRef.current = true;
-            } else if (state === 'failed') {
-                console.error('❌ WebRTC-Verbindung fehlgeschlagen!');
-                peerConnectionEstablishedRef.current = false;
-            }
-        };
+                if (state === 'connected') {
+                    console.log('✅ WebRTC-Verbindung erfolgreich hergestellt!');
+                    peerConnectionEstablishedRef.current = true;
+                } else if (state === 'failed') {
+                    console.error('❌ WebRTC-Verbindung fehlgeschlagen!');
+                    peerConnectionEstablishedRef.current = false;
+                }
+            };
 
-        // Zusätzliches Ereignis für Fehlersuche
-        peerConnectionRef.current.onicecandidateerror = (event) => {
-            console.error('🧊 ICE-Kandidat Fehler:', event);
-        };
+            // Zusätzliches Ereignis für Fehlersuche
+            peerConnection.onicecandidateerror = (event) => {
+                console.error('🧊 ICE-Kandidat Fehler:', event);
+            };
 
-        // Datenkanal einrichten mit verbesserter Fehlerbehandlung
-        try {
-            // KRITISCH: Beide Seiten erstellen einen eigenen Datenkanal mit gleicher ID
-            console.log(`📢 Erstelle Datenkanal mit negotiated: true und ID: 0`);
-            dataChannelRef.current = peerConnectionRef.current.createDataChannel('gameData', {
-                ordered: true,
-                negotiated: true, // WICHTIG: Direkt ausgehandelter Kanal
-                id: 0 // Feste ID für beide Seiten
-            });
-            setupDataChannel();
+            // Datenkanal einrichten mit verbesserter Fehlerbehandlung
+            try {
+                // KRITISCH: Beide Seiten erstellen einen eigenen Datenkanal mit gleicher ID
+                console.log(`📢 Erstelle Datenkanal mit negotiated: true und ID: 0`);
 
-            // Nur der Host erstellt das Angebot
-            if (isHost) {
-                // WICHTIG: Zeitverzögerung für das Angebot
-                setTimeout(() => {
-                    createOffer();
-                }, 1000);
+                const dataChannel = peerConnection.createDataChannel('gameData', {
+                    ordered: true,
+                    negotiated: true, // WICHTIG: Direkt ausgehandelter Kanal
+                    id: 0 // Feste ID für beide Seiten
+                });
+
+                // Referenz erst nach erfolgreicher Erstellung setzen
+                dataChannelRef.current = dataChannel;
+
+                setupDataChannel();
+
+                // Nur der Host erstellt das Angebot
+                if (isHost) {
+                    // WICHTIG: Zeitverzögerung für das Angebot
+                    setTimeout(() => {
+                        createOffer();
+                    }, 1000);
+                }
+            } catch (error) {
+                console.error('📢 Fehler beim Einrichten des Datenkanals:', error);
             }
         } catch (error) {
-            console.error('📢 Fehler beim Einrichten des Datenkanals:', error);
+            console.error('Fehler beim Erstellen der RTCPeerConnection:', error);
+            peerConnectionRef.current = null;
+        }
+    };
+
+    const cleanupWebRTC = () => {
+        console.log('🧹 Räume WebRTC-Ressourcen auf');
+
+        // Datenkanal schließen
+        if (dataChannelRef.current) {
+            console.log('🧹 Schließe Datenkanal');
+            try {
+                dataChannelRef.current.close();
+            } catch (e) {
+                console.error('Fehler beim Schließen des Datenkanals:', e);
+            }
+            dataChannelRef.current = null;
+        }
+
+        // Peer Connection schließen
+        if (peerConnectionRef.current) {
+            console.log('🧹 Schließe Peer-Verbindung');
+            try {
+                peerConnectionRef.current.close();
+            } catch (e) {
+                console.error('Fehler beim Schließen der Peer-Verbindung:', e);
+            }
+            peerConnectionRef.current = null;
+        }
+
+        // Event-Listener entfernen, aber Socket nicht trennen
+        if (socketRef.current) {
+            console.log('🧹 Entferne Socket-Event-Listener');
+            try {
+                socketRef.current.off('offer');
+                socketRef.current.off('answer');
+                socketRef.current.off('iceCandidate');
+                socketRef.current.off('error');
+                socketRef.current.off('peerDisconnected');
+            } catch (e) {
+                console.error('Fehler beim Entfernen der Socket-Event-Listener:', e);
+            }
         }
     };
 
@@ -1198,333 +1613,6 @@ const PongGame = ({
             requestRef.current = window.requestAnimationFrame(gameLoop);
         }
     };
-
-    useEffect(() => {
-        if (resetCount > 0) {
-            // Spiel zurücksetzen
-            resetGameState();
-            setGameRunning(true);
-        }
-    }, [resetCount]);
-
-    // Erkennen, ob es sich um ein mobiles Gerät handelt
-    useEffect(() => {
-        const checkMobile = () => {
-            setIsMobileDevice(window.innerWidth <= 768 ||
-                ('ontouchstart' in window) ||
-                (navigator.maxTouchPoints > 0));
-        };
-
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
-    }, []);
-
-    // Tastaturhandler für Debug-Modus
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            // Debug-Modus mit Strg+D umschalten
-            if ((e.key === 'd' || e.key === 'D') && e.ctrlKey) {
-                setShowDebugInfo(prev => !prev);
-                console.log("Debug-Modus umgeschaltet:", !showDebugInfo);
-            }
-        };
-
-        document.addEventListener('keydown', handleKeyDown);
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [showDebugInfo]);
-
-    // Touch-End-Event-Handler
-    useEffect(() => {
-        // Touch-End-Event-Handler
-        const handleTouchEnd = () => {
-            // Alle Touch-Controls zurücksetzen
-            const gameState = gameStateRef.current;
-            gameState.touchControls.leftUp = false;
-            gameState.touchControls.leftDown = false;
-            gameState.touchControls.rightUp = false;
-            gameState.touchControls.rightDown = false;
-        };
-
-        // Event-Listener für das Ende des Touchs hinzufügen
-        document.addEventListener('touchend', handleTouchEnd);
-
-        return () => {
-            document.removeEventListener('touchend', handleTouchEnd);
-        };
-    }, []);
-
-    useEffect(() => {
-        // Audio initialisieren
-        const randomIndex = Math.floor(Math.random() * songs.length);
-
-        // Neues Audio-Objekt mit zufälligem Lied erstellen
-        audioRef.current = new Audio(songs[randomIndex]);
-
-        // Canvas Context holen
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-
-        // Canvas für Touch Events responsive machen
-        const resizeCanvas = () => {
-            if (canvas) {
-                const container = canvas.parentElement;
-                const containerWidth = container.clientWidth;
-                const containerHeight = container.clientHeight;
-                const originalRatio = 800 / 500; // Original canvas ratio
-
-                // Setze die Größe des Canvas für CSS-Darstellung
-                if (window.innerWidth <= 915 || window.innerHeight <= 450) {
-                    if (window.matchMedia("(orientation: landscape)").matches) {
-                        // Landscape-Modus: Anpassen an die Höhe mit Berücksichtigung der Seitenverhältnisse
-                        const maxHeight = Math.min(containerHeight, window.innerHeight * 0.85);
-                        canvas.style.height = `${maxHeight}px`;
-                        canvas.style.width = `${maxHeight * originalRatio}px`;
-
-                        // Sicherstellen, dass die Breite nicht größer als die verfügbare Breite ist
-                        if (parseFloat(canvas.style.width) > containerWidth) {
-                            canvas.style.width = `${containerWidth}px`;
-                            canvas.style.height = `${containerWidth / originalRatio}px`;
-                        }
-                    } else {
-                        // Portrait-Modus: Anpassen an die Breite
-                        canvas.style.width = `${containerWidth}px`;
-                        canvas.style.height = `${containerWidth / originalRatio}px`;
-                    }
-
-                    // Sicherstellen, dass das Canvas im sichtbaren Bereich bleibt
-                    canvas.style.maxHeight = `${window.innerHeight * 0.85}px`;
-                    canvas.style.maxWidth = `${window.innerWidth * 0.95}px`;
-                } else {
-                    canvas.style.width = '';
-                    canvas.style.height = '';
-                }
-            }
-        };
-
-        // Initialisiere Canvas-Größe
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-
-        // Orientierungsänderung überwachen
-        window.addEventListener('orientationchange', () => {
-            setTimeout(resizeCanvas, 100); // Verzögerung für verlässlicheres Neuskalieren
-        });
-
-        // Tastatur-Event-Listener
-        const handleKeyDown = (e) => {
-            const gameState = gameStateRef.current;
-            if (e.key === 'ArrowUp' || e.key === 'Up') {
-                gameState.keys.upPressed = true;
-            } else if (e.key === 'ArrowDown' || e.key === 'Down') {
-                gameState.keys.downPressed = true;
-            } else if (e.key === 'w' || e.key === 'W') {
-                gameState.keys.wPressed = true;
-            } else if (e.key === 's' || e.key === 'S') {
-                gameState.keys.sPressed = true;
-            }
-        };
-
-        const handleKeyUp = (e) => {
-            const gameState = gameStateRef.current;
-            if (e.key === 'ArrowUp' || e.key === 'Up') {
-                gameState.keys.upPressed = false;
-            } else if (e.key === 'ArrowDown' || e.key === 'Down') {
-                gameState.keys.downPressed = false;
-            } else if (e.key === 'w' || e.key === 'W') {
-                gameState.keys.wPressed = false;
-            } else if (e.key === 's' || e.key === 'S') {
-                gameState.keys.sPressed = false;
-            }
-        };
-
-        document.addEventListener('keydown', handleKeyDown);
-        document.addEventListener('keyup', handleKeyUp);
-
-        // WebRTC-Setup für Online-Modus
-        if (gameMode === 'online-multiplayer') {
-            console.log('🎮 Initialisiere Online-Multiplayer mit initialIsHost =', initialIsHost);
-            isHostRef.current = initialIsHost;
-            setIsHostState(initialIsHost);
-            setupWebRTC();
-        }
-
-        // Hilfsfunktionen für WebRTC-Verbindung
-        const setupWebRTC = () => {
-            console.log('🎮 Starte Online-Multiplayer Setup');
-
-            // Überprüfen, ob wir einen Socket von außen bekommen haben
-            if (!socketRef.current) {
-                console.error('⚠️ Kein Socket übergeben! WebRTC-Setup nicht möglich.');
-                return;
-            }
-
-            console.log('🔌 Verwende vorhandenen Socket mit ID:', socketRef.current.id);
-            console.log('🏠 Raumverbindung bereits hergestellt:', currentRoomIdRef.current);
-
-            // Bestehende Event-Handler entfernen, um Duplikate zu vermeiden
-            socketRef.current.off('offer');
-            socketRef.current.off('answer');
-            socketRef.current.off('iceCandidate');
-            socketRef.current.off('error');
-            socketRef.current.off('peerDisconnected');
-
-            // Weitere Socket.io Event-Handler für WebRTC-Signalisierung
-            setupWebRTCEventHandlers();
-
-            // PeerConnection direkt initialisieren
-            initializePeerConnection(isHostRef.current);
-        };
-
-        const setupWebRTCEventHandlers = () => {
-            socketRef.current.on('offer', async (data) => {
-                console.log('📩 SDP-Angebot empfangen:', data);
-
-                try {
-                    // Überprüfen, ob die PeerConnection bereits existiert
-                    if (!peerConnectionRef.current) {
-                        // Falls die Role noch nicht gesetzt wurde, nutze eine temporäre Rolle
-                        // Der Empfänger eines Angebots ist immer der Gast
-                        console.log('⚠️ PeerConnection noch nicht initialisiert, erstelle sie jetzt');
-                        isHostRef.current = false; // Wenn wir ein Angebot erhalten, sind wir der Gast
-                        setIsHostState(false);
-                        await initializePeerConnection(false);
-                    }
-
-                    // Jetzt können wir das Remote-Angebot setzen
-                    await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data));
-                    console.log('📩 Remote-Beschreibung gesetzt, erstelle Antwort');
-                    remoteDescriptionSetRef.current = true;
-
-                    // Gepufferte ICE-Kandidaten hinzufügen
-                    await addPendingIceCandidates();
-
-                    const answer = await peerConnectionRef.current.createAnswer();
-                    console.log('📩 SDP-Antwort erstellt');
-
-                    await peerConnectionRef.current.setLocalDescription(answer);
-                    console.log('📩 Lokale Beschreibung gesetzt, sende Antwort');
-
-                    // Kurze Verzögerung für stabileres Signaling
-                    setTimeout(() => {
-                        if (socketRef.current && socketRef.current.connected) {
-                            socketRef.current.emit('answer', peerConnectionRef.current.localDescription);
-                        } else {
-                            console.error('⚠️ Socket nicht verbunden - Antwort konnte nicht gesendet werden');
-                        }
-                    }, 300);
-                } catch (error) {
-                    console.error('📩 Fehler beim Verarbeiten des Angebots:', error);
-                }
-            });
-
-            socketRef.current.on('answer', async (data) => {
-                console.log('📩 SDP-Antwort empfangen:', data);
-                try {
-                    // Überprüfen, ob die PeerConnection bereits existiert
-                    if (!peerConnectionRef.current) {
-                        console.error('⚠️ Keine PeerConnection für die Antwort vorhanden');
-                        return;
-                    }
-
-                    await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data));
-                    remoteDescriptionSetRef.current = true;
-                    console.log('📩 Remote-Beschreibung gesetzt');
-
-                    // Gepufferte ICE-Kandidaten hinzufügen
-                    await addPendingIceCandidates();
-                } catch (error) {
-                    console.error('📩 Fehler beim Verarbeiten der Antwort:', error);
-                }
-            });
-
-            socketRef.current.on('iceCandidate', async (data) => {
-                console.log('🧊 ICE-Kandidat empfangen:', data);
-
-                // Kandidat zur Liste hinzufügen
-                pendingCandidatesRef.current.push(data);
-
-                // Nur hinzufügen, wenn RemoteDescription gesetzt ist
-                if (peerConnectionRef.current && remoteDescriptionSetRef.current) {
-                    await addPendingIceCandidates();
-                } else {
-                    console.log('⚠️ ICE-Kandidat für später gespeichert, warte auf Remote Description');
-                }
-            });
-
-            socketRef.current.on('error', ({message}) => {
-                console.error('❌ Server-Fehler:', message);
-            });
-
-            socketRef.current.on('peerDisconnected', () => {
-                console.log('👋 Gegner hat Verbindung getrennt');
-            });
-        };
-
-        const cleanupWebRTC = () => {
-            console.log('🧹 Räume WebRTC-Ressourcen auf');
-
-            // Datenkanal schließen
-            if (dataChannelRef.current) {
-                console.log('🧹 Schließe Datenkanal');
-                try {
-                    dataChannelRef.current.close();
-                } catch (e) {
-                    console.error('Fehler beim Schließen des Datenkanals:', e);
-                }
-                dataChannelRef.current = null;
-            }
-
-            // Peer Connection schließen
-            if (peerConnectionRef.current) {
-                console.log('🧹 Schließe Peer-Verbindung');
-                try {
-                    peerConnectionRef.current.close();
-                } catch (e) {
-                    console.error('Fehler beim Schließen der Peer-Verbindung:', e);
-                }
-                peerConnectionRef.current = null;
-            }
-
-            // Wir trennen den Socket NICHT, da er von der übergeordneten Komponente verwaltet wird
-            // Stattdessen entfernen wir nur die Event-Listener
-            if (socketRef.current) {
-                console.log('🧹 Entferne Socket-Event-Listener');
-                try {
-                    socketRef.current.off('offer');
-                    socketRef.current.off('answer');
-                    socketRef.current.off('iceCandidate');
-                    socketRef.current.off('error');
-                    socketRef.current.off('peerDisconnected');
-                } catch (e) {
-                    console.error('Fehler beim Entfernen der Socket-Event-Listener:', e);
-                }
-                // Socket-Referenz nicht löschen, da sie von außen kommt
-            }
-        };
-
-        // Spielschleife starten
-        resetBall();
-        gameLoop();
-
-        // Aufräumen beim Unmount
-        return () => {
-            document.removeEventListener('keydown', handleKeyDown);
-            document.removeEventListener('keyup', handleKeyUp);
-            window.removeEventListener('resize', resizeCanvas);
-
-            // Animation-Frame abbrechen
-            if (requestRef.current) {
-                cancelAnimationFrame(requestRef.current);
-                requestRef.current = null;
-            }
-
-            // WebRTC aufräumen, aber Socket nicht trennen
-            if (gameMode === 'online-multiplayer') {
-                cleanupWebRTC();
-            }
-        };
-    }, []);
 
     // Punktestand-Anzeige
     let scoreText = '';

@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import './PlayerProfile.css';
 
-const PlayerProfile = ({ onProfileSubmit }) => {
-    const [playerName, setPlayerName] = useState('');
+const PlayerProfile = ({playerName: initialPlayerName, onSave, onProfileSubmit, onBack}) => {
+    const [playerName, setPlayerName] = useState(initialPlayerName || '');
     const [errorMessage, setErrorMessage] = useState('');
     const [savedProfiles, setSavedProfiles] = useState([]);
 
@@ -15,8 +15,10 @@ const PlayerProfile = ({ onProfileSubmit }) => {
         const lastProfile = localStorage.getItem('pongLastProfile');
         if (lastProfile) {
             setPlayerName(lastProfile);
+        } else if (initialPlayerName) {
+            setPlayerName(initialPlayerName);
         }
-    }, []);
+    }, [initialPlayerName]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -49,8 +51,13 @@ const PlayerProfile = ({ onProfileSubmit }) => {
 
         localStorage.setItem(`pongStats_${playerName}`, JSON.stringify(playerStats));
 
-        // Übermittle den Namen an die Parent-Komponente
-        onProfileSubmit(playerName);
+        // Übermittle den Namen an die Parent-Komponente (Unterstützt beide Callback-Namen)
+        if (onSave) {
+            onSave(playerName);
+        }
+        if (onProfileSubmit) {
+            onProfileSubmit(playerName);
+        }
     };
 
     const handleProfileSelect = (name) => {
@@ -92,6 +99,12 @@ const PlayerProfile = ({ onProfileSubmit }) => {
                 )}
 
                 <button type="submit" className="button">Spielen</button>
+                {onBack && (
+                    <button type="button" className="button" onClick={onBack}
+                            style={{marginTop: '10px', backgroundColor: '#757575'}}>
+                        Zurück
+                    </button>
+                )}
             </form>
         </div>
     );

@@ -10,9 +10,13 @@ const GameOverScreen = ({
                             gameMode,
                             isHost,
                             ballExchanges,
+                            ballExchangeCount, // Zusätzlicher Parameter für Kompatibilität
                             gameStartTime
                         }) => {
     let winnerText = '';
+
+    // Verwendung von ballExchanges oder ballExchangeCount (für Kompatibilität)
+    const exchanges = ballExchanges || ballExchangeCount || 0;
 
     if (winner === 'left') {
         if (gameMode === 'singleplayer') {
@@ -60,7 +64,7 @@ const GameOverScreen = ({
                 </div>
                 <div className="stat-item">
                     <span className="stat-label">Ballwechsel:</span>
-                    <span className="stat-value">{ballExchanges}</span>
+                    <span className="stat-value">{exchanges}</span>
                 </div>
             </div>
 

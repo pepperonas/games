@@ -19,6 +19,7 @@ function App() {
     const [winData, setWinData] = useState({ winner: '', isLocalPlayerWinner: false });
     const [ballExchangeCount, setBallExchangeCount] = useState(0);
     const [playerName, setPlayerName] = useState(localStorage.getItem('playerName') || 'Spieler');
+    const [gameStartTime, setGameStartTime] = useState(null); // Hinzugefügt für GameOverScreen
 
     // Beim ersten Laden den Spielernamen aus dem lokalen Speicher laden
     useEffect(() => {
@@ -46,6 +47,7 @@ function App() {
             setDifficulty(selectedDifficulty);
             setCurrentScreen('game');
             setBallExchangeCount(0);
+            setGameStartTime(new Date()); // Spielstartzeit setzen
         }
     };
 
@@ -55,6 +57,7 @@ function App() {
         socketManager.setIsHost(host);
         setCurrentScreen('game');
         setBallExchangeCount(0);
+        setGameStartTime(new Date()); // Spielstartzeit setzen
     };
 
     const handleGameOver = (winner, isLocalPlayerWinner) => {
@@ -74,6 +77,7 @@ function App() {
         setResetCount(prev => prev + 1);
         setCurrentScreen('game');
         setBallExchangeCount(0);
+        setGameStartTime(new Date()); // Spielstartzeit zurücksetzen
     };
 
     const handleBallExchange = () => {
@@ -115,6 +119,7 @@ function App() {
                     playerName={playerName}
                     onSave={handleSaveProfile}
                     onBack={() => setCurrentScreen('start')}
+                    onProfileSubmit={handleSaveProfile} // Zusätzlicher Prop für Kompatibilität
                 />
             )}
 
@@ -135,6 +140,8 @@ function App() {
                     resetCount={resetCount}
                     playerName={playerName}
                     onMainMenu={handleMainMenu}
+                    socket={socketManager.getSocket()} // Socket über socketManager
+                    roomId={socketManager.roomId} // Raum-ID aus socketManager
                 />
             )}
 
@@ -143,15 +150,19 @@ function App() {
                     winner={winData.winner}
                     isLocalPlayerWinner={winData.isLocalPlayerWinner}
                     gameMode={gameMode}
+                    isHost={isHost} // Zusätzlich
                     ballExchangeCount={ballExchangeCount}
+                    ballExchanges={ballExchangeCount} // Für Kompatibilität beide Namen
                     onRestart={handleRestart}
                     onMainMenu={handleMainMenu}
+                    gameStartTime={gameStartTime} // Zusätzlich
                 />
             )}
 
             {currentScreen === 'stats' && (
                 <StatsScreen
                     onBack={() => setCurrentScreen('start')}
+                    playerName={playerName} // Zusätzlich
                 />
             )}
 
