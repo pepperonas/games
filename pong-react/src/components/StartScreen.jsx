@@ -1,5 +1,5 @@
-// Änderungen für StartScreen.jsx
-import React, { useEffect, useState } from 'react';
+// components/StartScreen.jsx
+import React, {useEffect, useState} from 'react';
 import './StartScreen.css';
 
 const StartScreen = ({
@@ -7,143 +7,101 @@ const StartScreen = ({
                          onStartLocalMultiplayer,
                          onSetupOnlineMultiplayer,
                          onShowStats,
+                         onShowDebug, // Neuer Prop für den Debug-Button
                          playerName,
                          isMobile,
                          isLandscape,
-                         onSwitchPlayer // Neue Prop für den Spielerwechsel
+                         onSwitchPlayer
                      }) => {
-    const [isWideDevice, setIsWideDevice] = useState(false);
-    const [showPlayerList, setShowPlayerList] = useState(false);
-    const [availablePlayers, setAvailablePlayers] = useState([]);
+    const [showPlayerMenu, setShowPlayerMenu] = useState(false);
+    const [savedPlayers, setSavedPlayers] = useState([]);
 
-    // Laden der verfügbaren Spieler aus localStorage
+    // Lade gespeicherte Spieler aus localStorage
     useEffect(() => {
-        const loadPlayers = () => {
-            const profiles = JSON.parse(localStorage.getItem('pongProfiles')) || [];
-            setAvailablePlayers(profiles);
+        const loadSavedPlayers = () => {
+            const players = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                // Nur Spieler-Einträge berücksichtigen (nicht die Einträge für andere Daten)
+                if (key && key.startsWith('pongPlayer_')) {
+                    const playerName = key.replace('pongPlayer_', '');
+                    players.push(playerName);
+                }
+            }
+            setSavedPlayers(players);
         };
 
-        loadPlayers();
+        loadSavedPlayers();
     }, []);
 
-    // Prüft, ob das Gerät sehr breit ist (wie S24 Ultra)
-    useEffect(() => {
-        const checkWideDevice = () => {
-            const isWide = window.innerWidth >= 1200 && window.innerHeight <= 500;
-            setIsWideDevice(isWide);
-        };
-
-        checkWideDevice();
-        window.addEventListener('resize', checkWideDevice);
-        window.addEventListener('orientationchange', () => {
-            setTimeout(checkWideDevice, 100);
-        });
-
-        return () => {
-            window.removeEventListener('resize', checkWideDevice);
-            window.removeEventListener('orientationchange', checkWideDevice);
-        };
-    }, []);
-
-    // Spielerwechsel initiieren
-    const handlePlayerSwitch = () => {
-        if (availablePlayers.length <= 1) {
-            // Wenn keine anderen Spieler verfügbar sind, direkt zum Profilbildschirm
-            onSwitchPlayer();
-        } else {
-            // Sonst Spielerliste anzeigen
-            setShowPlayerList(!showPlayerList);
-        }
+    const handlePlayerSelect = (playerName) => {
+        onSwitchPlayer(playerName);
+        setShowPlayerMenu(false);
     };
 
-    // Spieler auswählen
-    const selectPlayer = (name) => {
-        onSwitchPlayer(name);
-        setShowPlayerList(false);
+    const handleNewPlayer = () => {
+        onSwitchPlayer(); // Ohne Parameter, um zum Profile-Screen zu wechseln
+        setShowPlayerMenu(false);
     };
-
-    // Neuen Spieler erstellen
-    const createNewPlayer = () => {
-        onSwitchPlayer(); // Zurück zum Profilbildschirm ohne Spieler auszuwählen
-        setShowPlayerList(false);
-    };
-
-    // CSS-Klassen basierend auf Gerätetyp und Orientierung
-    const screenClasses = `start-screen ${isLandscape ? 'landscape-mode' : ''} ${isWideDevice ? 'wide-device' : ''}`;
 
     return (
-        <div className={screenClasses}>
-            <h1>PONG</h1>
+        <div className="start-screen">
+            <h1>Pong</h1>
 
             <div className="player-welcome">
-                Willkommen, <span className="player-name">{playerName}</span>!
-                <button
-                    className="switch-player-btn"
-                    onClick={handlePlayerSwitch}
-                    aria-label="Spieler wechseln"
-                >
-                    <span className="switch-icon">⟳</span>
-                </button>
+                <p>Willkommen, <strong
+                    onClick={() => setShowPlayerMenu(!showPlayerMenu)}>{playerName} ▼</strong></p>
+
+                {showPlayerMenu && (
+                    <div className="player-menu">
+                        <div className="player-list">
+                            {savedPlayers.map((name) => (
+                                <div
+                                    key={name}
+                                    className={`player-item ${name === playerName ? 'active' : ''}`}
+                                    onClick={() => handlePlayerSelect(name)}
+                                >
+                                    {name}
+                                </div>
+                            ))}
+                            <div className="player-item new-player" onClick={handleNewPlayer}>
+                                + Neuer Spieler
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {/* Spielerliste Dropdown/Popover */}
-            {showPlayerList && (
-                <div className="player-list-container">
-                    <div className="player-list">
-                        <h3>Spieler wechseln</h3>
-                        <ul>
-                            {availablePlayers.map((player, index) => (
-                                <li key={index} className={player === playerName ? 'current-player' : ''}>
-                                    <button onClick={() => selectPlayer(player)}>
-                                        {player} {player === playerName && <span className="current-mark">✓</span>}
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                        <button className="new-player-btn" onClick={createNewPlayer}>
-                            + Neuer Spieler
-                        </button>
-                        <button className="close-list-btn" onClick={() => setShowPlayerList(false)}>
-                            Schließen
-                        </button>
+            <div className="game-modes">
+                <h2>Spielmodus wählen</h2>
+
+                <div className="mode-section">
+                    <h3>Einzelspieler</h3>
+                    <div className="difficulty-buttons">
+                        <button onClick={() => onStartSinglePlayer(2)}>Einfach</button>
+                        <button onClick={() => onStartSinglePlayer(3)}>Mittel</button>
+                        <button onClick={() => onStartSinglePlayer(5)}>Schwer</button>
                     </div>
                 </div>
-            )}
 
-            <div className="button-group">
-                {/* Die drei Schwierigkeits-Buttons immer in einer horizontalen Reihe */}
-                <div className="difficulty-buttons">
-                    <button onClick={() => onStartSinglePlayer(2)} className="button easy-btn">Einfach</button>
-                    <button onClick={() => onStartSinglePlayer(3)} className="button medium-btn">Mittel</button>
-                    <button onClick={() => onStartSinglePlayer(5)} className="button hard-btn">Schwer</button>
-                </div>
-
-                {/* Die Multiplayer-Buttons darunter */}
-                <div className="multiplayer-buttons">
-                    <button onClick={onStartLocalMultiplayer} className="button multiplayer-local-btn">Multiplayer (Lokal)</button>
-                    <button onClick={onSetupOnlineMultiplayer} className="button multiplayer-online-btn">Multiplayer (Online)</button>
-                </div>
-
-                {/* Statistik-Button */}
-                <div className="stats-button-container">
-                    <button onClick={onShowStats} className="button stats-btn">Statistiken</button>
+                <div className="mode-section">
+                    <h3>Mehrspieler</h3>
+                    <div className="multiplayer-buttons">
+                        <button onClick={onStartLocalMultiplayer}>Lokal (2 Spieler)</button>
+                        <button onClick={onSetupOnlineMultiplayer}>Online-Multiplayer</button>
+                    </div>
                 </div>
             </div>
 
-            {(!isLandscape || (isLandscape && !isWideDevice) || (isLandscape && window.innerHeight > 450)) && (
-                <div className="controls-info">
-                    {isMobile ? (
-                        <>
-                            <p>Bedienung über Touch-Steuerelemente am Bildschirmrand</p>
-                            <p>Tippe auf die Pfeile ▲▼</p>
-                        </>
-                    ) : (
-                        <>
-                            <p>Einzelspieler: Pfeiltasten (Hoch/Runter)</p>
-                            <p>Multiplayer (Lokal): Spieler 1 - W/S, Spieler 2 - Pfeiltasten (Hoch/Runter)</p>
-                            <p>Multiplayer (Online): W/S oder Pfeiltasten (Hoch/Runter)</p>
-                        </>
-                    )}
+            <div className="bottom-buttons">
+                <button className="stats-button" onClick={onShowStats}>Statistiken</button>
+                {/* Debug-Button hinzufügen */}
+                <button className="debug-button" onClick={onShowDebug}>WebRTC Debug</button>
+            </div>
+
+            {isMobile && !isLandscape && (
+                <div className="orientation-warning">
+                    <p>Für ein besseres Spielerlebnis, drehe dein Gerät ins Querformat.</p>
                 </div>
             )}
         </div>

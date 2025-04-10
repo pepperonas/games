@@ -9,7 +9,17 @@ const PADDLE_HEIGHT = 100;
 const PADDLE_WIDTH = 15;
 const BALL_RADIUS = 10;
 const WINNING_SCORE = 5;
+
+// Korrekte Socket.io-Konfiguration
 const SIGNALING_SERVER = 'https://mrx3k1.de';
+const SOCKET_OPTIONS = {
+    path: '/socket.io/',
+    transports: ['websocket', 'polling'],
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+    timeout: 10000
+};
 
 const PongGame = ({
                       gameMode,
@@ -221,15 +231,8 @@ const PongGame = ({
         function setupWebRTC() {
             console.log('🎮 Starte Online-Multiplayer Setup');
 
-            // Socket.io-Verbindung initialisieren
-            socketRef.current = io(SIGNALING_SERVER, {
-                path: '/socket.io/',
-                transports: ['websocket', 'polling'],
-                reconnection: true,
-                reconnectionAttempts: 5,
-                reconnectionDelay: 1000,
-                timeout: 10000
-            });
+            // Socket.io-Verbindung initialisieren - KORRIGIERTE ZEILE
+            socketRef.current = io(SIGNALING_SERVER, SOCKET_OPTIONS);
 
             // Socket.io Event-Handler
             socketRef.current.on('connect', () => {
@@ -342,26 +345,49 @@ const PongGame = ({
                 return;
             }
 
-            // Event Handler
+            // Event Handler mit robusterer Fehlerbehandlung
             peerConnectionRef.current.onicecandidate = (event) => {
                 if (event.candidate) {
                     console.log('🧊 Neuer ICE-Kandidat gefunden');
-                    socketRef.current.emit('iceCandidate', event.candidate);
+                    // Überprüfe, ob socketRef.current existiert und verbunden ist
+                    if (socketRef.current && socketRef.current.connected) {
+                        socketRef.current.emit('iceCandidate', event.candidate);
+                    } else {
+                        console.warn('⚠️ Socket nicht verfügbar - ICE-Kandidat kann nicht gesendet werden');
+                    }
                 } else {
                     console.log('🧊 ICE-Kandidatensammlung abgeschlossen');
                 }
             };
 
             peerConnectionRef.current.oniceconnectionstatechange = () => {
-                console.log('🧊 ICE-Status geändert:', peerConnectionRef.current.iceConnectionState);
-                setConnectionStatus(peerConnectionRef.current.iceConnectionState);
+                const state = peerConnectionRef.current.iceConnectionState;
+                console.log('🧊 ICE-Status geändert:', state);
+                setConnectionStatus(state);
+
+                // Zusätzliche Informationen für Fehlersuche
+                if (state === 'failed' || state === 'disconnected' || state === 'closed') {
+                    console.warn('⚠️ ICE-Verbindung problematisch:', state);
+                }
             };
 
             peerConnectionRef.current.onconnectionstatechange = () => {
-                console.log('🔄 Verbindungsstatus geändert:', peerConnectionRef.current.connectionState);
+                const state = peerConnectionRef.current.connectionState;
+                console.log('🔄 Verbindungsstatus geändert:', state);
+
+                if (state === 'connected') {
+                    console.log('✅ WebRTC-Verbindung erfolgreich hergestellt!');
+                } else if (state === 'failed') {
+                    console.error('❌ WebRTC-Verbindung fehlgeschlagen!');
+                }
             };
 
-            // Datenkanal einrichten mit Fehlerbehandlung
+            // Zusätzliches Ereignis für Fehlersuche
+            peerConnectionRef.current.onicecandidateerror = (event) => {
+                console.error('🧊 ICE-Kandidat Fehler:', event);
+            };
+
+            // Datenkanal einrichten mit verbesserter Fehlerbehandlung
             try {
                 if (isHostState) {
                     console.log('📢 Erstelle Datenkanal (Host)');
@@ -383,11 +409,22 @@ const PongGame = ({
 
             // Wenn Host, SDP-Angebot senden
             if (isHostState) {
-                createOffer();
+                console.log('🚀 Starte Verbindungsprozess als Host');
+                // Verzögerung hinzufügen, um sicherzustellen, dass alles initialisiert ist
+                setTimeout(() => {
+                    createOffer();
+                }, 500);
+            } else {
+                console.log('⏳ Warte auf Angebot vom Host');
             }
         }
 
         function setupDataChannel() {
+            if (!dataChannelRef.current) {
+                console.error('Datenkanal nicht verfügbar für Setup');
+                return;
+            }
+
             console.log('📢 Richte Datenkanal ein. Status:', dataChannelRef.current.readyState);
 
             dataChannelRef.current.onopen = () => {
@@ -494,13 +531,22 @@ const PongGame = ({
         async function createOffer() {
             try {
                 console.log('📤 Erstelle SDP-Angebot');
+                if (!peerConnectionRef.current) {
+                    console.error('Keine PeerConnection vorhanden für createOffer');
+                    return;
+                }
+
                 const offer = await peerConnectionRef.current.createOffer();
                 console.log('📤 SDP-Angebot erstellt');
 
                 await peerConnectionRef.current.setLocalDescription(offer);
                 console.log('📤 Lokale Beschreibung gesetzt, sende an Signaling-Server');
 
-                socketRef.current.emit('offer', peerConnectionRef.current.localDescription);
+                if (socketRef.current && socketRef.current.connected) {
+                    socketRef.current.emit('offer', peerConnectionRef.current.localDescription);
+                } else {
+                    console.error('Socket nicht verbunden - Angebot konnte nicht gesendet werden');
+                }
             } catch (error) {
                 console.error('📤 Fehler beim Erstellen des Angebots:', error);
             }

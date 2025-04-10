@@ -1,4 +1,4 @@
-// App.jsx - Mit Spieler-Profil und Statistiken
+// App.jsx - Mit Spieler-Profil, Statistiken und Debug-Screen
 import React, {useEffect, useState} from 'react';
 import './App.css';
 import PongGame from './components/PongGame';
@@ -7,11 +7,12 @@ import GameOverScreen from './components/GameOverScreen';
 import OnlineConnectionScreen from './components/OnlineConnectionScreen';
 import PlayerProfile from './components/PlayerProfile';
 import StatsScreen from './components/StatsScreen';
+import PongDebug from './components/PongDebug'; // Neue Debug-Komponente
 import StatsService from './services/StatsService';
 
 const App = () => {
     const [gameState, setGameState] = useState({
-        screen: 'profile', // 'profile', 'start', 'game', 'gameOver', 'onlineConnection', 'stats'
+        screen: 'profile', // 'profile', 'start', 'game', 'gameOver', 'onlineConnection', 'stats', 'debug'
         gameMode: 'singleplayer', // 'singleplayer', 'local-multiplayer', 'online-multiplayer'
         difficulty: 3, // 2=easy, 3=medium, 5=hard
         winner: '',
@@ -27,6 +28,17 @@ const App = () => {
     const [gameStartTime, setGameStartTime] = useState(null);
     const [ballExchanges, setBallExchanges] = useState(0);
     const [resetCounter, setResetCounter] = useState(0); // Counter für den Neustart des Spiels
+
+    // Prüfe URL-Parameter für Debug-Modus
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('debug') === 'true') {
+            setGameState(prevState => ({
+                ...prevState,
+                screen: 'debug'
+            }));
+        }
+    }, []);
 
     // Erkennen, ob es sich um ein mobiles Gerät handelt und Orientation prüfen
     useEffect(() => {
@@ -210,6 +222,14 @@ const App = () => {
         });
     };
 
+    // Neue Funktion zum Anzeigen des Debug-Screens
+    const showDebugScreen = () => {
+        setGameState({
+            ...gameState,
+            screen: 'debug'
+        });
+    };
+
     const handleBallExchange = () => {
         setBallExchanges(prevCount => {
             const newCount = prevCount + 1;
@@ -234,6 +254,7 @@ const App = () => {
                     onStartLocalMultiplayer={startLocalMultiplayerGame}
                     onSetupOnlineMultiplayer={setupOnlineMultiplayer}
                     onShowStats={showStatsScreen}
+                    onShowDebug={showDebugScreen} // Neuer Prop für Debug
                     playerName={playerName}
                     isMobile={isMobile}
                     isLandscape={isLandscape}
@@ -285,6 +306,11 @@ const App = () => {
                     playerName={playerName}
                     onBack={returnToMainMenu}
                 />
+            )}
+
+            {/* Neuer Debug-Screen */}
+            {gameState.screen === 'debug' && (
+                <PongDebug onBack={returnToMainMenu} />
             )}
 
             <footer className="footer">
