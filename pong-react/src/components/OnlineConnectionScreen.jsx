@@ -1,63 +1,121 @@
 // components/OnlineConnectionScreen.jsx
 import React, {useEffect, useRef, useState} from 'react';
-import io from 'socket.io-client';
 import './OnlineConnectionScreen.css';
-
-const SIGNALING_SERVER = 'https://mrx3k1.de';
+import { socketManager } from '../socket-connection';
 
 const OnlineConnectionScreen = ({onStartGame, onBack}) => {
     const [connectionId, setConnectionId] = useState('Wird generiert...');
     const [isConnecting, setIsConnecting] = useState(false);
     const [error, setError] = useState('');
+    const [isWaiting, setIsWaiting] = useState(false);
     const connectionInputRef = useRef(null);
     const socketRef = useRef(null);
+    const firstConnectRef = useRef(true);
 
     useEffect(() => {
-        // Socket.io-Verbindung herstellen
-        socketRef.current = io(SIGNALING_SERVER, {
-            path: '/socket.io/',
-            transports: ['websocket', 'polling'],
-            reconnection: true,
-            reconnectionAttempts: 5,
-            reconnectionDelay: 1000,
-            timeout: 10000
-        });
+        console.log('OnlineConnectionScreen wird initialisiert');
+        let mounted = true;
 
-        // Event-Handler für Socket.io
-        socketRef.current.on('connect', () => {
-            console.log('Mit Signaling-Server verbunden');
-            // Raum erstellen
-            socketRef.current.emit('createRoom');
-        });
+        // Socket über den socketManager abrufen
+        try {
+            socketRef.current = socketManager.getSocket();
+            socketManager.logStatus();
 
-        socketRef.current.on('roomCreated', ({roomId}) => {
-            setConnectionId(roomId);
-        });
+            // Event-Handler für Socket.io
+            socketRef.current.on('connect', () => {
+                if (!mounted) return;
+                console.log('Mit Signaling-Server verbunden, Socket ID:', socketRef.current.id);
 
-        socketRef.current.on('gameReady', () => {
-            // Spiel kann beginnen
-            console.log('Spiel ist bereit!');
-        });
+                // Nur beim ersten Verbinden automatisch einen Raum erstellen
+                if (firstConnectRef.current) {
+                    firstConnectRef.current = false;
+                    console.log('Erstelle neuen Raum (automatisch)');
+                    socketRef.current.emit('createRoom');
+                }
+            });
 
-        socketRef.current.on('playerRole', ({isHost}) => {
-            // Starte das Spiel mit der zugewiesenen Rolle
-            onStartGame(isHost);
-        });
+            socketRef.current.on('roomCreated', ({roomId}) => {
+                if (!mounted) return;
+                console.log('Raum wurde erstellt:', roomId);
+                setConnectionId(roomId);
+                socketManager.setRoomId(roomId);
+                setIsWaiting(true);
+            });
 
-        socketRef.current.on('error', ({message}) => {
-            setError(message);
-            setIsConnecting(false);
-        });
+            socketRef.current.on('gameReady', () => {
+                // Spiel ist bereit, aber wir warten auf die Rollenzuweisung
+                if (!mounted) return;
+                console.log('Spiel ist bereit!');
+            });
+
+            socketRef.current.on('playerRole', ({isHost}) => {
+                if (!mounted) return;
+                console.log('Spielerrolle zugewiesen:', isHost ? 'Host' : 'Gast');
+
+                // Speichere die Host-Rolle im socketManager
+                socketManager.setIsHost(isHost);
+
+                // Stelle sicher, dass die Verbindung hergestellt wurde, bevor wir weitergehen
+                setTimeout(() => {
+                    if (mounted) {
+                        setIsConnecting(false);
+                        setIsWaiting(false);
+                        onStartGame(isHost);
+                    }
+                }, 500);
+            });
+
+            socketRef.current.on('error', ({message}) => {
+                if (!mounted) return;
+                console.error('Server-Fehler:', message);
+                setError(message);
+                setIsConnecting(false);
+                setIsWaiting(false);
+            });
+
+            // Verbindungsprobleme behandeln
+            socketRef.current.on('connect_error', (err) => {
+                if (!mounted) return;
+                console.error('Verbindungsfehler:', err);
+                setError('Verbindungsfehler: Bitte prüfe deine Internetverbindung.');
+                setIsConnecting(false);
+            });
+
+            socketRef.current.on('disconnect', (reason) => {
+                if (!mounted) return;
+                console.log('Verbindung zum Server getrennt:', reason);
+                setError(`Verbindung zum Server unterbrochen: ${reason}`);
+                setIsConnecting(false);
+                setIsWaiting(false);
+            });
+
+        } catch (err) {
+            console.error('Fehler beim Initialisieren der Socket.io-Verbindung:', err);
+            if (mounted) {
+                setError('Fehler beim Verbinden mit dem Server. Bitte versuche es später erneut.');
+            }
+        }
 
         return () => {
             // Aufräumen beim Unmount
+            mounted = false;
+            console.log('OnlineConnectionScreen wird aufgeräumt');
+
+            // WICHTIG: Socket-Verbindung NICHT trennen, nur Event-Listener entfernen
             if (socketRef.current) {
-                socketRef.current.disconnect();
+                console.log('Socket-Event-Listener werden entfernt');
+                // Entferne alle Screen-spezifischen Event-Listener
+                socketRef.current.off('roomCreated');
+                socketRef.current.off('gameReady');
+                socketRef.current.off('playerRole');
+                socketRef.current.off('error');
             }
         };
     }, [onStartGame]);
 
     const copyRoomIdToClipboard = () => {
+        if (connectionId === 'Wird generiert...') return;
+
         navigator.clipboard.writeText(connectionId)
             .then(() => {
                 // Feedback für den Benutzer
@@ -71,6 +129,7 @@ const OnlineConnectionScreen = ({onStartGame, onBack}) => {
             })
             .catch(err => {
                 console.error('Fehler beim Kopieren:', err);
+                setError('Kopieren nicht möglich. Bitte die ID manuell kopieren.');
             });
     };
 
@@ -85,15 +144,17 @@ const OnlineConnectionScreen = ({onStartGame, onBack}) => {
         setIsConnecting(true);
         setError('');
 
-        // Debugging-Events hinzufügen
-        socketRef.current.on('connect_error', (error) => {
-            console.error('Verbindungsfehler:', error);
-            setError('Verbindungsfehler: ' + error.message);
-            setIsConnecting(false);
-        });
+        // Versuche dem Raum beizutreten
+        console.log('Versuche Raum beizutreten:', roomId);
 
-        // Einem Raum beitreten
-        console.log('Versuche, Raum beizutreten:', roomId);
+        if (!socketRef.current || !socketRef.current.connected) {
+            setError('Nicht mit dem Server verbunden. Bitte Seite neu laden.');
+            setIsConnecting(false);
+            return;
+        }
+
+        // Speichere die Raum-ID im socketManager
+        socketManager.setRoomId(roomId);
         socketRef.current.emit('joinRoom', {roomId});
     };
 
@@ -108,10 +169,13 @@ const OnlineConnectionScreen = ({onStartGame, onBack}) => {
                     id="copy-btn"
                     onClick={copyRoomIdToClipboard}
                     className="button copy-btn"
+                    disabled={connectionId === 'Wird generiert...'}
                 >
                     Kopieren
                 </button>
-                <div className={`waiting-message pulse`}>Warte auf Verbindung...</div>
+                {isWaiting && (
+                    <div className="waiting-message pulse">Warte auf Verbindung...</div>
+                )}
             </div>
 
             <div className="join-section">
@@ -136,7 +200,13 @@ const OnlineConnectionScreen = ({onStartGame, onBack}) => {
                 <div className="error-message">{error}</div>
             )}
 
-            <button onClick={onBack} className="button back-btn">Zurück</button>
+            <button
+                onClick={onBack}
+                className="button back-btn"
+                disabled={isConnecting}
+            >
+                Zurück
+            </button>
         </div>
     );
 };

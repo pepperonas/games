@@ -1,4 +1,4 @@
-// socket-connection.js - Diese Datei im src-Verzeichnis erstellen
+// socket-connection.js - Socket.io-Verbindungsverwaltung
 
 import { io } from 'socket.io-client';
 
@@ -13,51 +13,110 @@ const SOCKET_OPTIONS = {
     timeout: 10000
 };
 
-// Factory-Funktion zur Erstellung einer Socket-Verbindung
-export const createSocketConnection = () => {
-    try {
-        console.log('Verbinde mit Signaling-Server:', SIGNALING_SERVER);
-        const socket = io(SIGNALING_SERVER, SOCKET_OPTIONS);
+// Singleton-Objekt für die Socket-Verbindung
+export const socketManager = {
+    socket: null,
+    roomId: null,
+    isHost: false,
+    connectionCount: 0,
 
-        // Standard Event-Handler hinzufügen
-        socket.on('connect', () => {
-            console.log('Mit dem Signaling-Server verbunden. Socket ID:', socket.id);
-        });
+    // Socket-Verbindung holen oder erstellen
+    getSocket() {
+        if (!this.socket) {
+            console.log('⚡ SocketManager: Erstelle neue Socket.io-Verbindung');
+            try {
+                this.socket = io(SIGNALING_SERVER, SOCKET_OPTIONS);
 
-        socket.on('connect_error', (error) => {
-            console.error('Verbindungsfehler zum Signaling-Server:', error);
-        });
+                // Standardmäßige Event-Handler hinzufügen
+                this.socket.on('connect', () => {
+                    console.log('⚡ SocketManager: Verbunden mit ID:', this.socket.id);
+                    this.connectionCount++;
+                });
 
-        socket.on('disconnect', (reason) => {
-            console.log('Vom Signaling-Server getrennt. Grund:', reason);
-        });
+                this.socket.on('connect_error', (error) => {
+                    console.error('⚡ SocketManager: Verbindungsfehler:', error);
+                });
 
-        return socket;
-    } catch (error) {
-        console.error('Fehler beim Herstellen der Socket.io-Verbindung:', error);
-        throw error;
+                this.socket.on('disconnect', (reason) => {
+                    console.log('⚡ SocketManager: Verbindung getrennt. Grund:', reason);
+                });
+            } catch (error) {
+                console.error('⚡ SocketManager: Fehler beim Verbinden:', error);
+                throw error;
+            }
+        } else {
+            console.log('⚡ SocketManager: Verwende bestehende Socket-Verbindung, ID:', this.socket.id);
+        }
+
+        return this.socket;
+    },
+
+    // Raum-ID setzen
+    setRoomId(id) {
+        console.log('⚡ SocketManager: Speichere Raum-ID:', id);
+        this.roomId = id;
+    },
+
+    // Host-Status setzen
+    setIsHost(host) {
+        console.log('⚡ SocketManager: Setze Host-Status auf:', host);
+        this.isHost = host;
+    },
+
+    // Socket-Verbindung trennen und Zustand zurücksetzen
+    cleanup() {
+        if (this.socket) {
+            console.log('⚡ SocketManager: Trenne Socket-Verbindung und setze Zustand zurück');
+
+            // Alle Standard-Events entfernen
+            this.socket.off('roomCreated');
+            this.socket.off('gameReady');
+            this.socket.off('playerRole');
+            this.socket.off('offer');
+            this.socket.off('answer');
+            this.socket.off('iceCandidate');
+            this.socket.off('error');
+            this.socket.off('peerDisconnected');
+
+            // Verbindung trennen
+            this.socket.disconnect();
+            this.socket = null;
+            this.roomId = null;
+            this.isHost = false;
+        }
+    },
+
+    // Debug-Info ausgeben
+    logStatus() {
+        console.log('⚡ SocketManager Status:');
+        console.log('  • Verbunden:', this.socket ? 'Ja' : 'Nein');
+        if (this.socket) {
+            console.log('  • Socket ID:', this.socket.id);
+            console.log('  • Socket verbunden:', this.socket.connected);
+        }
+        console.log('  • Raum-ID:', this.roomId);
+        console.log('  • Host:', this.isHost);
+        console.log('  • Verbindungszähler:', this.connectionCount);
     }
 };
 
-// Hilfsfunktion zum Aufräumen der Socket-Verbindung
-export const cleanupSocketConnection = (socket) => {
-    if (socket) {
-        console.log('Räume Socket.io-Verbindung auf');
-        try {
-            // Alle benutzerdefinierten Event-Listener entfernen
-            socket.off('roomCreated');
-            socket.off('gameReady');
-            socket.off('playerRole');
-            socket.off('offer');
-            socket.off('answer');
-            socket.off('iceCandidate');
-            socket.off('error');
-            socket.off('peerDisconnected');
+// Legacy-Funktionen für Abwärtskompatibilität
+export const createSocketConnection = () => {
+    console.log('⚠️ Veraltete Funktion: createSocketConnection wird durch socketManager ersetzt');
+    return socketManager.getSocket();
+};
 
-            // Verbindung trennen
-            socket.disconnect();
-        } catch (e) {
-            console.error('Fehler beim Aufräumen der Socket-Verbindung:', e);
-        }
+export const cleanupSocketConnection = (socket) => {
+    console.log('⚠️ Veraltete Funktion: cleanupSocketConnection wird durch socketManager ersetzt');
+    // Nur lokales Aufräumen, nicht die globale Socket-Instanz trennen
+    if (socket) {
+        socket.off('roomCreated');
+        socket.off('gameReady');
+        socket.off('playerRole');
+        socket.off('offer');
+        socket.off('answer');
+        socket.off('iceCandidate');
+        socket.off('error');
+        socket.off('peerDisconnected');
     }
 };
