@@ -8,6 +8,7 @@
 
 canvas {
     background-color: #1a1b23;
+    border-radius: 8px;
     display: block;
 }
 

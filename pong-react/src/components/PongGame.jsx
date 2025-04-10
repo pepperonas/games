@@ -3,7 +3,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import './PongGame.css';
 import './TouchControls.css';
 import TouchControls from './TouchControls';
-import { socketManager } from '../socket-connection';
+import {socketManager} from '../socket-connection';
 
 const PADDLE_HEIGHT = 100;
 const PADDLE_WIDTH = 15;
@@ -61,13 +61,16 @@ const PongGame = ({
         ballSpeedY: 2,
         leftPaddleY: 200,
         rightPaddleY: 200,
+        // Vorherige Paddel-Positionen für Bewegungserkennung
+        prevLeftPaddleY: 200,
+        prevRightPaddleY: 200,
         scores: {left: 0, right: 0},
         keys: {
             wPressed: false,
             sPressed: false,
             upPressed: false,
             downPressed: false,
-            shiftPressed: false // Neue Eigenschaft für die Shift-Taste
+            shiftPressed: false
         },
         touchControls: {
             leftUp: false,
@@ -85,8 +88,8 @@ const PongGame = ({
         isLocalPlayerWinner: false,
         gameOver: false,
         raindrops: [],
-        lastBallX: 400, // Für Ballwechsel-Tracking
-        lastBallSpeedX: 5 // Für Ballwechsel-Tracking
+        lastBallX: 400,
+        lastBallSpeedX: 5
     });
 
     // Audio Element
@@ -425,8 +428,14 @@ const PongGame = ({
                     case 'syncResponse':
                         console.log('🔄 Synchronisierungsantwort vom Peer:', data);
                         // Zeige die Differenz zwischen lokalem und Remote-Status
-                        const localBall = { x: gameStateRef.current.ballX, y: gameStateRef.current.ballY };
-                        console.log('Differenz: Ball lokal:', localBall, 'Ball remote:', { x: data.ballX, y: data.ballY });
+                        const localBall = {
+                            x: gameStateRef.current.ballX,
+                            y: gameStateRef.current.ballY
+                        };
+                        console.log('Differenz: Ball lokal:', localBall, 'Ball remote:', {
+                            x: data.ballX,
+                            y: data.ballY
+                        });
                         break;
                     case 'gameOver':
                         processGameOverMessage(data);
@@ -683,7 +692,7 @@ const PongGame = ({
         // Versuche, eine neue PeerConnection zu erstellen
         try {
             // Verwende eine lokale Variable für die neue PeerConnection
-            const peerConnection = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+            const peerConnection = new RTCPeerConnection({iceServers: ICE_SERVERS});
             console.log('✅ PeerConnection erfolgreich erstellt');
 
             // Erst nach erfolgreicher Erstellung die Referenz setzen
@@ -984,8 +993,7 @@ const PongGame = ({
 
             // Leicht variieren, damit er nicht in einer horizontalen Linie bleibt
             gameState.ballSpeedY += Math.random() * 0.5;
-        }
-        else if (gameState.ballY + BALL_RADIUS >= 500) {
+        } else if (gameState.ballY + BALL_RADIUS >= 500) {
             // Ball berührt untere Wand
             gameState.ballY = 500 - BALL_RADIUS; // Reposition to avoid sticking
             gameState.ballSpeedY = -Math.abs(gameState.ballSpeedY); // Immer nach oben abprallen
@@ -999,6 +1007,18 @@ const PongGame = ({
     const checkCollisions = () => {
         const gameState = gameStateRef.current;
 
+        // Speichere die vorherigen Paddel-Positionen für Bewegungserkennung
+        const prevLeftPaddleY = gameState.prevLeftPaddleY || gameState.leftPaddleY;
+        const prevRightPaddleY = gameState.prevRightPaddleY || gameState.rightPaddleY;
+
+        // Berechne die Paddelbewegung (positiv = nach unten, negativ = nach oben)
+        const leftPaddleMovement = gameState.leftPaddleY - prevLeftPaddleY;
+        const rightPaddleMovement = gameState.rightPaddleY - prevRightPaddleY;
+
+        // Aktualisiere die vorherigen Positionen für den nächsten Frame
+        gameState.prevLeftPaddleY = gameState.leftPaddleY;
+        gameState.prevRightPaddleY = gameState.rightPaddleY;
+
         // Im Online-Modus prüft nur der Host auf Kollisionen
         if (gameMode === 'online-multiplayer' && !isHostRef.current) {
             return;
@@ -1009,67 +1029,42 @@ const PongGame = ({
         const ballY = gameState.ballY;
         const ballRadius = BALL_RADIUS;
 
-        // Kollisionserkennung für linken Schläger (komplexere Version)
+        // Kollisionserkennung für linken Schläger
         if (ballX - ballRadius <= PADDLE_WIDTH) {
-            // Horizontale Kollision: Ball nahe am linken Schläger
-            // Prüfen, ob der Ball vertikal mit dem Schläger kollidiert
-
-            // Erweiterter Kollisionsbereich: Auch etwas über und unter dem Schläger für eine bessere Eckenkollision
+            // Erweiterter Kollisionsbereich
             const paddleTop = gameState.leftPaddleY - ballRadius * 0.5;
             const paddleBottom = gameState.leftPaddleY + PADDLE_HEIGHT + ballRadius * 0.5;
 
             if (ballY >= paddleTop && ballY <= paddleBottom) {
-                // Prüfe, ob sich der Ball tatsächlich auf den Schläger zubewegt (Richtung links)
+                // Prüfe, ob sich der Ball auf den Schläger zubewegt (Richtung links)
                 if (gameState.ballSpeedX < 0) {
-                    // Prüfe, ob die Richtung des Balls geändert wird (für Ballwechsel-Zählung)
-                    const directionChanged = true;
-
                     // Ball abprallen lassen
-                    gameState.ballX = PADDLE_WIDTH + ballRadius; // Leicht vom Schläger weg positionieren
-                    gameState.ballSpeedX = -gameState.ballSpeedX; // Richtung umkehren
+                    gameState.ballX = PADDLE_WIDTH + ballRadius;
+                    gameState.ballSpeedX = -gameState.ballSpeedX;
 
                     // Abprallwinkel basierend auf Trefferpunkt auf dem Schläger
-                    // Je näher am Rand des Schlägers, desto steiler der Winkel
                     const hitPosition = (ballY - (gameState.leftPaddleY + PADDLE_HEIGHT / 2)) / (PADDLE_HEIGHT / 2);
-                    gameState.ballSpeedY = hitPosition * 7; // Stärkerer Effekt für steilere Winkel
+                    gameState.ballSpeedY = hitPosition * 7;
 
-                    // Erhöhung der Geschwindigkeit für mehr Spannung
-                    gameState.ballSpeedX *= 1.05;
-                    // Begrenze die maximale Geschwindigkeit
-                    if (Math.abs(gameState.ballSpeedX) > 12) {
-                        gameState.ballSpeedX = gameState.ballSpeedX > 0 ? 12 : -12;
+                    // EFFET: Wenn Shift gedrückt ist und das Paddel sich bewegt, Effet hinzufügen
+                    if (gameState.keys.shiftPressed && Math.abs(leftPaddleMovement) > 0) {
+                        // Paddel-Bewegungsrichtung bestimmt den Effet (additiver Y-Geschwindigkeitseffekt)
+                        // Wir verstärken den Effet relativ zur Bewegungsgeschwindigkeit des Paddels
+                        // const effetStrength = Math.min(Math.abs(leftPaddleMovement) * 0.5, 3);
+                        const effetStrength = Math.min(Math.abs(leftPaddleMovement) * 1.5, 6);
+
+                        // Richtung des Effets entspricht der Bewegungsrichtung des Paddels
+                        if (leftPaddleMovement > 0) {
+                            // Paddel bewegt sich nach unten = Ball erhält zusätzliche Geschwindigkeit nach unten
+                            gameState.ballSpeedY += effetStrength;
+                        } else {
+                            // Paddel bewegt sich nach oben = Ball erhält zusätzliche Geschwindigkeit nach oben
+                            gameState.ballSpeedY -= effetStrength;
+                        }
+
+                        // Visuelles Feedback für den Effet (könnte später hinzugefügt werden)
+                        // z.B. Partikeleffekte oder kurzzeitige Farbänderung des Balls
                     }
-
-                    // Wenn die Richtung geändert wurde, zähle einen Ballwechsel
-                    if (directionChanged && onBallExchange) {
-                        onBallExchange();
-                    }
-                }
-            }
-        }
-
-        // Kollisionserkennung für rechten Schläger (komplexere Version)
-        if (ballX + ballRadius >= 800 - PADDLE_WIDTH) {
-            // Horizontale Kollision: Ball nahe am rechten Schläger
-            // Prüfen, ob der Ball vertikal mit dem Schläger kollidiert
-
-            // Erweiterter Kollisionsbereich für bessere Eckenkollision
-            const paddleTop = gameState.rightPaddleY - ballRadius * 0.5;
-            const paddleBottom = gameState.rightPaddleY + PADDLE_HEIGHT + ballRadius * 0.5;
-
-            if (ballY >= paddleTop && ballY <= paddleBottom) {
-                // Prüfe, ob sich der Ball tatsächlich auf den Schläger zubewegt (Richtung rechts)
-                if (gameState.ballSpeedX > 0) {
-                    // Prüfe, ob die Richtung des Balls geändert wird (für Ballwechsel-Zählung)
-                    const directionChanged = true;
-
-                    // Ball abprallen lassen
-                    gameState.ballX = 800 - PADDLE_WIDTH - ballRadius; // Leicht vom Schläger weg positionieren
-                    gameState.ballSpeedX = -gameState.ballSpeedX; // Richtung umkehren
-
-                    // Abprallwinkel basierend auf Trefferpunkt auf dem Schläger
-                    const hitPosition = (ballY - (gameState.rightPaddleY + PADDLE_HEIGHT / 2)) / (PADDLE_HEIGHT / 2);
-                    gameState.ballSpeedY = hitPosition * 7; // Stärkerer Effekt für steilere Winkel
 
                     // Erhöhung der Geschwindigkeit
                     gameState.ballSpeedX *= 1.05;
@@ -1078,8 +1073,55 @@ const PongGame = ({
                         gameState.ballSpeedX = gameState.ballSpeedX > 0 ? 12 : -12;
                     }
 
-                    // Wenn die Richtung geändert wurde, zähle einen Ballwechsel
-                    if (directionChanged && onBallExchange) {
+                    // Ballwechsel zählen
+                    if (onBallExchange) {
+                        onBallExchange();
+                    }
+                }
+            }
+        }
+
+        // Kollisionserkennung für rechten Schläger
+        if (ballX + ballRadius >= 800 - PADDLE_WIDTH) {
+            // Erweiterter Kollisionsbereich
+            const paddleTop = gameState.rightPaddleY - ballRadius * 0.5;
+            const paddleBottom = gameState.rightPaddleY + PADDLE_HEIGHT + ballRadius * 0.5;
+
+            if (ballY >= paddleTop && ballY <= paddleBottom) {
+                // Prüfe, ob sich der Ball auf den Schläger zubewegt
+                if (gameState.ballSpeedX > 0) {
+                    // Ball abprallen lassen
+                    gameState.ballX = 800 - PADDLE_WIDTH - ballRadius;
+                    gameState.ballSpeedX = -gameState.ballSpeedX;
+
+                    // Abprallwinkel basierend auf Trefferpunkt
+                    const hitPosition = (ballY - (gameState.rightPaddleY + PADDLE_HEIGHT / 2)) / (PADDLE_HEIGHT / 2);
+                    gameState.ballSpeedY = hitPosition * 7;
+
+                    // EFFET: Wenn Shift gedrückt ist und das Paddel sich bewegt, Effet hinzufügen
+                    if (gameState.keys.shiftPressed && Math.abs(rightPaddleMovement) > 0) {
+                        // Paddel-Bewegungsrichtung bestimmt den Effet (additiver Y-Geschwindigkeitseffekt)
+                        const effetStrength = Math.min(Math.abs(rightPaddleMovement) * 0.5, 3);
+
+                        // Richtung des Effets entspricht der Bewegungsrichtung des Paddels
+                        if (rightPaddleMovement > 0) {
+                            // Paddel bewegt sich nach unten = Ball erhält zusätzliche Geschwindigkeit nach unten
+                            gameState.ballSpeedY += effetStrength;
+                        } else {
+                            // Paddel bewegt sich nach oben = Ball erhält zusätzliche Geschwindigkeit nach oben
+                            gameState.ballSpeedY -= effetStrength;
+                        }
+                    }
+
+                    // Erhöhung der Geschwindigkeit
+                    gameState.ballSpeedX *= 1.05;
+                    // Begrenze die maximale Geschwindigkeit
+                    if (Math.abs(gameState.ballSpeedX) > 12) {
+                        gameState.ballSpeedX = gameState.ballSpeedX > 0 ? 12 : -12;
+                    }
+
+                    // Ballwechsel zählen
+                    if (onBallExchange) {
                         onBallExchange();
                     }
                 }
@@ -1515,10 +1557,47 @@ const PongGame = ({
         // Rechter Schläger zeichnen
         ctx.fillRect(canvas.width - PADDLE_WIDTH, gameState.rightPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT);
 
-        // Ball zeichnen
+        // Ball zeichnen mit optionalem Effet-Effekt
+        const ballHasEffet = gameState.keys.shiftPressed &&
+            (Math.abs(gameState.leftPaddleY - gameState.prevLeftPaddleY) > 0 ||
+                Math.abs(gameState.rightPaddleY - gameState.prevRightPaddleY) > 0);
+
         ctx.beginPath();
-        ctx.arc(gameState.ballX, gameState.ballY, BALL_RADIUS, 0, Math.PI * 2);
-        ctx.fillStyle = "white";
+
+        // Ball mit normaler Farbe oder Effet-Farbe zeichnen
+        if (ballHasEffet) {
+            // Farbverlauf für Effet-Ball
+            const gradient = ctx.createRadialGradient(
+                gameState.ballX, gameState.ballY, 0,
+                gameState.ballX, gameState.ballY, BALL_RADIUS
+            );
+            gradient.addColorStop(0, 'white');
+            gradient.addColorStop(1, '#4CAF50'); // Grünlicher Farbton für den Effet
+            ctx.fillStyle = gradient;
+
+            // Bei Effet einen leicht größeren Ball zeichnen
+            ctx.arc(gameState.ballX, gameState.ballY, BALL_RADIUS * 1.1, 0, Math.PI * 2);
+
+            // Optional: Bewegungs-Trail hinter dem Ball
+            if (Math.abs(gameState.ballSpeedY) > 3) {
+                ctx.globalAlpha = 0.3;
+                for (let i = 1; i <= 3; i++) {
+                    const trailX = gameState.ballX - (gameState.ballSpeedX * i * 0.1);
+                    const trailY = gameState.ballY - (gameState.ballSpeedY * i * 0.1);
+                    const trailRadius = BALL_RADIUS * (1 - i * 0.15);
+
+                    ctx.beginPath();
+                    ctx.arc(trailX, trailY, trailRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1.0;
+            }
+        } else {
+            // Normaler Ball
+            ctx.fillStyle = "white";
+            ctx.arc(gameState.ballX, gameState.ballY, BALL_RADIUS, 0, Math.PI * 2);
+        }
+
         ctx.fill();
         ctx.closePath();
 
@@ -1547,7 +1626,13 @@ const PongGame = ({
             }
         }
 
-        // Debug-Info wurde entfernt
+        // Effet-Hilfestellung anzeigen, wenn Shift-Taste gedrückt ist
+        if (gameState.keys.shiftPressed) {
+            ctx.font = "14px Arial";
+            ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+            ctx.textAlign = "center";
+            ctx.fillText("Effet-Modus aktiv", canvas.width / 2, 20);
+        }
     };
 
     const resetGameState = () => {

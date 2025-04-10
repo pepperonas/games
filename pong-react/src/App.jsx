@@ -1,13 +1,14 @@
 // App.jsx - Modifizierte Version ohne PongDebug
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import './App.css';
+import StatsService from './services/StatsService';
 import StartScreen from './components/StartScreen';
 import PongGame from './components/PongGame';
 import GameOverScreen from './components/GameOverScreen';
 import OnlineConnectionScreen from './components/OnlineConnectionScreen';
 import StatsScreen from './components/StatsScreen';
 import PlayerProfile from './components/PlayerProfile';
-import { socketManager } from './socket-connection';
+import {socketManager} from './socket-connection';
 
 function App() {
     const [currentScreen, setCurrentScreen] = useState('start');
@@ -15,7 +16,7 @@ function App() {
     const [difficulty, setDifficulty] = useState(5);
     const [isHost, setIsHost] = useState(false);
     const [resetCount, setResetCount] = useState(0);
-    const [winData, setWinData] = useState({ winner: '', isLocalPlayerWinner: false });
+    const [winData, setWinData] = useState({winner: '', isLocalPlayerWinner: false});
     const [ballExchangeCount, setBallExchangeCount] = useState(0);
     const [playerName, setPlayerName] = useState(localStorage.getItem('playerName') || 'Spieler');
     const [gameStartTime, setGameStartTime] = useState(null); // Hinzugefügt für GameOverScreen
@@ -50,7 +51,7 @@ function App() {
         }
     };
 
-    const handleStartOnlineGame = (host) => {
+    const handleStartOnlineGame = (host) => {π
         console.log(`Starte Online-Spiel als ${host ? 'Host' : 'Gast'}`);
         setIsHost(host);
         socketManager.setIsHost(host);
@@ -61,7 +62,30 @@ function App() {
 
     const handleGameOver = (winner, isLocalPlayerWinner) => {
         console.log(`Spiel beendet! Gewinner: ${winner}, Lokaler Spieler gewonnen: ${isLocalPlayerWinner}`);
-        setWinData({ winner, isLocalPlayerWinner });
+        setWinData({winner, isLocalPlayerWinner});
+
+        // Spieldauer berechnen
+        const gameDuration = gameStartTime ? Math.floor((new Date() - gameStartTime) / 1000) : 0;
+
+        // Statistiken speichern
+        const statsService = new StatsService(playerName);
+        statsService.startNewGame(gameMode, difficulty);
+
+        // Aktualisiere alle relevanten Spieldetails
+        statsService.currentGame.startTime = gameStartTime || new Date();
+        statsService.currentGame.ballExchanges = ballExchangeCount;
+
+        // Bei Multiplayer-Spielen kann man auch den Gegner speichern
+        if (gameMode === 'online-multiplayer') {
+            statsService.currentGame.opponent = 'Online-Gegner';
+        } else if (gameMode === 'local-multiplayer') {
+            statsService.currentGame.opponent = 'Lokaler Spieler';
+        }
+
+        // Statistik speichern und finalisieren
+        const gameResult = statsService.endGame(isLocalPlayerWinner);
+        console.log('Spielstatistik gespeichert:', gameResult);
+
         setCurrentScreen('game-over');
     };
 
