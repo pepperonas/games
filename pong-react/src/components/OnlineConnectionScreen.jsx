@@ -8,6 +8,7 @@ const SIGNALING_SERVER = 'https://mrx3k1.de';
 const OnlineConnectionScreen = ({onStartGame, onBack}) => {
     const [connectionId, setConnectionId] = useState('Wird generiert...');
     const [isConnecting, setIsConnecting] = useState(false);
+    const [isJoiningRoom, setIsJoiningRoom] = useState(false); // Neue State-Variable
     const [error, setError] = useState('');
     const connectionInputRef = useRef(null);
     const socketRef = useRef(null);
@@ -26,11 +27,16 @@ const OnlineConnectionScreen = ({onStartGame, onBack}) => {
         // Event-Handler für Socket.io
         socketRef.current.on('connect', () => {
             console.log('Mit Signaling-Server verbunden');
-            // Raum erstellen
-            socketRef.current.emit('createRoom');
+
+            // Raum erstellen NUR, wenn nicht im Beitrittsprozess
+            if (!isJoiningRoom) {
+                // Raum erstellen
+                socketRef.current.emit('createRoom');
+            }
         });
 
         socketRef.current.on('roomCreated', ({roomId}) => {
+            console.log('Raum erstellt:', roomId);
             setConnectionId(roomId);
         });
 
@@ -40,13 +46,28 @@ const OnlineConnectionScreen = ({onStartGame, onBack}) => {
         });
 
         socketRef.current.on('playerRole', ({isHost}) => {
+            console.log('Spielerrolle erhalten:', isHost ? 'Host' : 'Gast');
             // Starte das Spiel mit der zugewiesenen Rolle
             onStartGame(isHost);
         });
 
         socketRef.current.on('error', ({message}) => {
+            console.error('Socket.io-Fehler:', message);
             setError(message);
             setIsConnecting(false);
+            setIsJoiningRoom(false);
+        });
+
+        socketRef.current.on('connect_error', (error) => {
+            console.error('Verbindungsfehler:', error);
+            setError('Verbindungsfehler: ' + error.message);
+            setIsConnecting(false);
+            setIsJoiningRoom(false);
+        });
+
+        // Diagnose-Events
+        socketRef.current.onAny((event, ...args) => {
+            console.log(`Socket.io-Event: ${event}`, args);
         });
 
         return () => {
@@ -55,7 +76,7 @@ const OnlineConnectionScreen = ({onStartGame, onBack}) => {
                 socketRef.current.disconnect();
             }
         };
-    }, [onStartGame]);
+    }, [onStartGame, isJoiningRoom]);
 
     const copyRoomIdToClipboard = () => {
         navigator.clipboard.writeText(connectionId)
@@ -83,10 +104,25 @@ const OnlineConnectionScreen = ({onStartGame, onBack}) => {
         }
 
         setIsConnecting(true);
+        setIsJoiningRoom(true); // Markieren, dass wir einem Raum beitreten
         setError('');
+
+        console.log('Versuche, Raum beizutreten:', roomId);
 
         // Einem Raum beitreten
         socketRef.current.emit('joinRoom', {roomId});
+    };
+
+    // Debug-Modus für Fehlerbehebung
+    const startTestMode = () => {
+        console.log('🧪 Starte Multiplayer-Test-Modus');
+
+        // Wechselt zwischen Host und Gast
+        const debugRole = localStorage.getItem('pongDebugRole') !== 'false';
+        localStorage.setItem('pongDebugRole', !debugRole);
+
+        console.log(`🧪 Test als ${debugRole ? 'Host' : 'Gast'}`);
+        onStartGame(debugRole);
     };
 
     return (
@@ -126,6 +162,22 @@ const OnlineConnectionScreen = ({onStartGame, onBack}) => {
 
             {error && (
                 <div className="error-message">{error}</div>
+            )}
+
+            {/* Debug-Button, kann für die Produktion auskommentiert werden */}
+            {process.env.NODE_ENV === 'development' && (
+                <button
+                    onClick={startTestMode}
+                    className="button debug-btn"
+                    style={{
+                        marginTop: '15px',
+                        backgroundColor: '#8d8d8d',
+                        fontSize: '12px',
+                        padding: '5px 10px'
+                    }}
+                >
+                    Test-Modus
+                </button>
             )}
 
             <button onClick={onBack} className="button back-btn">Zurück</button>

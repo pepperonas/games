@@ -14,12 +14,13 @@ const SIGNALING_SERVER = 'https://mrx3k1.de';
 const PongGame = ({
                       gameMode,
                       difficulty,
-                      isHost,
+                      isHost: initialIsHost, // Umbenennen, um Verwechslung zu vermeiden
                       onGameOver,
                       onBallExchange,
                       isMobile,
                       isLandscape,
                       resetCount,
+                      playerName,
                       onMainMenu
                   }) => {
     const canvasRef = useRef(null);
@@ -27,7 +28,10 @@ const PongGame = ({
     const socketRef = useRef(null);
     const peerConnectionRef = useRef(null);
     const dataChannelRef = useRef(null);
+    const lastSendTimeRef = useRef(0); // Für Ratenbegrenzung
 
+    // isHost als State statt als props
+    const [isHostState, setIsHostState] = useState(initialIsHost);
     const [scores, setScores] = useState({left: 0, right: 0});
     const [connectionStatus, setConnectionStatus] = useState('-');
     const [ping, setPing] = useState('-');
@@ -119,7 +123,6 @@ const PongGame = ({
         'old-thing.wav',
         'welcome-to-st-tropez.wav'
     ];
-
 
     useEffect(() => {
         // Audio initialisieren
@@ -243,9 +246,9 @@ const PongGame = ({
             });
 
             socketRef.current.on('playerRole', ({isHost: role}) => {
-                console.log(`👑 Spielerrolle: ${role ? 'Host' : 'Gast'}`);
-                // Rolle festlegen
-                isHost = role;
+                console.log(`👑 Spielerrolle erhalten: ${role ? 'Host' : 'Gast'}`);
+                // Setze isHostState mit dem state updater
+                setIsHostState(role);
             });
 
             // Weitere Socket.io Event-Handler für WebRTC-Signalisierung
@@ -359,7 +362,7 @@ const PongGame = ({
 
             // Datenkanal einrichten mit Fehlerbehandlung
             try {
-                if (isHost) {
+                if (isHostState) {
                     console.log('📢 Erstelle Datenkanal (Host)');
                     dataChannelRef.current = peerConnectionRef.current.createDataChannel('gameData', {
                         ordered: true
@@ -378,7 +381,7 @@ const PongGame = ({
             }
 
             // Wenn Host, SDP-Angebot senden
-            if (isHost) {
+            if (isHostState) {
                 createOffer();
             }
         }
@@ -407,6 +410,7 @@ const PongGame = ({
             dataChannelRef.current.onmessage = (event) => {
                 try {
                     const data = JSON.parse(event.data);
+                    console.log(`🔍 Empfangen (${isHostState ? 'Host' : 'Gast'}):`, data);
 
                     if (data.type === 'ping') {
                         // Ping-Anfrage - sende sofort Antwort zurück
@@ -418,14 +422,14 @@ const PongGame = ({
                     } else if (data.type === 'gameState') {
                         // Spielzustand vom anderen Spieler
                         // Update der Gegnerposition
-                        if (isHost) {
+                        if (isHostState) {
                             gameStateRef.current.rightPaddleY = data.paddleY;
                         } else {
                             gameStateRef.current.leftPaddleY = data.paddleY;
                         }
 
                         // Wenn Gast, synchronisiere Ball und Punkte
-                        if (!isHost && data.ballX !== undefined) {
+                        if (!isHostState && data.ballX !== undefined) {
                             gameStateRef.current.ballX = data.ballX;
                             gameStateRef.current.ballY = data.ballY;
                             gameStateRef.current.ballSpeedX = data.ballSpeedX;
@@ -433,6 +437,7 @@ const PongGame = ({
 
                             // Aktualisiere Punktestand im gameStateRef und im React-State
                             if (data.leftScore !== undefined && data.rightScore !== undefined) {
+                                console.log('🏆 Punkteaktualisierung empfangen:', data.leftScore, data.rightScore);
                                 gameStateRef.current.scores.left = data.leftScore;
                                 gameStateRef.current.scores.right = data.rightScore;
                                 setScores({
@@ -453,7 +458,7 @@ const PongGame = ({
                         gameStateRef.current.showWinAnimation = true;
                         gameStateRef.current.winAnimationStartTime = Date.now();
                         gameStateRef.current.winningPlayer = data.winner;
-                        gameStateRef.current.isLocalPlayerWinner = (!isHost && data.winner === 'right');
+                        gameStateRef.current.isLocalPlayerWinner = (!isHostState && data.winner === 'right');
 
                         // Initialisiere Regentropfen für Verlierer-Animation
                         if (!gameStateRef.current.isLocalPlayerWinner) {
@@ -467,7 +472,7 @@ const PongGame = ({
                         }, gameStateRef.current.winAnimationDuration);
                     }
                 } catch (error) {
-                    console.error('📢 Fehler beim Verarbeiten der Nachricht:', error);
+                    console.error('📢 Fehler beim Verarbeiten der Nachricht:', error, 'Rohdaten:', event.data);
                 }
             };
         }
@@ -503,32 +508,15 @@ const PongGame = ({
         function sendData(data) {
             if (dataChannelRef.current && dataChannelRef.current.readyState === 'open') {
                 try {
+                    console.log(`📤 Senden (${isHostState ? 'Host' : 'Gast'}):`, data);
                     dataChannelRef.current.send(JSON.stringify(data));
                 } catch (error) {
                     console.error('📤 Fehler beim Senden von Daten:', error);
                 }
+            } else {
+                console.warn('Datenkanal nicht bereit:',
+                    dataChannelRef.current ? dataChannelRef.current.readyState : 'nicht vorhanden');
             }
-        }
-
-        function sendGameState() {
-            const gameState = {
-                type: 'gameState',
-                paddleY: isHost ? gameStateRef.current.leftPaddleY : gameStateRef.current.rightPaddleY
-            };
-
-            // Host sendet zusätzlich Ball- und Punktestand-Daten
-            if (isHost) {
-                gameState.ballX = gameStateRef.current.ballX;
-                gameState.ballY = gameStateRef.current.ballY;
-                gameState.ballSpeedX = gameStateRef.current.ballSpeedX;
-                gameState.ballSpeedY = gameStateRef.current.ballSpeedY;
-                gameState.leftScore = scores.left;
-                gameState.rightScore = scores.right;
-                gameState.ballInResetState = gameStateRef.current.ballInResetState;
-                gameState.ballResetStartTime = gameStateRef.current.ballResetStartTime;
-            }
-
-            sendData(gameState);
         }
 
         function cleanupWebRTC() {
@@ -660,7 +648,7 @@ const PongGame = ({
                 newRightPaddleY += 8;
             }
         } else if (gameMode === 'online-multiplayer') {
-            if (isHost) {
+            if (isHostState) {
                 // Host steuert den linken Schläger mit beliebigen Tasten oder Touch
                 if ((keys.wPressed || keys.upPressed || touchControls.leftUp) && newLeftPaddleY > 0) {
                     newLeftPaddleY -= 8;
@@ -690,7 +678,7 @@ const PongGame = ({
         gameState.lastBallX = gameState.ballX;
 
         // Im Online-Modus aktualisiert nur der Host den Ball
-        if (gameMode === 'online-multiplayer' && !isHost) {
+        if (gameMode === 'online-multiplayer' && !isHostState) {
             return;
         }
 
@@ -722,7 +710,7 @@ const PongGame = ({
         const gameState = gameStateRef.current;
 
         // Im Online-Modus prüft nur der Host auf Kollisionen
-        if (gameMode === 'online-multiplayer' && !isHost) {
+        if (gameMode === 'online-multiplayer' && !isHostState) {
             return;
         }
 
@@ -784,7 +772,7 @@ const PongGame = ({
         const gameState = gameStateRef.current;
 
         // Im Online-Modus aktualisiert nur der Host den Punktestand
-        if (gameMode === 'online-multiplayer' && !isHost) {
+        if (gameMode === 'online-multiplayer' && !isHostState) {
             return;
         }
 
@@ -837,7 +825,7 @@ const PongGame = ({
             const winner = currentScores.left > currentScores.right ? 'left' : 'right';
 
             // Im Online-Multiplayer: informiere den Gegner über das Spielende
-            if (gameMode === 'online-multiplayer' && isHost && dataChannelRef.current?.readyState === 'open') {
+            if (gameMode === 'online-multiplayer' && isHostState && dataChannelRef.current?.readyState === 'open') {
                 sendData({
                     type: 'gameOver',
                     winner: winner
@@ -851,7 +839,7 @@ const PongGame = ({
             } else if (gameMode === 'local-multiplayer') {
                 isLocalPlayerWinner = true;
             } else if (gameMode === 'online-multiplayer') {
-                if (isHost) {
+                if (isHostState) {
                     isLocalPlayerWinner = (currentScores.left > currentScores.right);
                 } else {
                     isLocalPlayerWinner = (currentScores.right > currentScores.left);
@@ -943,8 +931,8 @@ const PongGame = ({
                 winText = 'Spieler 1 gewinnt!';
                 ctx.fillStyle = `rgba(50, 255, 50, ${0.7 + flashIntensity * 0.3})`;
             } else if (gameMode === 'online-multiplayer') {
-                winText = isHost ? 'Du hast gewonnen!' : 'Gegner gewinnt!';
-                ctx.fillStyle = isHost
+                winText = isHostState ? 'Du hast gewonnen!' : 'Gegner gewinnt!';
+                ctx.fillStyle = isHostState
                     ? `rgba(50, 255, 50, ${0.7 + flashIntensity * 0.3})`
                     : `rgba(255, 50, 50, ${0.7 + flashIntensity * 0.3})`;
             }
@@ -956,8 +944,8 @@ const PongGame = ({
                 winText = 'Spieler 2 gewinnt!';
                 ctx.fillStyle = `rgba(50, 50, 255, ${0.7 + flashIntensity * 0.3})`;
             } else if (gameMode === 'online-multiplayer') {
-                winText = isHost ? 'Gegner gewinnt!' : 'Du hast gewonnen!';
-                ctx.fillStyle = isHost
+                winText = isHostState ? 'Gegner gewinnt!' : 'Du hast gewonnen!';
+                ctx.fillStyle = isHostState
                     ? `rgba(255, 50, 50, ${0.7 + flashIntensity * 0.3})`
                     : `rgba(50, 255, 50, ${0.7 + flashIntensity * 0.3})`;
             }
@@ -1124,7 +1112,7 @@ const PongGame = ({
         if (gameRunning || gameStateRef.current.showWinAnimation) {
             if (gameRunning) {
                 // Nur Host oder lokale Spieler aktualisieren den Ball-Reset-Zustand
-                if (gameMode !== 'online-multiplayer' || isHost) {
+                if (gameMode !== 'online-multiplayer' || isHostState) {
                     updateBallResetState();
                 }
 
@@ -1133,13 +1121,17 @@ const PongGame = ({
                 checkCollisions();
 
                 // Im Online-Modus aktualisiert nur der Host den Punktestand
-                if (gameMode !== 'online-multiplayer' || isHost) {
+                if (gameMode !== 'online-multiplayer' || isHostState) {
                     checkScore();
                 }
 
-                // Im Online-Modus senden wir den Spielstatus
+                // Im Online-Modus senden wir den Spielstatus mit Ratenbegrenzung
                 if (gameMode === 'online-multiplayer' && dataChannelRef.current?.readyState === 'open') {
-                    sendGameState();
+                    const now = Date.now();
+                    if (now - lastSendTimeRef.current > 30) { // Max ~33fps
+                        sendGameState();
+                        lastSendTimeRef.current = now;
+                    }
                 }
             }
 
@@ -1164,10 +1156,14 @@ const PongGame = ({
     const sendData = (data) => {
         if (dataChannelRef.current && dataChannelRef.current.readyState === 'open') {
             try {
+                console.log(`📤 Senden (${isHostState ? 'Host' : 'Gast'}):`, data);
                 dataChannelRef.current.send(JSON.stringify(data));
             } catch (error) {
                 console.error('Fehler beim Senden von Daten:', error);
             }
+        } else {
+            console.warn('Datenkanal nicht bereit:',
+                dataChannelRef.current ? dataChannelRef.current.readyState : 'nicht vorhanden');
         }
     };
 
@@ -1176,11 +1172,12 @@ const PongGame = ({
         const gameState = gameStateRef.current;
         const state = {
             type: 'gameState',
-            paddleY: isHost ? gameState.leftPaddleY : gameState.rightPaddleY
+            paddleY: isHostState ? gameState.leftPaddleY : gameState.rightPaddleY,
+            timestamp: Date.now() // Timestamp für bessere Synchronisierung
         };
 
         // Host sendet zusätzlich Ball- und Punktestand-Daten
-        if (isHost) {
+        if (isHostState) {
             state.ballX = gameState.ballX;
             state.ballY = gameState.ballY;
             state.ballSpeedX = gameState.ballSpeedX;
@@ -1197,14 +1194,14 @@ const PongGame = ({
     // Punktestand-Anzeige
     let scoreText = '';
     if (gameMode === 'singleplayer') {
-        scoreText = `Spieler: ${scores.left} | Computer: ${scores.right}`;
+        scoreText = `${playerName}: ${scores.left} | Computer: ${scores.right}`;
     } else if (gameMode === 'local-multiplayer') {
-        scoreText = `Spieler 1: ${scores.left} | Spieler 2: ${scores.right}`;
+        scoreText = `${playerName}: ${scores.left} | Spieler 2: ${scores.right}`;
     } else if (gameMode === 'online-multiplayer') {
-        if (isHost) {
-            scoreText = `Du (links): ${scores.left} | Gegner: ${scores.right}`;
+        if (isHostState) {
+            scoreText = `${playerName} (links): ${scores.left} | Gegner: ${scores.right}`;
         } else {
-            scoreText = `Gegner: ${scores.left} | Du (rechts): ${scores.right}`;
+            scoreText = `Gegner: ${scores.left} | ${playerName} (rechts): ${scores.right}`;
         }
     }
 
@@ -1243,6 +1240,10 @@ const PongGame = ({
                 </div>
             )}
 
+            <div className="score-display">
+                {scoreText}
+            </div>
+
             {gameMode === 'online-multiplayer' && (
                 <>
                     <div className="connection-info">
@@ -1262,28 +1263,28 @@ const PongGame = ({
                 <TouchControls
                     onMoveUp={() => {
                         if (gameMode === 'singleplayer' ||
-                            (gameMode === 'online-multiplayer' && isHost) ||
+                            (gameMode === 'online-multiplayer' && isHostState) ||
                             gameMode === 'local-multiplayer') {
                             gameStateRef.current.touchControls.leftUp = true;
                             gameStateRef.current.touchControls.leftDown = false;
                         }
 
                         if (gameMode === 'local-multiplayer' ||
-                            (gameMode === 'online-multiplayer' && !isHost)) {
+                            (gameMode === 'online-multiplayer' && !isHostState)) {
                             gameStateRef.current.touchControls.rightUp = true;
                             gameStateRef.current.touchControls.rightDown = false;
                         }
                     }}
                     onMoveDown={() => {
                         if (gameMode === 'singleplayer' ||
-                            (gameMode === 'online-multiplayer' && isHost) ||
+                            (gameMode === 'online-multiplayer' && isHostState) ||
                             gameMode === 'local-multiplayer') {
                             gameStateRef.current.touchControls.leftDown = true;
                             gameStateRef.current.touchControls.leftUp = false;
                         }
 
                         if (gameMode === 'local-multiplayer' ||
-                            (gameMode === 'online-multiplayer' && !isHost)) {
+                            (gameMode === 'online-multiplayer' && !isHostState)) {
                             gameStateRef.current.touchControls.rightDown = true;
                             gameStateRef.current.touchControls.rightUp = false;
                         }

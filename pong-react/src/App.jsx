@@ -251,6 +251,7 @@ const App = () => {
                     isMobile={isMobile}
                     isLandscape={isLandscape}
                     resetCount={resetCounter}
+                    playerName={playerName}
                     onMainMenu={returnToMainMenu}
                 />
             )}
