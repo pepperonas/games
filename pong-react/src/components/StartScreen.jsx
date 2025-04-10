@@ -120,7 +120,7 @@ const StartScreen = ({
             <h1>Pong</h1>
 
             <div className="player-welcome" onClick={() => setShowPlayerMenu(!showPlayerMenu)}>
-                Willkommen, <span className="player-name">{playerName} ▼</span>
+                Hallo,<span className="player-name">{playerName} ▼</span>
 
                 {showPlayerMenu && (
                     <div className="player-menu">

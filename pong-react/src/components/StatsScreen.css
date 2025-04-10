@@ -21,6 +21,10 @@
     flex-direction: column;
 }
 
+.player-name{
+    padding-left: 4px;
+}
+
 /* Fixierter Header */
 .stats-header {
     position: fixed;

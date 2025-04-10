@@ -51,7 +51,7 @@ function App() {
         }
     };
 
-    const handleStartOnlineGame = (host) => {π
+    const handleStartOnlineGame = (host) => {
         console.log(`Starte Online-Spiel als ${host ? 'Host' : 'Gast'}`);
         setIsHost(host);
         socketManager.setIsHost(host);
