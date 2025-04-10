@@ -1,12 +1,20 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { useDatabase } from './DatabaseContext';
+import React, {createContext, useContext, useEffect, useState} from 'react';
+import {useDatabase} from './DatabaseContext';
 
 const GameContext = createContext();
 
 export const useGame = () => useContext(GameContext);
 
-export const GameProvider = ({ children }) => {
-    const { saveGame, savePlayer, saveThrow, db } = useDatabase();
+export const GameProvider = ({children}) => {
+    const {saveGame, savePlayer, saveThrow, db} = useDatabase();
+
+    // Array mit verfügbaren Songs
+    const victorySongs = [
+        'assets/relight.m4a',
+        'assets/old-thing.wav',
+        'assets/welcome-to-st-tropez.wav',
+        'assets/i-want-your-soul.wav'
+    ];
 
     const [gameState, setGameState] = useState({
         players: [],
@@ -28,6 +36,12 @@ export const GameProvider = ({ children }) => {
 
     const [timerInterval, setTimerInterval] = useState(null);
 
+    // Funktion zum zufälligen Auswählen eines Songs
+    const getRandomVictorySong = () => {
+        const randomIndex = Math.floor(Math.random() * victorySongs.length);
+        return victorySongs[randomIndex];
+    };
+
     // Load saved game state from session storage
     useEffect(() => {
         const savedState = sessionStorage.getItem('dartGameState');
@@ -40,7 +54,7 @@ export const GameProvider = ({ children }) => {
                     parsedState.gameEndTime = new Date(parsedState.gameEndTime);
                 }
                 parsedState.history.forEach(entry => entry.timestamp = new Date(entry.timestamp));
-                parsedState.isGameActive = parsedState.isGameActive !== false; // Falls undefined, auf true setzen
+                parsedState.isGameActive = parsedState.isGameActive !== false;
 
                 setGameState(parsedState);
                 if (parsedState.isGameActive) {
@@ -57,7 +71,7 @@ export const GameProvider = ({ children }) => {
     useEffect(() => {
         const handleBeforeUnload = () => {
             if (gameState.players.length > 0) {
-                const gameStateCopy = { ...gameState };
+                const gameStateCopy = {...gameState};
                 delete gameStateCopy.timerInterval;
                 sessionStorage.setItem('dartGameState', JSON.stringify(gameStateCopy));
             }
@@ -102,7 +116,6 @@ export const GameProvider = ({ children }) => {
             winner: null
         };
 
-        // Create player objects
         for (let i = 0; i < settings.players.length; i++) {
             const playerName = settings.players[i].trim() || `Spieler ${i + 1}`;
             newGameState.players.push({
@@ -123,7 +136,6 @@ export const GameProvider = ({ children }) => {
 
         setGameState(newGameState);
 
-        // Save game to database
         const gameData = {
             gameType: settings.gameType,
             numSets: settings.numSets,
@@ -140,17 +152,16 @@ export const GameProvider = ({ children }) => {
 
         const gameId = await saveGame(gameData);
         if (gameId) {
-            setGameState(prev => ({ ...prev, gameId }));
+            setGameState(prev => ({...prev, gameId}));
 
-            // Save players to database and update player IDs in game state
             const updatedPlayers = [...newGameState.players];
             for (let i = 0; i < updatedPlayers.length; i++) {
-                const playerId = await savePlayer({ name: updatedPlayers[i].name });
+                const playerId = await savePlayer({name: updatedPlayers[i].name});
                 if (playerId) {
                     updatedPlayers[i].id = playerId;
                 }
             }
-            setGameState(prev => ({ ...prev, players: updatedPlayers }));
+            setGameState(prev => ({...prev, players: updatedPlayers}));
         }
 
         startTurnTimer();
@@ -163,11 +174,11 @@ export const GameProvider = ({ children }) => {
         }
 
         const interval = setInterval(() => {
-            setGameState(prev => ({ ...prev })); // Force re-render to update timer display
+            setGameState(prev => ({...prev}));
         }, 1000);
 
         setTimerInterval(interval);
-        setGameState(prev => ({ ...prev, turnStartTime: new Date() }));
+        setGameState(prev => ({...prev, turnStartTime: new Date()}));
     };
 
     // Update player's average score
@@ -177,7 +188,6 @@ export const GameProvider = ({ children }) => {
         const totalScore = player.scores.reduce((sum, score) => sum + score, 0);
         const numDarts = player.dartsThrown;
 
-        // Create a new player object with updated averageScore
         return {
             ...player,
             averageScore: (totalScore / numDarts) * 3
@@ -187,36 +197,22 @@ export const GameProvider = ({ children }) => {
     // Submit score
     const submitScore = async (scoreValue) => {
         if (isNaN(scoreValue) || scoreValue < 0 || scoreValue > 180) {
-            return { success: false, message: "Bitte gib eine gültige Punktzahl zwischen 0 und 180 ein." };
+            return {
+                success: false,
+                message: "Bitte gib eine gültige Punktzahl zwischen 0 und 180 ein."
+            };
         }
 
-        const newGameState = { ...gameState };
-        let currentPlayer = { ...newGameState.players[newGameState.currentPlayerIndex] };
+        const newGameState = {...gameState};
+        let currentPlayer = {...newGameState.players[newGameState.currentPlayerIndex]};
 
         if (currentPlayer.score - scoreValue < 0) {
-            return { success: false, message: `Überworfen! ${currentPlayer.name} kann nicht mehr als ${currentPlayer.score} Punkte abziehen.` };
+            return {
+                success: false,
+                message: `Überworfen! ${currentPlayer.name} kann nicht mehr als ${currentPlayer.score} Punkte abziehen.`
+            };
         }
 
-        // Update highest score if applicable
-        if (scoreValue > currentPlayer.highestScore) {
-            currentPlayer.highestScore = scoreValue;
-        }
-
-        // Save throw to database
-        if (newGameState.gameId && currentPlayer.id) {
-            await saveThrow({
-                gameId: newGameState.gameId,
-                playerId: currentPlayer.id,
-                playerName: currentPlayer.name,
-                score: scoreValue,
-                remainingScore: currentPlayer.score - scoreValue,
-                set: newGameState.currentSet,
-                leg: newGameState.currentLeg,
-                throwNumber: currentPlayer.dartsThrown / 3 + 1
-            });
-        }
-
-        // Check if player has won the leg
         if (currentPlayer.score - scoreValue === 0) {
             currentPlayer.score -= scoreValue;
             currentPlayer.scores.push(scoreValue);
@@ -224,16 +220,13 @@ export const GameProvider = ({ children }) => {
             newGameState.dartsThrown.push(scoreValue);
             currentPlayer = updateAverageScore(currentPlayer);
 
-            // Add history entry for checkout
             newGameState.history.push({
                 text: `${currentPlayer.name} - Checkout mit ${scoreValue} Punkten!`,
                 timestamp: new Date()
             });
 
-            // Increment legs won
             currentPlayer.legsWon += 1;
 
-            // Check if player has won the set
             if (currentPlayer.legsWon >= Math.ceil(newGameState.numLegs / 2)) {
                 currentPlayer.setsWon += 1;
                 newGameState.history.push({
@@ -241,9 +234,7 @@ export const GameProvider = ({ children }) => {
                     timestamp: new Date()
                 });
 
-                // Check if player has won the game
                 if (currentPlayer.setsWon >= Math.ceil(newGameState.numSets / 2)) {
-                    // Setze das isGameActive-Flag auf false, um das Spielende zu signalisieren
                     newGameState.isGameActive = false;
                     newGameState.gameEndTime = new Date();
                     newGameState.winner = currentPlayer.name;
@@ -253,25 +244,23 @@ export const GameProvider = ({ children }) => {
                         timestamp: new Date()
                     });
 
-                    // Update player in array
                     newGameState.players[newGameState.currentPlayerIndex] = currentPlayer;
                     setGameState(newGameState);
 
-                    // Play win sound
                     try {
-                        const winSound = document.getElementById('relight-sound');
+                        const winSound = document.getElementById('victory-sound');
                         if (winSound) {
+                            const randomSong = getRandomVictorySong();
+                            winSound.src = randomSong;
                             winSound.currentTime = 0;
-                            winSound.play().catch(e => console.error("Audio Playback Error:", e));
+                            await winSound.play().catch(e => console.error("Audio Playback Error:", e));
                         }
                     } catch (error) {
                         console.error("Error playing victory sound:", error);
                     }
 
-                    // Create confetti animation
                     createConfetti();
 
-                    // Speichere den finalen Spielstatus in der Datenbank
                     if (newGameState.gameId && db) {
                         const finalGameData = {
                             gameType: newGameState.gameType,
@@ -290,7 +279,6 @@ export const GameProvider = ({ children }) => {
                         };
 
                         try {
-                            // Aktualisiere das Spiel in der Datenbank
                             const tx = db.transaction('games', 'readwrite');
                             const gamesStore = tx.objectStore('games');
                             await gamesStore.put({
@@ -303,81 +291,67 @@ export const GameProvider = ({ children }) => {
                         }
                     }
 
-                    return { success: true, message: 'game_won' };
+                    return {success: true, message: 'game_won'};
                 }
 
-                // Reset legs won for new set
                 newGameState.players.forEach((p, idx) => {
-                    if (idx === newGameState.currentPlayerIndex) {
-                        // Skip the current player, we'll update them separately
-                        return;
-                    }
-                    newGameState.players[idx] = { ...p, legsWon: 0 };
+                    if (idx === newGameState.currentPlayerIndex) return;
+                    newGameState.players[idx] = {...p, legsWon: 0};
                 });
                 currentPlayer.legsWon = 0;
                 newGameState.currentSet += 1;
             }
 
-            // Reset scores for new leg
             newGameState.players.forEach((p, idx) => {
-                if (idx === newGameState.currentPlayerIndex) {
-                    // Skip the current player, we'll update them separately
-                    return;
-                }
-                newGameState.players[idx] = { ...p, score: newGameState.gameType };
+                if (idx === newGameState.currentPlayerIndex) return;
+                newGameState.players[idx] = {...p, score: newGameState.gameType};
             });
             currentPlayer.score = newGameState.gameType;
             newGameState.currentLeg += 1;
 
-            // Update player in array
             newGameState.players[newGameState.currentPlayerIndex] = currentPlayer;
             setGameState(newGameState);
 
-            // Play win sound
             try {
-                const winSound = document.getElementById('relight-sound');
+                const winSound = document.getElementById('victory-sound');
                 if (winSound) {
+                    const randomSong = getRandomVictorySong();
+                    winSound.src = randomSong;
                     winSound.currentTime = 0;
-                    winSound.play().catch(e => console.error("Audio Playback Error:", e));
+                    await winSound.play().catch(e => console.error("Audio Playback Error:", e));
                 }
             } catch (error) {
                 console.error("Error playing victory sound:", error);
             }
 
-            // Create confetti for leg win
             createConfetti();
-
-            return { success: true, message: 'leg_won' };
+            return {success: true, message: 'leg_won'};
         }
 
-        // Standard score update
         currentPlayer.score -= scoreValue;
         currentPlayer.scores.push(scoreValue);
         currentPlayer.dartsThrown += 3;
         newGameState.dartsThrown.push(scoreValue);
         currentPlayer = updateAverageScore(currentPlayer);
 
-        // Add history entry
         newGameState.history.push({
             text: `${currentPlayer.name} - ${scoreValue} Punkte`,
             timestamp: new Date()
         });
 
-        // Update player in array
         newGameState.players[newGameState.currentPlayerIndex] = currentPlayer;
         nextPlayer(newGameState);
 
         setGameState(newGameState);
-        return { success: true, message: 'score_updated' };
+        return {success: true, message: 'score_updated'};
     };
 
     // Move to next player
     const nextPlayer = (gameState) => {
         const currentTime = new Date();
-        const currentPlayer = { ...gameState.players[gameState.currentPlayerIndex] };
+        const currentPlayer = {...gameState.players[gameState.currentPlayerIndex]};
         const turnDuration = (currentTime - gameState.turnStartTime) / 1000;
 
-        // Update turn statistics
         const updatedPlayer = {
             ...currentPlayer,
             turnTime: currentPlayer.turnTime + turnDuration,
@@ -385,10 +359,7 @@ export const GameProvider = ({ children }) => {
         };
         updatedPlayer.averageTurnTime = updatedPlayer.turnTime / updatedPlayer.turnCount;
 
-        // Update player in array
         gameState.players[gameState.currentPlayerIndex] = updatedPlayer;
-
-        // Move to next player
         gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
         gameState.turnStartTime = new Date();
 
@@ -398,25 +369,20 @@ export const GameProvider = ({ children }) => {
     // Undo last throw
     const undoLastThrow = () => {
         if (gameState.dartsThrown.length === 0) {
-            return { success: false, message: 'Keine Würfe zum Zurücknehmen vorhanden.' };
+            return {success: false, message: 'Keine Würfe zum Zurücknehmen vorhanden.'};
         }
 
-        const newGameState = { ...gameState };
+        const newGameState = {...gameState};
 
-        // Remove last history entry
         if (newGameState.history.length > 0) {
             newGameState.history.pop();
         }
 
-        // Get last throw
         const lastThrow = newGameState.dartsThrown.pop();
-
-        // Move to previous player
         let playerIndex = (newGameState.currentPlayerIndex - 1 + newGameState.players.length) % newGameState.players.length;
         newGameState.currentPlayerIndex = playerIndex;
 
-        // Update player score
-        const player = { ...newGameState.players[playerIndex] };
+        const player = {...newGameState.players[playerIndex]};
         if (lastThrow !== 0) {
             player.score = Math.min(player.score + lastThrow, newGameState.gameType);
             player.dartsThrown = Math.max(0, player.dartsThrown - 3);
@@ -425,15 +391,13 @@ export const GameProvider = ({ children }) => {
                 player.scores.pop();
             }
 
-            // Recalculate average
             let updatedPlayer = player;
             if (player.dartsThrown > 0) {
                 updatedPlayer = updateAverageScore(player);
             } else {
-                updatedPlayer = { ...player, averageScore: 0 };
+                updatedPlayer = {...player, averageScore: 0};
             }
 
-            // Update turn statistics
             if (updatedPlayer.turnCount > 0) {
                 updatedPlayer.turnCount = Math.max(0, updatedPlayer.turnCount - 1);
                 updatedPlayer.averageTurnTime = updatedPlayer.turnCount > 0 ? updatedPlayer.turnTime / updatedPlayer.turnCount : 0;
@@ -445,11 +409,9 @@ export const GameProvider = ({ children }) => {
             newGameState.players[playerIndex] = updatedPlayer;
         }
 
-        // Reset turn start time
         newGameState.turnStartTime = new Date();
-
         setGameState(newGameState);
-        return { success: true, message: 'Wurf zurückgenommen.' };
+        return {success: true, message: 'Wurf zurückgenommen.'};
     };
 
     // Create confetti animation
@@ -503,10 +465,9 @@ export const GameProvider = ({ children }) => {
 
     // Get leading player
     const getLeadingPlayer = () => {
-        const { players } = gameState;
+        const {players} = gameState;
         if (!players || players.length === 0) return null;
 
-        // First check sets won
         const maxSetsWon = Math.max(...players.map(p => p.setsWon));
         const playersWithMaxSets = players.filter(p => p.setsWon === maxSetsWon);
 
@@ -514,7 +475,6 @@ export const GameProvider = ({ children }) => {
             return playersWithMaxSets[0];
         }
 
-        // If tied on sets, check legs won
         const maxLegsWon = Math.max(...playersWithMaxSets.map(p => p.legsWon));
         const playersWithMaxLegs = playersWithMaxSets.filter(p => p.legsWon === maxLegsWon);
 
@@ -522,8 +482,6 @@ export const GameProvider = ({ children }) => {
             return playersWithMaxLegs[0];
         }
 
-        // Wenn Gleichstand bei Sätzen und Legs besteht, gewinnt der Spieler mit dem
-        // niedrigsten verbleibenden Punktestand (weil man bei Darts Punkte abzieht)
         const minRemainingScore = Math.min(...playersWithMaxLegs.map(p => p.score));
         const playersWithMinScore = playersWithMaxLegs.filter(p => p.score === minRemainingScore);
 
@@ -531,7 +489,6 @@ export const GameProvider = ({ children }) => {
             return playersWithMinScore[0];
         }
 
-        // Fallback to first player
         return players[0];
     };
 
@@ -547,8 +504,7 @@ export const GameProvider = ({ children }) => {
             }}
         >
             {children}
-            <audio id="relight-sound" preload="auto">
-                <source src="assets/relight.m4a" type="audio/mp4" />
+            <audio id="victory-sound" preload="auto">
                 Ihr Browser unterstützt das Audio-Element nicht.
             </audio>
         </GameContext.Provider>

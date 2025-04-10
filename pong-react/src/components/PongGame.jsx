@@ -119,9 +119,10 @@ const PongGame = ({
     }, []);
 
     const songs = [
-        'relight.m4a',
-        'old-thing.wav',
-        'welcome-to-st-tropez.wav'
+        'assets/relight.m4a',
+        'assets/old-thing.wav',
+        'assets/welcome-to-st-tropez.wav',
+        'assets/i-want-your-soul.wav'
     ];
 
     useEffect(() => {
