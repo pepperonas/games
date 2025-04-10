@@ -1,9 +1,9 @@
-// components/PongGame.jsx
+// components/PongGame.jsx - Komplette Version mit allen Verbesserungen
 import React, {useEffect, useRef, useState} from 'react';
 import './PongGame.css';
 import './TouchControls.css';
 import TouchControls from './TouchControls';
-import {socketManager} from '../socket-connection';
+import { socketManager } from '../socket-connection';
 
 const PADDLE_HEIGHT = 100;
 const PADDLE_WIDTH = 15;
@@ -13,8 +13,8 @@ const WINNING_SCORE = 5;
 // ICE-Server-Konfiguration für WebRTC
 const ICE_SERVERS = [
     {urls: 'stun:stun.l.google.com:19302'},
-    {urls: 'stun:stun1.l.google.com:19302'},
-    {urls: 'stun:stun2.l.google.com:19302'}
+    {urls: 'stun:stun1.google.com:19302'},
+    {urls: 'stun:stun2.google.com:19302'}
 ];
 
 const PongGame = ({
@@ -52,9 +52,8 @@ const PongGame = ({
     const [gameRunning, setGameRunning] = useState(true);
     const [isMobileDevice, setIsMobileDevice] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-    const [showDebugInfo, setShowDebugInfo] = useState(true); // Debug-Info standardmäßig anzeigen
 
-    // Spielstatus
+    // Spielstatus mit Unterstützung für Shift-Taste
     const gameStateRef = useRef({
         ballX: 400,
         ballY: 250,
@@ -67,7 +66,8 @@ const PongGame = ({
             wPressed: false,
             sPressed: false,
             upPressed: false,
-            downPressed: false
+            downPressed: false,
+            shiftPressed: false // Neue Eigenschaft für die Shift-Taste
         },
         touchControls: {
             leftUp: false,
@@ -146,20 +146,6 @@ const PongGame = ({
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
-
-    // Tastaturhandler für Debug-Modus
-    // useEffect(() => {
-    //     const handleKeyDown = (e) => {
-    //         // Debug-Modus mit Strg+D umschalten
-    //         if ((e.key === 'd' || e.key === 'D') && e.ctrlKey) {
-    //             setShowDebugInfo(prev => !prev);
-    //             console.log("Debug-Modus umgeschaltet:", !showDebugInfo);
-    //         }
-    //     };
-    //
-    //     document.addEventListener('keydown', handleKeyDown);
-    //     return () => document.removeEventListener('keydown', handleKeyDown);
-    // }, [showDebugInfo]);
 
     // Touch-End-Event-Handler
     useEffect(() => {
@@ -260,7 +246,7 @@ const PongGame = ({
             setTimeout(resizeCanvas, 100); // Verzögerung für verlässlicheres Neuskalieren
         });
 
-        // Tastatur-Event-Listener
+        // Tastatur-Event-Listener mit Shift-Taste
         const handleKeyDown = (e) => {
             const gameState = gameStateRef.current;
             if (e.key === 'ArrowUp' || e.key === 'Up') {
@@ -271,6 +257,8 @@ const PongGame = ({
                 gameState.keys.wPressed = true;
             } else if (e.key === 's' || e.key === 'S') {
                 gameState.keys.sPressed = true;
+            } else if (e.key === 'Shift') {
+                gameState.keys.shiftPressed = true;
             }
         };
 
@@ -284,6 +272,8 @@ const PongGame = ({
                 gameState.keys.wPressed = false;
             } else if (e.key === 's' || e.key === 'S') {
                 gameState.keys.sPressed = false;
+            } else if (e.key === 'Shift') {
+                gameState.keys.shiftPressed = false;
             }
         };
 
@@ -405,12 +395,6 @@ const PongGame = ({
 
                 switch (data.type) {
                     case 'gameState':
-                        // Wenn Debug-Modus an, sporadisch loggen
-                        if (showDebugInfo && Math.random() < 0.05) {
-                            console.log('🎮 GameState-Update empfangen:',
-                                isHostRef.current ? `Right Paddle: ${data.rightPaddleY}` :
-                                    `Left Paddle: ${data.leftPaddleY}, Ball: ${data.ballX},${data.ballY}`);
-                        }
                         processGameStateUpdate(data);
                         break;
                     case 'ping':
@@ -441,14 +425,8 @@ const PongGame = ({
                     case 'syncResponse':
                         console.log('🔄 Synchronisierungsantwort vom Peer:', data);
                         // Zeige die Differenz zwischen lokalem und Remote-Status
-                        const localBall = {
-                            x: gameStateRef.current.ballX,
-                            y: gameStateRef.current.ballY
-                        };
-                        console.log('Differenz: Ball lokal:', localBall, 'Ball remote:', {
-                            x: data.ballX,
-                            y: data.ballY
-                        });
+                        const localBall = { x: gameStateRef.current.ballX, y: gameStateRef.current.ballY };
+                        console.log('Differenz: Ball lokal:', localBall, 'Ball remote:', { x: data.ballX, y: data.ballY });
                         break;
                     case 'gameOver':
                         processGameOverMessage(data);
@@ -705,7 +683,7 @@ const PongGame = ({
         // Versuche, eine neue PeerConnection zu erstellen
         try {
             // Verwende eine lokale Variable für die neue PeerConnection
-            const peerConnection = new RTCPeerConnection({iceServers: ICE_SERVERS});
+            const peerConnection = new RTCPeerConnection({ iceServers: ICE_SERVERS });
             console.log('✅ PeerConnection erfolgreich erstellt');
 
             // Erst nach erfolgreicher Erstellung die Referenz setzen
@@ -841,32 +819,46 @@ const PongGame = ({
         }
     };
 
-    // Funktion zum Zurücksetzen des Balls
+    // Verbesserte resetBall Funktion mit besserer Zufallsverteilung
     const resetBall = () => {
         const gameState = gameStateRef.current;
         if (gameState.gameOver) {
             return;
         }
+
+        // Positioniere den Ball in der Mitte
         gameState.ballX = 400;
         gameState.ballY = 250;
         gameState.ballInResetState = true;
         gameState.ballResetStartTime = Date.now();
         gameState.ballSpeedX = 0;
         gameState.ballSpeedY = 0;
+
+        // Die Aktualisierung der Ballgeschwindigkeit erfolgt in updateBallResetState
     };
 
-    // Ball-Reset-Zustand aktualisieren
+    // Verbesserte updateBallResetState Funktion für bessere Zufallswerte
     const updateBallResetState = () => {
         const gameState = gameStateRef.current;
         if (gameState.gameOver) {
             gameState.ballInResetState = false;
             return;
         }
+
         if (gameState.ballInResetState) {
             if (Date.now() - gameState.ballResetStartTime >= gameState.ballResetDuration) {
                 gameState.ballInResetState = false;
-                gameState.ballSpeedX = Math.random() > 0.5 ? 5 : -5;
-                gameState.ballSpeedY = Math.random() * 4 - 2;
+
+                // Wähle zufällig eine Richtung (links oder rechts)
+                const directionX = Math.random() > 0.5 ? 1 : -1;
+
+                // Setze eine bessere vertikale Komponente für vielfältigere Trajektorien
+                // Zwischen -3 und 3, aber niemals 0
+                let speedY = (Math.random() * 6 - 3);
+                if (Math.abs(speedY) < 0.5) speedY = (speedY >= 0) ? 0.5 : -0.5;
+
+                gameState.ballSpeedX = 5 * directionX;
+                gameState.ballSpeedY = speedY;
 
                 // Speichere aktuelle Richtung für Ballwechsel-Tracking
                 gameState.lastBallSpeedX = gameState.ballSpeedX;
@@ -876,62 +868,70 @@ const PongGame = ({
         }
     };
 
-    // Schläger aktualisieren
+    // Verbesserte Paddle-Steuerung mit Shift-Taste und isolierter Computergeschwindigkeit
     const updatePaddles = () => {
         const gameState = gameStateRef.current;
         const {keys, touchControls} = gameState;
         let newLeftPaddleY = gameState.leftPaddleY;
         let newRightPaddleY = gameState.rightPaddleY;
 
-        // Touch-Steuerung wird jetzt gleichwertig zur Tastatur behandelt
+        // Bewegungsgeschwindigkeit für Spieler: normal oder halb, wenn Shift gedrückt ist
+        const playerPaddleSpeed = keys.shiftPressed ? 4 : 8;
+
+        // WICHTIG: Lokale Kopie der Difficulty für den Computer erstellen
+        // So wird sichergestellt, dass die Schwierigkeit nicht durch andere Logik geändert wird
+        const computerDifficulty = difficulty; // Verwendung einer isolierten Variable
+
         if (gameMode === 'singleplayer') {
             // Spieler: Linker Schläger (Tasten oder Touch)
             if ((keys.upPressed || keys.wPressed || touchControls.leftUp) && newLeftPaddleY > 0) {
-                newLeftPaddleY -= 8;
+                newLeftPaddleY -= playerPaddleSpeed;
             } else if ((keys.downPressed || keys.sPressed || touchControls.leftDown) && newLeftPaddleY < 500 - PADDLE_HEIGHT) {
-                newLeftPaddleY += 8;
+                newLeftPaddleY += playerPaddleSpeed;
             }
 
-            // Computer: Rechter Schläger KI
+            // Computer: Rechter Schläger KI - FESTE GESCHWINDIGKEIT
             const computerPaddleCenter = newRightPaddleY + PADDLE_HEIGHT / 2;
             const distanceToMove = gameState.ballY - computerPaddleCenter;
 
             if (Math.abs(distanceToMove) > PADDLE_HEIGHT / 4) {
                 if (distanceToMove > 0) {
-                    newRightPaddleY += difficulty;
+                    // Computer bewegt sich nach unten
+                    newRightPaddleY += computerDifficulty; // Verwendung der isolierten Variable
                 } else {
-                    newRightPaddleY -= difficulty;
+                    // Computer bewegt sich nach oben
+                    newRightPaddleY -= computerDifficulty; // Verwendung der isolierten Variable
                 }
             }
         } else if (gameMode === 'local-multiplayer') {
             // Spieler 1: Linker Schläger mit W/S oder Touch
             if ((keys.wPressed || touchControls.leftUp) && newLeftPaddleY > 0) {
-                newLeftPaddleY -= 8;
+                newLeftPaddleY -= playerPaddleSpeed;
             } else if ((keys.sPressed || touchControls.leftDown) && newLeftPaddleY < 500 - PADDLE_HEIGHT) {
-                newLeftPaddleY += 8;
+                newLeftPaddleY += playerPaddleSpeed;
             }
 
             // Spieler 2: Rechter Schläger mit Pfeiltasten oder Touch
             if ((keys.upPressed || touchControls.rightUp) && newRightPaddleY > 0) {
-                newRightPaddleY -= 8;
+                newRightPaddleY -= playerPaddleSpeed;
             } else if ((keys.downPressed || touchControls.rightDown) && newRightPaddleY < 500 - PADDLE_HEIGHT) {
-                newRightPaddleY += 8;
+                newRightPaddleY += playerPaddleSpeed;
             }
         } else if (gameMode === 'online-multiplayer') {
             // Verwende isHostRef für sofortigen Zugriff
             if (isHostRef.current) {
                 // Host steuert den linken Schläger mit beliebigen Tasten oder Touch
                 if ((keys.wPressed || keys.upPressed || touchControls.leftUp) && newLeftPaddleY > 0) {
-                    newLeftPaddleY -= 8;
+                    newLeftPaddleY -= playerPaddleSpeed;
                 } else if ((keys.sPressed || keys.downPressed || touchControls.leftDown) && newLeftPaddleY < 500 - PADDLE_HEIGHT) {
-                    newLeftPaddleY += 8;
+                    newLeftPaddleY += playerPaddleSpeed;
                 }
             } else {
                 // Gast steuert den rechten Schläger mit beliebigen Tasten oder Touch
                 if ((keys.wPressed || keys.upPressed || touchControls.rightUp) && newRightPaddleY > 0) {
-                    newRightPaddleY -= 8;
+                    newRightPaddleY -= playerPaddleSpeed;
                 } else if ((keys.sPressed || keys.downPressed || touchControls.rightDown) && newRightPaddleY < 500 - PADDLE_HEIGHT) {
-                    newRightPaddleY += 8;
+                    newRightPaddleY += playerPaddleSpeed;
                 }
             }
         }
@@ -941,7 +941,7 @@ const PongGame = ({
         gameState.rightPaddleY = Math.max(0, Math.min(newRightPaddleY, 500 - PADDLE_HEIGHT));
     };
 
-    // Ball aktualisieren
+    // Verbesserte Ball-Bewegung mit Sicherheitsmechanismen gegen horizontale Endlos-Zustände
     const updateBall = () => {
         const gameState = gameStateRef.current;
 
@@ -967,16 +967,35 @@ const PongGame = ({
             return;
         }
 
+        // Speichere die aktuelle Position für die Kollisionsprüfung
+        const prevBallX = gameState.ballX;
+        const prevBallY = gameState.ballY;
+
+        // Ball bewegen
         gameState.ballX += gameState.ballSpeedX;
         gameState.ballY += gameState.ballSpeedY;
 
-        // Kollision mit oberer/unterer Wand
-        if (gameState.ballY < BALL_RADIUS || gameState.ballY > 500 - BALL_RADIUS) {
-            gameState.ballSpeedY = -gameState.ballSpeedY;
+        // Verbesserte Kollision mit oberer/unterer Wand
+        // Sicherstellen, dass der Ball nicht am Rand "stecken" bleibt
+        if (gameState.ballY - BALL_RADIUS <= 0) {
+            // Ball berührt obere Wand
+            gameState.ballY = BALL_RADIUS; // Reposition to avoid sticking
+            gameState.ballSpeedY = Math.abs(gameState.ballSpeedY); // Immer nach unten abprallen
+
+            // Leicht variieren, damit er nicht in einer horizontalen Linie bleibt
+            gameState.ballSpeedY += Math.random() * 0.5;
+        }
+        else if (gameState.ballY + BALL_RADIUS >= 500) {
+            // Ball berührt untere Wand
+            gameState.ballY = 500 - BALL_RADIUS; // Reposition to avoid sticking
+            gameState.ballSpeedY = -Math.abs(gameState.ballSpeedY); // Immer nach oben abprallen
+
+            // Leicht variieren, damit er nicht in einer horizontalen Linie bleibt
+            gameState.ballSpeedY -= Math.random() * 0.5;
         }
     };
 
-    // Kollisionsprüfung
+    // Verbesserte Kollisionserkennung mit Unterstützung für Paddle-Ecken
     const checkCollisions = () => {
         const gameState = gameStateRef.current;
 
@@ -985,56 +1004,92 @@ const PongGame = ({
             return;
         }
 
-        // Kollision mit linkem Schläger
-        if (gameState.ballX < PADDLE_WIDTH + BALL_RADIUS) {
-            if (gameState.ballY > gameState.leftPaddleY &&
-                gameState.ballY < gameState.leftPaddleY + PADDLE_HEIGHT) {
-                // Prüfe, ob sich die Richtung des Balls ändert (für Ballwechsel-Zählung)
-                const directionChanged = gameState.ballSpeedX < 0;
+        // Ball-Position und Radius für die Kollisionsberechnung
+        const ballX = gameState.ballX;
+        const ballY = gameState.ballY;
+        const ballRadius = BALL_RADIUS;
 
-                gameState.ballSpeedX = -gameState.ballSpeedX;
+        // Kollisionserkennung für linken Schläger (komplexere Version)
+        if (ballX - ballRadius <= PADDLE_WIDTH) {
+            // Horizontale Kollision: Ball nahe am linken Schläger
+            // Prüfen, ob der Ball vertikal mit dem Schläger kollidiert
 
-                // Abprallwinkel basierend auf Trefferpunkt
-                const deltaY = gameState.ballY - (gameState.leftPaddleY + PADDLE_HEIGHT / 2);
-                gameState.ballSpeedY = deltaY * 0.2;
+            // Erweiterter Kollisionsbereich: Auch etwas über und unter dem Schläger für eine bessere Eckenkollision
+            const paddleTop = gameState.leftPaddleY - ballRadius * 0.5;
+            const paddleBottom = gameState.leftPaddleY + PADDLE_HEIGHT + ballRadius * 0.5;
 
-                // Erhöhung der Geschwindigkeit
-                gameState.ballSpeedX *= 1.05;
-                if (Math.abs(gameState.ballSpeedX) > 12) {
-                    gameState.ballSpeedX = gameState.ballSpeedX > 0 ? 12 : -12;
-                }
+            if (ballY >= paddleTop && ballY <= paddleBottom) {
+                // Prüfe, ob sich der Ball tatsächlich auf den Schläger zubewegt (Richtung links)
+                if (gameState.ballSpeedX < 0) {
+                    // Prüfe, ob die Richtung des Balls geändert wird (für Ballwechsel-Zählung)
+                    const directionChanged = true;
 
-                // Wenn die Richtung geändert wurde, zähle einen Ballwechsel
-                if (directionChanged && onBallExchange) {
-                    onBallExchange();
+                    // Ball abprallen lassen
+                    gameState.ballX = PADDLE_WIDTH + ballRadius; // Leicht vom Schläger weg positionieren
+                    gameState.ballSpeedX = -gameState.ballSpeedX; // Richtung umkehren
+
+                    // Abprallwinkel basierend auf Trefferpunkt auf dem Schläger
+                    // Je näher am Rand des Schlägers, desto steiler der Winkel
+                    const hitPosition = (ballY - (gameState.leftPaddleY + PADDLE_HEIGHT / 2)) / (PADDLE_HEIGHT / 2);
+                    gameState.ballSpeedY = hitPosition * 7; // Stärkerer Effekt für steilere Winkel
+
+                    // Erhöhung der Geschwindigkeit für mehr Spannung
+                    gameState.ballSpeedX *= 1.05;
+                    // Begrenze die maximale Geschwindigkeit
+                    if (Math.abs(gameState.ballSpeedX) > 12) {
+                        gameState.ballSpeedX = gameState.ballSpeedX > 0 ? 12 : -12;
+                    }
+
+                    // Wenn die Richtung geändert wurde, zähle einen Ballwechsel
+                    if (directionChanged && onBallExchange) {
+                        onBallExchange();
+                    }
                 }
             }
         }
 
-        // Kollision mit rechtem Schläger
-        if (gameState.ballX > 800 - PADDLE_WIDTH - BALL_RADIUS) {
-            if (gameState.ballY > gameState.rightPaddleY &&
-                gameState.ballY < gameState.rightPaddleY + PADDLE_HEIGHT) {
-                // Prüfe, ob sich die Richtung des Balls ändert (für Ballwechsel-Zählung)
-                const directionChanged = gameState.ballSpeedX > 0;
+        // Kollisionserkennung für rechten Schläger (komplexere Version)
+        if (ballX + ballRadius >= 800 - PADDLE_WIDTH) {
+            // Horizontale Kollision: Ball nahe am rechten Schläger
+            // Prüfen, ob der Ball vertikal mit dem Schläger kollidiert
 
-                gameState.ballSpeedX = -gameState.ballSpeedX;
+            // Erweiterter Kollisionsbereich für bessere Eckenkollision
+            const paddleTop = gameState.rightPaddleY - ballRadius * 0.5;
+            const paddleBottom = gameState.rightPaddleY + PADDLE_HEIGHT + ballRadius * 0.5;
 
-                // Abprallwinkel basierend auf Trefferpunkt
-                const deltaY = gameState.ballY - (gameState.rightPaddleY + PADDLE_HEIGHT / 2);
-                gameState.ballSpeedY = deltaY * 0.2;
+            if (ballY >= paddleTop && ballY <= paddleBottom) {
+                // Prüfe, ob sich der Ball tatsächlich auf den Schläger zubewegt (Richtung rechts)
+                if (gameState.ballSpeedX > 0) {
+                    // Prüfe, ob die Richtung des Balls geändert wird (für Ballwechsel-Zählung)
+                    const directionChanged = true;
 
-                // Erhöhung der Geschwindigkeit
-                gameState.ballSpeedX *= 1.05;
-                if (Math.abs(gameState.ballSpeedX) > 12) {
-                    gameState.ballSpeedX = gameState.ballSpeedX > 0 ? 12 : -12;
-                }
+                    // Ball abprallen lassen
+                    gameState.ballX = 800 - PADDLE_WIDTH - ballRadius; // Leicht vom Schläger weg positionieren
+                    gameState.ballSpeedX = -gameState.ballSpeedX; // Richtung umkehren
 
-                // Wenn die Richtung geändert wurde, zähle einen Ballwechsel
-                if (directionChanged && onBallExchange) {
-                    onBallExchange();
+                    // Abprallwinkel basierend auf Trefferpunkt auf dem Schläger
+                    const hitPosition = (ballY - (gameState.rightPaddleY + PADDLE_HEIGHT / 2)) / (PADDLE_HEIGHT / 2);
+                    gameState.ballSpeedY = hitPosition * 7; // Stärkerer Effekt für steilere Winkel
+
+                    // Erhöhung der Geschwindigkeit
+                    gameState.ballSpeedX *= 1.05;
+                    // Begrenze die maximale Geschwindigkeit
+                    if (Math.abs(gameState.ballSpeedX) > 12) {
+                        gameState.ballSpeedX = gameState.ballSpeedX > 0 ? 12 : -12;
+                    }
+
+                    // Wenn die Richtung geändert wurde, zähle einen Ballwechsel
+                    if (directionChanged && onBallExchange) {
+                        onBallExchange();
+                    }
                 }
             }
+        }
+
+        // Zusätzliche Sicherheit: Verhindere, dass der Ball genau horizontal fliegt
+        if (Math.abs(gameState.ballSpeedY) < 0.2) {
+            // Kleine zufällige Komponente hinzufügen, wenn die vertikale Geschwindigkeit zu klein ist
+            gameState.ballSpeedY += (Math.random() * 2 - 1) * 0.5;
         }
     };
 
@@ -1138,12 +1193,6 @@ const PongGame = ({
 
         // Als Gast die Ballposition und Spielstand-Updates vom Host übernehmen
         if (!isHostRef.current && data.ballX !== undefined) {
-            // Explizite Log-Ausgabe bei Ballpositionsänderungen (nur sporadisch)
-            const now = Date.now();
-            if ((now % 60) === 0) { // Nur etwa jede Sekunde loggen
-                console.log('Ball-Update:', data.ballX, data.ballY, 'Reset:', data.ballInResetState);
-            }
-
             // Ball-Position und -Geschwindigkeit übernehmen
             gameStateRef.current.ballX = data.ballX;
             gameStateRef.current.ballY = data.ballY;
@@ -1438,45 +1487,6 @@ const PongGame = ({
         ctx.restore();
     };
 
-    // Debug-Informationen zeichnen
-    // const drawDebugInfo = (ctx) => {
-    //     if (!showDebugInfo) return;
-    //
-    //     const gameState = gameStateRef.current;
-    //
-    //     // Hintergrund für Debug-Informationen
-    //     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    //     ctx.fillRect(10, 10, 380, 200);
-    //
-    //     // Text-Styling
-    //     ctx.font = '12px monospace';
-    //     ctx.fillStyle = 'white';
-    //     ctx.textAlign = 'left';
-    //
-    //     // Verschiedene Debug-Informationen anzeigen
-    //     const info = [
-    //         `Host: ${isHostRef.current ? 'Ja' : 'Nein'}`,
-    //         `Ball-Position: ${Math.round(gameState.ballX)}, ${Math.round(gameState.ballY)}`,
-    //         `Ball-Geschwindigkeit: ${gameState.ballSpeedX.toFixed(2)}, ${gameState.ballSpeedY.toFixed(2)}`,
-    //         `Reset-Zustand: ${gameState.ballInResetState ? 'Ja' : 'Nein'}`,
-    //         `Reset-Zeit: ${gameState.ballInResetState ? ((Date.now() - gameState.ballResetStartTime) / 1000).toFixed(1) + 's' : 'N/A'}`,
-    //         `Punktestand: ${gameState.scores.left} : ${gameState.scores.right}`,
-    //         `Datenkanal: ${dataChannelRef.current ? dataChannelRef.current.readyState : 'nicht initialisiert'}`,
-    //         `Verbindungsstatus: ${connectionStatus}`,
-    //         `Ping: ${ping} ms`,
-    //         `Frame-Rate: ${Math.round(1000 / (Date.now() - lastFrameTimeRef.current || 16))} FPS`,
-    //         `Anhängige ICE-Kandidaten: ${pendingCandidatesRef.current.length}`,
-    //         `Remote Description Set: ${remoteDescriptionSetRef.current ? 'Ja' : 'Nein'}`,
-    //         `Socket-ID: ${socketRef.current ? socketRef.current.id : 'keine'}`,
-    //         `Raum-ID: ${currentRoomIdRef.current || 'keine'}`,
-    //     ];
-    //
-    //     // Informationen anzeigen
-    //     info.forEach((text, index) => {
-    //         ctx.fillText(text, 20, 30 + (index * 18));
-    //     });
-    // };
-
     // Alles zeichnen
     const drawEverything = () => {
         const canvas = canvasRef.current;
@@ -1537,8 +1547,7 @@ const PongGame = ({
             }
         }
 
-        // Debug-Informationen anzeigen
-        // drawDebugInfo(ctx);
+        // Debug-Info wurde entfernt
     };
 
     const resetGameState = () => {
@@ -1647,72 +1656,7 @@ const PongGame = ({
                 ⮜ Menü
             </button>
 
-            {/* Debug-Button (nur im Online-Modus) */}
-            {/* {gameMode === 'online-multiplayer' && (
-                <button
-                    className="debug-btn"
-                    onClick={() => setShowDebugInfo(!showDebugInfo)}
-                    style={{
-                        position: 'absolute',
-                        top: 10,
-                        right: 10,
-                        padding: '5px 10px',
-                        background: '#333',
-                        color: 'white',
-                        border: '1px solid #555',
-                        borderRadius: '3px',
-                        cursor: 'pointer',
-                        zIndex: 100
-                    }}
-                    title="Debug-Infos anzeigen (Strg+D)"
-                >
-                    {showDebugInfo ? 'Debug aus' : 'Debug an'}
-                </button>
-            )}*/}
-
-            {/* Sync-Check-Button (nur im Online-Modus und wenn Debug aktiv) */}
-            {/*{gameMode === 'online-multiplayer' && showDebugInfo && (
-                <>
-                    <button
-                        className="sync-btn"
-                        onClick={checkGameSync}
-                        style={{
-                            position: 'absolute',
-                            top: 10,
-                            right: 100,
-                            padding: '5px 10px',
-                            background: '#553388',
-                            color: 'white',
-                            border: '1px solid #7744AA',
-                            borderRadius: '3px',
-                            cursor: 'pointer',
-                            zIndex: 100
-                        }}
-                        title="Synchronisation überprüfen"
-                    >
-                        Sync-Check
-                    </button>
-                    <button
-                        className="retry-btn"
-                        onClick={retryWebRtcConnection}
-                        style={{
-                            position: 'absolute',
-                            top: 10,
-                            right: 190,
-                            padding: '5px 10px',
-                            background: '#AA3333',
-                            color: 'white',
-                            border: '1px solid #CC4444',
-                            borderRadius: '3px',
-                            cursor: 'pointer',
-                            zIndex: 100
-                        }}
-                        title="WebRTC-Verbindung erneut aufbauen"
-                    >
-                        Verbindung neu aufbauen
-                    </button>
-                </>
-            )}*/}
+            {/* Debug-Buttons wurden entfernt */}
 
             {showConfirmDialog && (
                 <div className="confirm-dialog">
