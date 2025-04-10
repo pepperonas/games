@@ -3,7 +3,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import './PongGame.css';
 import './TouchControls.css';
 import TouchControls from './TouchControls';
-import { socketManager } from '../socket-connection';
+import {socketManager} from '../socket-connection';
 
 const PADDLE_HEIGHT = 100;
 const PADDLE_WIDTH = 15;
@@ -148,18 +148,18 @@ const PongGame = ({
     }, []);
 
     // Tastaturhandler für Debug-Modus
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            // Debug-Modus mit Strg+D umschalten
-            if ((e.key === 'd' || e.key === 'D') && e.ctrlKey) {
-                setShowDebugInfo(prev => !prev);
-                console.log("Debug-Modus umgeschaltet:", !showDebugInfo);
-            }
-        };
-
-        document.addEventListener('keydown', handleKeyDown);
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [showDebugInfo]);
+    // useEffect(() => {
+    //     const handleKeyDown = (e) => {
+    //         // Debug-Modus mit Strg+D umschalten
+    //         if ((e.key === 'd' || e.key === 'D') && e.ctrlKey) {
+    //             setShowDebugInfo(prev => !prev);
+    //             console.log("Debug-Modus umgeschaltet:", !showDebugInfo);
+    //         }
+    //     };
+    //
+    //     document.addEventListener('keydown', handleKeyDown);
+    //     return () => document.removeEventListener('keydown', handleKeyDown);
+    // }, [showDebugInfo]);
 
     // Touch-End-Event-Handler
     useEffect(() => {
@@ -441,8 +441,14 @@ const PongGame = ({
                     case 'syncResponse':
                         console.log('🔄 Synchronisierungsantwort vom Peer:', data);
                         // Zeige die Differenz zwischen lokalem und Remote-Status
-                        const localBall = { x: gameStateRef.current.ballX, y: gameStateRef.current.ballY };
-                        console.log('Differenz: Ball lokal:', localBall, 'Ball remote:', { x: data.ballX, y: data.ballY });
+                        const localBall = {
+                            x: gameStateRef.current.ballX,
+                            y: gameStateRef.current.ballY
+                        };
+                        console.log('Differenz: Ball lokal:', localBall, 'Ball remote:', {
+                            x: data.ballX,
+                            y: data.ballY
+                        });
                         break;
                     case 'gameOver':
                         processGameOverMessage(data);
@@ -699,7 +705,7 @@ const PongGame = ({
         // Versuche, eine neue PeerConnection zu erstellen
         try {
             // Verwende eine lokale Variable für die neue PeerConnection
-            const peerConnection = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+            const peerConnection = new RTCPeerConnection({iceServers: ICE_SERVERS});
             console.log('✅ PeerConnection erfolgreich erstellt');
 
             // Erst nach erfolgreicher Erstellung die Referenz setzen
@@ -1433,43 +1439,43 @@ const PongGame = ({
     };
 
     // Debug-Informationen zeichnen
-    const drawDebugInfo = (ctx) => {
-        if (!showDebugInfo) return;
-
-        const gameState = gameStateRef.current;
-
-        // Hintergrund für Debug-Informationen
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillRect(10, 10, 380, 200);
-
-        // Text-Styling
-        ctx.font = '12px monospace';
-        ctx.fillStyle = 'white';
-        ctx.textAlign = 'left';
-
-        // Verschiedene Debug-Informationen anzeigen
-        const info = [
-            `Host: ${isHostRef.current ? 'Ja' : 'Nein'}`,
-            `Ball-Position: ${Math.round(gameState.ballX)}, ${Math.round(gameState.ballY)}`,
-            `Ball-Geschwindigkeit: ${gameState.ballSpeedX.toFixed(2)}, ${gameState.ballSpeedY.toFixed(2)}`,
-            `Reset-Zustand: ${gameState.ballInResetState ? 'Ja' : 'Nein'}`,
-            `Reset-Zeit: ${gameState.ballInResetState ? ((Date.now() - gameState.ballResetStartTime) / 1000).toFixed(1) + 's' : 'N/A'}`,
-            `Punktestand: ${gameState.scores.left} : ${gameState.scores.right}`,
-            `Datenkanal: ${dataChannelRef.current ? dataChannelRef.current.readyState : 'nicht initialisiert'}`,
-            `Verbindungsstatus: ${connectionStatus}`,
-            `Ping: ${ping} ms`,
-            `Frame-Rate: ${Math.round(1000 / (Date.now() - lastFrameTimeRef.current || 16))} FPS`,
-            `Anhängige ICE-Kandidaten: ${pendingCandidatesRef.current.length}`,
-            `Remote Description Set: ${remoteDescriptionSetRef.current ? 'Ja' : 'Nein'}`,
-            `Socket-ID: ${socketRef.current ? socketRef.current.id : 'keine'}`,
-            `Raum-ID: ${currentRoomIdRef.current || 'keine'}`,
-        ];
-
-        // Informationen anzeigen
-        info.forEach((text, index) => {
-            ctx.fillText(text, 20, 30 + (index * 18));
-        });
-    };
+    // const drawDebugInfo = (ctx) => {
+    //     if (!showDebugInfo) return;
+    //
+    //     const gameState = gameStateRef.current;
+    //
+    //     // Hintergrund für Debug-Informationen
+    //     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    //     ctx.fillRect(10, 10, 380, 200);
+    //
+    //     // Text-Styling
+    //     ctx.font = '12px monospace';
+    //     ctx.fillStyle = 'white';
+    //     ctx.textAlign = 'left';
+    //
+    //     // Verschiedene Debug-Informationen anzeigen
+    //     const info = [
+    //         `Host: ${isHostRef.current ? 'Ja' : 'Nein'}`,
+    //         `Ball-Position: ${Math.round(gameState.ballX)}, ${Math.round(gameState.ballY)}`,
+    //         `Ball-Geschwindigkeit: ${gameState.ballSpeedX.toFixed(2)}, ${gameState.ballSpeedY.toFixed(2)}`,
+    //         `Reset-Zustand: ${gameState.ballInResetState ? 'Ja' : 'Nein'}`,
+    //         `Reset-Zeit: ${gameState.ballInResetState ? ((Date.now() - gameState.ballResetStartTime) / 1000).toFixed(1) + 's' : 'N/A'}`,
+    //         `Punktestand: ${gameState.scores.left} : ${gameState.scores.right}`,
+    //         `Datenkanal: ${dataChannelRef.current ? dataChannelRef.current.readyState : 'nicht initialisiert'}`,
+    //         `Verbindungsstatus: ${connectionStatus}`,
+    //         `Ping: ${ping} ms`,
+    //         `Frame-Rate: ${Math.round(1000 / (Date.now() - lastFrameTimeRef.current || 16))} FPS`,
+    //         `Anhängige ICE-Kandidaten: ${pendingCandidatesRef.current.length}`,
+    //         `Remote Description Set: ${remoteDescriptionSetRef.current ? 'Ja' : 'Nein'}`,
+    //         `Socket-ID: ${socketRef.current ? socketRef.current.id : 'keine'}`,
+    //         `Raum-ID: ${currentRoomIdRef.current || 'keine'}`,
+    //     ];
+    //
+    //     // Informationen anzeigen
+    //     info.forEach((text, index) => {
+    //         ctx.fillText(text, 20, 30 + (index * 18));
+    //     });
+    // };
 
     // Alles zeichnen
     const drawEverything = () => {
@@ -1532,7 +1538,7 @@ const PongGame = ({
         }
 
         // Debug-Informationen anzeigen
-        drawDebugInfo(ctx);
+        // drawDebugInfo(ctx);
     };
 
     const resetGameState = () => {
@@ -1642,7 +1648,7 @@ const PongGame = ({
             </button>
 
             {/* Debug-Button (nur im Online-Modus) */}
-            {gameMode === 'online-multiplayer' && (
+            {/* {gameMode === 'online-multiplayer' && (
                 <button
                     className="debug-btn"
                     onClick={() => setShowDebugInfo(!showDebugInfo)}
@@ -1662,10 +1668,10 @@ const PongGame = ({
                 >
                     {showDebugInfo ? 'Debug aus' : 'Debug an'}
                 </button>
-            )}
+            )}*/}
 
             {/* Sync-Check-Button (nur im Online-Modus und wenn Debug aktiv) */}
-            {gameMode === 'online-multiplayer' && showDebugInfo && (
+            {/*{gameMode === 'online-multiplayer' && showDebugInfo && (
                 <>
                     <button
                         className="sync-btn"
@@ -1706,7 +1712,7 @@ const PongGame = ({
                         Verbindung neu aufbauen
                     </button>
                 </>
-            )}
+            )}*/}
 
             {showConfirmDialog && (
                 <div className="confirm-dialog">

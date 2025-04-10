@@ -1,4 +1,4 @@
-// App.jsx
+// App.jsx - Modifizierte Version ohne PongDebug
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import StartScreen from './components/StartScreen';
@@ -7,7 +7,6 @@ import GameOverScreen from './components/GameOverScreen';
 import OnlineConnectionScreen from './components/OnlineConnectionScreen';
 import StatsScreen from './components/StatsScreen';
 import PlayerProfile from './components/PlayerProfile';
-import PongDebug from './components/PongDebug';
 import { socketManager } from './socket-connection';
 
 function App() {
@@ -98,10 +97,6 @@ function App() {
         setCurrentScreen('start');
     };
 
-    const handleDebugScreen = () => {
-        setCurrentScreen('debug');
-    };
-
     return (
         <div className="App">
             {currentScreen === 'start' && (
@@ -109,7 +104,6 @@ function App() {
                     onStartGame={handleStartGame}
                     onViewStats={handleViewStats}
                     onEditProfile={handleEditProfile}
-                    onDebug={handleDebugScreen}
                     playerName={playerName}
                 />
             )}
@@ -163,12 +157,6 @@ function App() {
                 <StatsScreen
                     onBack={() => setCurrentScreen('start')}
                     playerName={playerName} // Zusätzlich
-                />
-            )}
-
-            {currentScreen === 'debug' && (
-                <PongDebug
-                    onBack={() => setCurrentScreen('start')}
                 />
             )}
         </div>

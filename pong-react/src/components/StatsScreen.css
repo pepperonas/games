@@ -1,4 +1,4 @@
-/* StatsScreen.css mit Scrolling-Fix */
+/* StatsScreen.css mit verbessertem Layout */
 .stats-screen {
     position: fixed;
     top: 0;
@@ -7,9 +7,9 @@
     height: 100vh;
     overflow-y: auto;
     background-color: #2C2E3B;
-    padding: 0; /* Padding oben entfernt */
-    padding-top: 20px; /* Explizit kein Padding oben */
-    padding-bottom: 20px; /* Padding nur unten */
+    padding: 0;
+    padding-top: 1000px; /* Platz für den fixen Header */
+    padding-bottom: 20px;
     padding-left: 20px;
     padding-right: 20px;
     box-sizing: border-box;
@@ -19,6 +19,43 @@
     z-index: 1000;
     display: flex;
     flex-direction: column;
+}
+
+/* Fixierter Header */
+.stats-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #232531;
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1100;
+    box-sizing: border-box;
+}
+
+.stats-header h2 {
+    flex: 1;
+    text-align: center;
+    margin: 0;
+}
+
+.back-btn-fixed {
+    background-color: #4a4d5e;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background-color 0.3s;
+    min-width: unset;
+}
+
+.back-btn-fixed:hover {
+    background-color: #616478;
 }
 
 /* Der Stats-Screen setzt dynamisch Styles für HTML und Body */
@@ -40,12 +77,6 @@
     height: auto !important;
 }
 
-.stats-screen h2 {
-    text-align: center;
-    margin-top: 10px;
-    margin-bottom: 20px;
-}
-
 .player-selection {
     display: flex;
     justify-content: space-between;
@@ -56,6 +87,17 @@
     padding: 0 5px;
 }
 
+.player-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.player-selection label {
+    white-space: nowrap;
+    font-weight: bold;
+}
+
 .player-select {
     padding: 8px 12px;
     background-color: #3a3c4e;
@@ -63,8 +105,8 @@
     border-radius: 5px;
     color: white;
     min-width: 150px;
-    font-size: 16px; /* Größer für Mobilgeräte */
-    -webkit-appearance: none; /* Entfernt den nativen Stil auf iOS */
+    font-size: 16px;
+    -webkit-appearance: none;
 }
 
 .stats-actions {
@@ -83,7 +125,7 @@
     cursor: pointer;
     border-radius: 5px;
     transition: background-color 0.3s;
-    -webkit-tap-highlight-color: transparent; /* Entfernt das Highlight beim Tippen auf iOS */
+    -webkit-tap-highlight-color: transparent;
 }
 
 .export-btn {
@@ -321,7 +363,7 @@
 
 .history-table-container {
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch; /* Für besseres iOS Scrolling */
+    -webkit-overflow-scrolling: touch;
 }
 
 .history-table {
@@ -390,10 +432,15 @@
     .stats-screen {
         padding-left: 10px;
         padding-right: 10px;
+        padding-top: 65px; /* Etwas mehr Platz für den Header auf kleinen Geräten */
     }
 
-    .stats-screen h2 {
-        margin-top: 5px;
+    .stats-header {
+        padding: 10px;
+    }
+
+    .stats-header h2 {
+        font-size: 20px;
     }
 
     .player-selection {
@@ -401,14 +448,18 @@
         align-items: stretch;
     }
 
+    .player-selector {
+        justify-content: flex-start;
+        margin-bottom: 10px;
+    }
+
     .player-selection label {
-        margin-bottom: 5px;
+        min-width: 60px;
     }
 
     .stats-actions {
         width: 100%;
         justify-content: center;
-        margin-top: 10px;
     }
 
     .stats-actions .button {
@@ -547,7 +598,7 @@
         /* iOS specific scrolling fix */
         position: absolute;
         height: 100%;
-        transform: translateZ(0); /* Aktiviert Hardware-Beschleunigung */
+        transform: translateZ(0);
     }
 
     .player-select {
@@ -559,7 +610,7 @@
     }
 
     .chart-bar {
-        transition: none; /* Vermeidet Rendering-Probleme auf iOS */
+        transition: none;
     }
 }
 

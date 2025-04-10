@@ -1,10 +1,41 @@
-/* Ergänzungen für StartScreen.css */
+/* StartScreen.css - Mit verbesserten Styles passend zur Statistik-Seite */
+.start-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #2C2E3B;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.start-screen h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
 
 .player-welcome {
     font-size: 18px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     color: #ccc;
     text-align: center;
+    position: relative;
+    cursor: pointer;
+    background-color: rgba(61, 64, 82, 0.7);
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: background-color 0.3s;
+}
+
+.player-welcome:hover {
+    background-color: rgba(61, 64, 82, 0.9);
 }
 
 .player-name {
@@ -12,94 +43,264 @@
     color: white;
 }
 
-.stats-button-container {
+.game-modes {
     width: 100%;
+    max-width: 500px;
+    margin-bottom: 30px;
+    background-color: rgba(61, 64, 82, 0.7);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.game-modes h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #fff;
+}
+
+.mode-section {
+    margin-bottom: 20px;
+}
+
+.mode-section h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #ccc;
+    text-align: center;
+}
+
+.difficulty-buttons, .multiplayer-buttons {
     display: flex;
     justify-content: center;
-    margin-top: 15px;
-    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
-.stats-btn {
+.difficulty-buttons button,
+.multiplayer-buttons button,
+.bottom-buttons button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    min-width: 120px;
+    transition: all 0.3s ease;
+}
+
+.difficulty-buttons button:hover,
+.multiplayer-buttons button:hover,
+.bottom-buttons button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.difficulty-buttons button:nth-child(1) {
+    background-color: #4CAF50; /* Einfach - Grün */
+}
+
+.difficulty-buttons button:nth-child(2) {
+    background-color: #FF9800; /* Mittel - Orange */
+}
+
+.difficulty-buttons button:nth-child(3) {
+    background-color: #F44336; /* Schwer - Rot */
+}
+
+.multiplayer-buttons button:nth-child(1) {
+    background-color: #2196F3; /* Lokal - Blau */
+}
+
+.multiplayer-buttons button:nth-child(2) {
+    background-color: #9C27B0; /* Online - Lila */
+}
+
+.bottom-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.stats-button {
+    background-color: #673AB7 !important;
+}
+
+.stats-button:hover {
+    background-color: #5E35B1 !important;
+}
+
+.player-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #2C2E3B;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    width: 220px;
+    z-index: 100;
+    margin-top: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.player-menu:before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid #2C2E3B;
+}
+
+.player-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0 0 10px 0;
+}
+
+.player-item {
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    background-color: #3a3c4e;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.player-item:hover {
+    background-color: #4a4d5e;
+}
+
+.player-item.active {
+    background-color: #4CAF50;
+    font-weight: bold;
+}
+
+.player-item.new-player {
     background-color: #673AB7;
-    max-width: 250px;
+    color: white;
+    text-align: center;
+}
+
+.orientation-warning {
+    position: fixed;
+    bottom: 10px;
+    left: 0;
     width: 100%;
+    text-align: center;
+    background-color: rgba(255, 152, 0, 0.8);
+    padding: 10px;
+    color: white;
+    font-weight: bold;
 }
 
-.stats-btn:hover {
-    background-color: #5E35B1;
+/* Mobile Anpassungen */
+@media (max-width: 768px) {
+    .start-screen h1 {
+        font-size: 36px;
+        margin-bottom: 15px;
+    }
+
+    .player-welcome {
+        font-size: 16px;
+        margin-bottom: 15px;
+    }
+
+    .game-modes {
+        padding: 15px;
+    }
+
+    .game-modes h2 {
+        font-size: 20px;
+        margin-bottom: 15px;
+    }
+
+    .mode-section h3 {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+
+    .difficulty-buttons button,
+    .multiplayer-buttons button,
+    .bottom-buttons button {
+        padding: 10px 16px;
+        font-size: 14px;
+        min-width: 100px;
+    }
+
+    .bottom-buttons {
+        flex-direction: column;
+        width: 100%;
+        max-width: 500px;
+    }
+
+    .bottom-buttons button {
+        width: 100%;
+    }
 }
 
-/* Anpassungen für Landscape-Modus */
-@media (orientation: landscape) {
-    .stats-button-container {
+/* Landscape Anpassungen */
+@media (max-width: 915px) and (orientation: landscape) {
+    .start-screen {
+        padding: 10px;
+    }
+
+    .start-screen h1 {
+        font-size: 30px;
+        margin-bottom: 10px;
+    }
+
+    .game-modes {
+        display: flex;
+        max-width: 90%;
+        padding: 10px;
+    }
+
+    .mode-section {
+        flex: 1;
+        margin-right: 15px;
+        margin-bottom: 0;
+    }
+
+    .mode-section:last-child {
+        margin-right: 0;
+    }
+
+    .difficulty-buttons,
+    .multiplayer-buttons {
+        flex-direction: column;
+    }
+
+    .bottom-buttons {
+        flex-direction: row;
         margin-top: 10px;
     }
 
-    .stats-btn {
-        padding: 8px 16px;
+    .player-menu {
+        max-height: 200px;
     }
 }
 
-/* Anpassungen für schmale Bildschirme */
-@media (max-width: 480px) {
-    .player-welcome {
-        font-size: 16px;
-        margin-bottom: 10px;
-    }
-}
-
-/* Zusatz für StatsScreen.css - Chart-Unterstützung */
-
-.chart-container {
-    height: 200px;
-    width: 100%;
-    position: relative;
-}
-
-.chart-card {
-    padding-bottom: 15px;
-}
-
-.no-data {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: #888;
-    font-style: italic;
-    text-align: center;
-    background-color: rgba(0, 0, 0, 0.1);
-    border-radius: 4px;
-}
-
-/* Spezifische Chart-Anpassungen */
-.winrate-chart .chart-container {
-    height: 200px;
-}
-
-.ball-exchanges-chart .chart-container {
-    height: 200px;
-}
-
-.charts-container {
-    grid-template-columns: 1fr 1fr;
-}
-
-.chart-card {
-    min-height: 280px;
-}
-
-@media (max-width: 768px) {
-    .charts-container {
-        grid-template-columns: 1fr;
+/* Kleine Geräte */
+@media (max-width: 360px) {
+    .start-screen h1 {
+        font-size: 28px;
     }
 
-    .chart-container {
-        height: 180px;
-    }
-
-    .chart-card {
-        min-height: 250px;
+    .difficulty-buttons button,
+    .multiplayer-buttons button,
+    .bottom-buttons button {
+        padding: 8px 12px;
+        font-size: 13px;
     }
 }

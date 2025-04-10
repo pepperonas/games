@@ -1,3 +1,4 @@
+// StatsScreen.jsx mit verbessertem Layout für Spielerauswahl und Navigation
 import React, {useEffect, useRef, useState} from 'react';
 import StatsService from '../services/StatsService';
 import './StatsScreen.css';
@@ -103,6 +104,16 @@ const StatsScreen = ({playerName, onBack}) => {
                             boxWidth: isMobile ? 10 : 15,
                             font: {
                                 size: isMobile ? 10 : 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                // Formatiere die Spielzeit im Tooltip
+                                const seconds = context.raw;
+                                const label = context.label;
+                                return `${label}: ${formatPlayTime(seconds)}`;
                             }
                         }
                     }
@@ -223,17 +234,19 @@ const StatsScreen = ({playerName, onBack}) => {
         e.target.value = null;
     };
 
-    // Rendere die Spielzeit in einem lesbaren Format
+    // Rendere die Spielzeit im HH:mm:ss Format
     const formatPlayTime = (seconds) => {
+        // Konvertiere in Stunden, Minuten und Sekunden
         const hours = Math.floor(seconds / 3600);
         const minutes = Math.floor((seconds % 3600) / 60);
         const secs = Math.floor(seconds % 60);
 
+        // Formatiere mit führenden Nullen für HH:mm:ss Format
         return [
-            hours > 0 ? `${hours}h` : null,
-            minutes > 0 ? `${minutes}m` : null,
-            `${secs}s`
-        ].filter(Boolean).join(' ');
+            hours.toString().padStart(2, '0'),
+            minutes.toString().padStart(2, '0'),
+            secs.toString().padStart(2, '0')
+        ].join(':');
     };
 
     // Formatiere das Datum für die Anzeige
@@ -302,8 +315,13 @@ const StatsScreen = ({playerName, onBack}) => {
             'unbekannt': 'Unbekannt'
         };
 
+        // Bereite formatierte Labels mit Spielzeit für die Legende vor
+        const formattedLabels = labels.map(mode => {
+            return `${modeLabels[mode] || mode}`;
+        });
+
         return {
-            labels: labels.map(mode => modeLabels[mode] || mode),
+            labels: formattedLabels,
             datasets: [{
                 data: Object.values(timeByMode),
                 backgroundColor: [
@@ -368,20 +386,28 @@ const StatsScreen = ({playerName, onBack}) => {
 
     return (
         <div className="stats-screen">
-            <h2>Spielstatistiken</h2>
+            {/* Fixierte Header-Leiste mit Titel, Spielerauswahl und Navigation */}
+            <div className="stats-header">
+                <button className="button back-btn-fixed" onClick={onBack}>
+                    ← Zurück
+                </button>
+                <h2>Spielstatistiken</h2>
+            </div>
 
             <div className="player-selection">
-                <label htmlFor="player-select">Spieler:</label>
-                <select
-                    id="player-select"
-                    value={selectedPlayer}
-                    onChange={handlePlayerChange}
-                    className="player-select"
-                >
-                    {allPlayers.map((player, index) => (
-                        <option key={index} value={player}>{player}</option>
-                    ))}
-                </select>
+                <div className="player-selector">
+                    <label htmlFor="player-select">Spieler: </label>
+                    <select
+                        id="player-select"
+                        value={selectedPlayer}
+                        onChange={handlePlayerChange}
+                        className="player-select"
+                    >
+                        {allPlayers.map((player, index) => (
+                            <option key={index} value={player}>{player}</option>
+                        ))}
+                    </select>
+                </div>
 
                 <div className="stats-actions">
                     <button className="button export-btn" onClick={handleExportStats}>
@@ -544,6 +570,7 @@ const StatsScreen = ({playerName, onBack}) => {
                 </div>
             )}
 
+            {/* Zurück-Button am Ende ist immer noch vorhanden (optional) */}
             <button className="button back-btn" onClick={onBack}>Zurück zum Hauptmenü</button>
         </div>
     );

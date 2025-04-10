@@ -1,4 +1,4 @@
-// components/StartScreen.jsx
+// components/StartScreen.jsx - Verbessertes Design passend zur Statistikseite
 import React, {useEffect, useState} from 'react';
 import './StartScreen.css';
 
@@ -7,7 +7,7 @@ const StartScreen = ({
                          onStartGame,
                          onViewStats,
                          onEditProfile,
-                         onDebug,
+                         onDebug, // Wird weiterhin unterstützt, aber Button wird entfernt
                          playerName,
 
                          // Alternativ-Props (für Kompatibilität)
@@ -26,10 +26,17 @@ const StartScreen = ({
     // Lade gespeicherte Spieler aus localStorage
     useEffect(() => {
         const loadSavedPlayers = () => {
+            // Prüfe zuerst die Profile aus pongProfiles
+            const profiles = JSON.parse(localStorage.getItem('pongProfiles')) || [];
+            if (profiles.length > 0) {
+                setSavedPlayers(profiles);
+                return;
+            }
+
+            // Alternativ: Suche nach Spieler-Einträgen
             const players = [];
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
-                // Nur Spieler-Einträge berücksichtigen (nicht die Einträge für andere Daten)
                 if (key && key.startsWith('pongPlayer_')) {
                     const playerName = key.replace('pongPlayer_', '');
                     players.push(playerName);
@@ -41,7 +48,23 @@ const StartScreen = ({
         loadSavedPlayers();
     }, []);
 
-    // Kompatibilitätsfunktionen: Verwendung der verfügbaren Funktionen
+    // Außerhalb des Menüs klicken schließt das Menü
+    useEffect(() => {
+        if (showPlayerMenu) {
+            const handleClickOutside = (event) => {
+                if (!event.target.closest('.player-welcome') && !event.target.closest('.player-menu')) {
+                    setShowPlayerMenu(false);
+                }
+            };
+
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => {
+                document.removeEventListener('mousedown', handleClickOutside);
+            };
+        }
+    }, [showPlayerMenu]);
+
+    // Kompatibilitätsfunktionen: Verwendung der verfügbaren Callback-Funktionen
     const startSinglePlayer = (difficulty) => {
         if (onStartSinglePlayer) {
             onStartSinglePlayer(difficulty);
@@ -74,14 +97,6 @@ const StartScreen = ({
         }
     };
 
-    const showDebug = () => {
-        if (onShowDebug) {
-            onShowDebug();
-        } else if (onDebug) {
-            onDebug();
-        }
-    };
-
     const handlePlayerSelect = (playerName) => {
         if (onSwitchPlayer) {
             onSwitchPlayer(playerName);
@@ -104,16 +119,15 @@ const StartScreen = ({
         <div className="start-screen">
             <h1>Pong</h1>
 
-            <div className="player-welcome">
-                <p>Willkommen, <strong
-                    onClick={() => setShowPlayerMenu(!showPlayerMenu)}>{playerName} ▼</strong></p>
+            <div className="player-welcome" onClick={() => setShowPlayerMenu(!showPlayerMenu)}>
+                Willkommen, <span className="player-name">{playerName} ▼</span>
 
                 {showPlayerMenu && (
                     <div className="player-menu">
                         <div className="player-list">
-                            {savedPlayers.map((name) => (
+                            {savedPlayers.map((name, index) => (
                                 <div
-                                    key={name}
+                                    key={index}
                                     className={`player-item ${name === playerName ? 'active' : ''}`}
                                     onClick={() => handlePlayerSelect(name)}
                                 >
@@ -151,8 +165,7 @@ const StartScreen = ({
 
             <div className="bottom-buttons">
                 <button className="stats-button" onClick={showStats}>Statistiken</button>
-                {/* Debug-Button hinzufügen */}
-                <button className="debug-button" onClick={showDebug}>WebRTC Debug</button>
+                {/* Debug-Button wurde entfernt */}
             </div>
 
             {isMobile && !isLandscape && (
