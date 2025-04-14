@@ -97,8 +97,9 @@ const PongGame = ({
 
     const songs = [
         'assets/relight.m4a',
-        'assets/old-thing.wav',
+        'assets/power_of_love.mp3',
         'assets/welcome-to-st-tropez.wav',
+        'assets/buscame.mp3',
         'assets/i-want-your-soul.wav'
     ];
 
